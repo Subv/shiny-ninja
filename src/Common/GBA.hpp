@@ -1,7 +1,7 @@
 #ifndef GBA_HPP
 #define GBA_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 struct GBAHeader
 {
@@ -20,13 +20,14 @@ struct GBAHeader
 
     bool VerifyChecksum()
     {
+        // The checksum is calculated using the bytes from the ROM header itself
         uint8_t check = 0;
         for (uint32_t i = 0xA0; i <= 0xBC; ++i)
             check -= *((uint8_t*)this + i);
 
         check = (check - 0x19) & 0xFF;
         
-        return complement == check;
+        return Complement == check;
     }
 };
 
