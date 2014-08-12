@@ -1,6 +1,7 @@
 #include "CPU.hpp"
+#include "Memory/Memory.hpp"
 
-CPU::CPU(CPUMode mode) : _mode(mode), _state(CPUState::Stopped), 
+CPU::CPU(CPUMode mode) : _mode(mode), _runState(CPURunState::Stopped),
 _decoder(new Decoder()), _interpreter(new Interpreter())
 {
     Reset();
@@ -14,13 +15,13 @@ void CPU::Reset()
 void CPU::Run()
 {
     // Ignore this call if we are already running
-    if (_state == CPUState::Running)
+    if (_runState == CPURunState::Running)
         return;
 
-    _state = CPUState::Running;
+    _runState = CPURunState::Running;
 
     // Loop until something stops the CPU
-    while (_state == CPUState::Running)
+    while (_runState == CPURunState::Running)
     {
         // Read the opcode from memory
         // TODO: Implement the Memory Management Unit
@@ -32,4 +33,9 @@ void CPU::Run()
 
         _interpreter->RunInstruction(instruction);
     }
+}
+
+void CPU::LoadROM(GBAHeader& header, FILE* rom)
+{
+    sMemory->LoadROM(header, rom);
 }

@@ -8,7 +8,7 @@
 class Decoder
 {
 public:
-    Decoder() { }
+    Decoder();
 
     Instruction DecodeARM(uint32_t opcode);
     Instruction DecodeThumb(uint16_t opcode);

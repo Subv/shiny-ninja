@@ -2,7 +2,7 @@
 #include "CPU/CPU.hpp"
 
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 
 int main(int argc, char* argv[])
 {
@@ -36,6 +36,9 @@ int main(int argc, char* argv[])
     }
 
     CPU arm7(CPUMode::Interpreter);
+    arm7.LoadROM(header, rom);
+
+    fclose(rom);
 
 	return 0;
 }
