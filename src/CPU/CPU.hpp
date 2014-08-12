@@ -22,6 +22,7 @@ enum class CPURunState
     Stopped
 };
 
+#pragma pack(push, 1)
 union CPSR
 {
     struct
@@ -46,6 +47,7 @@ union CPSR
 
     uint32_t Full;
 };
+#pragma pack(pop)
 
 struct CPUState
 {
