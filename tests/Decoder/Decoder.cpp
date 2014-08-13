@@ -22,13 +22,4 @@ TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructio
     REQUIRE(bx->GetCondition() == InstructionCondition::Always);
     REQUIRE(bx->GetRegister() == 0);
     REQUIRE(bx->Link() == false);
-
-    instruction = decoder->DecodeARM(0xF83CF000);
-
-    auto bl = std::dynamic_pointer_cast<ARM::BranchInstruction>(instruction);
-    REQUIRE(bl);
-    REQUIRE(bl->GetOpcode() == ARMOpcodes::BL);
-    REQUIRE(bl->GetCondition() == InstructionCondition::Always);
-    REQUIRE(bl->GetSignedOffset() == 0x7C - 8);
-    REQUIRE(bl->Link());
 }
