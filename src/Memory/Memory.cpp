@@ -43,7 +43,7 @@ uint32_t MMU::Read32(uint32_t address)
             // 32bit opcode at $+8 in ARM state, or the 16bit-opcode at $+4 in THUMB state,
             // in the later case the 16bit opcode is mirrored across both upper/lower 16bits
             // of the returned 32bit data.
-            return *(uint32_t*)(&_ewram[address - 0x02000000]);
+            return GetEWRAM()->ReadUint32(address - 0x02000000);
         case 0x3: // On-Chip WRAM
             if (address > 0x03007FFF) // Trying to read in an unused block (03008000-03FFFFFF)
                 return 0;
@@ -100,3 +100,9 @@ uint16_t MMU::Read16(uint32_t address)
     return 0;
 }
 
+void MMU::Reset()
+{
+    _ewram->Reset();
+    _iwram->Reset();
+    GetVRAM()->Reset();
+}
