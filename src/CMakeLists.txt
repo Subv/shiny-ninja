@@ -5,4 +5,8 @@ include_directories(
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR})
 	
-add_executable(ShinyNinja ${sources})
+if (TESTS)
+	add_library(ShinyNinja ${sources})
+else(TESTS)
+	add_executable(ShinyNinja ${sources})
+endif(TESTS)
