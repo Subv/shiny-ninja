@@ -25,10 +25,10 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
         return shared_ptr<Instruction>(new ARM::BranchInstruction(opcode));
     }
 
-    std::terminate();
+    return shared_ptr<Instruction>(nullptr);
 }
 
 shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 {
-    std::terminate();
+    return shared_ptr<Instruction>(nullptr);
 }

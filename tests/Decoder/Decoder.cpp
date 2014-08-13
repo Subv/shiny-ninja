@@ -1,6 +1,7 @@
 #include "catch/catch.hpp"
 #include "Decoder/Decoder.hpp"
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
+#include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 
 TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructions")
 {
@@ -11,6 +12,10 @@ TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructio
     REQUIRE(std::dynamic_pointer_cast<ARM::BranchInstruction>(instruction));
 
     instruction = decoder->DecodeARM(0xE12FFF10);
-
     REQUIRE(std::dynamic_pointer_cast<ARM::BranchLinkExchangeRegisterInstruction>(instruction));
+
+    instruction = decoder->DecodeARM(0xE2004020);
+    REQUIRE(std::dynamic_pointer_cast<ARM::DataProcessingInstruction>(instruction));
+
+    delete decoder;
 }
