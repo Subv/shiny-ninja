@@ -2,7 +2,7 @@
 
 std::string ARM::BranchInstruction::ToString()
 {
-    return (Link() ? "BL " : "B ") + "PC + " + std::to_string(GetSignedOffset());
+    return (Link() ? "BL PC + " : "B PC + ") + std::to_string(GetSignedOffset() + 8);
 }
 
 uint32_t ARM::BranchInstruction::GetOpcode()
@@ -12,7 +12,7 @@ uint32_t ARM::BranchInstruction::GetOpcode()
 
 std::string ARM::BranchLinkExchangeImmediateInstruction::ToString()
 {
-    return "BLX PC + " + std::to_string(GetSignedOffset());
+    return "BLX PC + " + std::to_string(GetSignedOffset() + 8);
 }
 
 uint32_t ARM::BranchLinkExchangeImmediateInstruction::GetOpcode()
@@ -22,7 +22,7 @@ uint32_t ARM::BranchLinkExchangeImmediateInstruction::GetOpcode()
 
 std::string ARM::BranchLinkExchangeRegisterInstruction::ToString()
 {
-    return (Link() ? "BLX " : "BX") + " R" + std::to_string(GetRegister());
+    return (Link() ? "BLX R" : "BX R") + std::to_string(GetRegister()) + " + 8";
 }
 
 uint32_t ARM::BranchLinkExchangeRegisterInstruction::GetOpcode()
