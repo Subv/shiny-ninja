@@ -13,7 +13,7 @@ void CPU::Reset()
 {
     for (int i = 0; i < 16; ++i)
         _state.Registers[i] = 0;
-    
+
     PC = 0x8000000; // Default entry point.
 
     _state.CPSR.Full = 0;
@@ -36,7 +36,7 @@ void CPU::Run()
         {
             // Read the opcode from memory, 4 bytes in ARM mode
             uint32_t opcode = sMemory->Read32(PC);
-            
+
             PC += 4; // Increment the PC 4 bytes
 
             // Extract the instruction from it

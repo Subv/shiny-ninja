@@ -22,10 +22,10 @@ int main(int argc, char* argv[])
 
     GBAHeader header;
     int read = fread(&header, sizeof(GBAHeader), 1, rom);
-    
+
     if (!read)
     {
-        std::cout << "Could not read from file." << std::endl;
+        std::cout << "Could not read ROM header." << std::endl;
         return 0;
     }
 
@@ -42,5 +42,5 @@ int main(int argc, char* argv[])
 
     arm7.Run();
 
-	return 0;
+    return 0;
 }
