@@ -40,5 +40,7 @@ int main(int argc, char* argv[])
 
     fclose(rom);
 
+    arm7.Run();
+
 	return 0;
 }

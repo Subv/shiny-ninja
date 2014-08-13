@@ -23,11 +23,8 @@ public:
 
     void LoadROM(GBAHeader& header, FILE* rom);
 
-    template<typename T>
-    T Read(uint32_t address)
-    {
-        return 0;
-    }
+    uint32_t Read32(uint32_t address);
+    uint16_t Read16(uint32_t address);
 
     void Write32(uint32_t address, uint32_t value);
     void Write16(uint32_t address, uint16_t value);

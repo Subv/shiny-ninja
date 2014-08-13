@@ -4,7 +4,6 @@
 #include "Decoder/Decoder.hpp"
 #include "Interpreter/Interpreter.hpp"
 
-#include <memory>
 #include <cstdio>
 
 struct GBAHeader;
@@ -63,6 +62,8 @@ public:
     void LoadROM(GBAHeader& header, FILE* rom);
     void Reset();
     void Run();
+
+    InstructionSet GetCurrentInstructionSet() { return InstructionSet(_state.CPSR.Flags.I); }
 
 private:
     CPUMode _mode;

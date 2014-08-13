@@ -1,6 +1,8 @@
 #include "CPU.hpp"
 #include "Memory/Memory.hpp"
 
+#include <iostream>
+
 CPU::CPU(CPUMode mode) : _mode(mode), _runState(CPURunState::Stopped),
 _decoder(new Decoder()), _interpreter(new Interpreter())
 {
@@ -9,7 +11,12 @@ _decoder(new Decoder()), _interpreter(new Interpreter())
 
 void CPU::Reset()
 {
+    for (int i = 0; i < 16; ++i)
+        _state.Registers[i] = 0;
+    
+    PC = 0x8000000; // Default entry point.
 
+    _state.CPSR.Full = 0;
 }
 
 void CPU::Run()
@@ -23,15 +30,28 @@ void CPU::Run()
     // Loop until something stops the CPU
     while (_runState == CPURunState::Running)
     {
-        // Read the opcode from memory
-        // TODO: Implement the Memory Management Unit
-        uint32_t opcode = 0x0;
+        std::shared_ptr<Instruction> instruction;
 
-        // Extract the instruction from it
-        // TODO: Only ARM mode is supported for now
-        Instruction instruction = _decoder->DecodeARM(opcode);
+        if (GetCurrentInstructionSet() == InstructionSet::ARM)
+        {
+            // Read the opcode from memory, 4 bytes in ARM mode
+            uint32_t opcode = sMemory->Read32(PC);
 
-        _interpreter->RunInstruction(instruction);
+            // Extract the instruction from it
+            instruction = _decoder->DecodeARM(opcode);
+        }
+        else
+        {
+            // Read the opcode from memory, 2 bytes in Thumb mode
+            uint16_t opcode = sMemory->Read16(PC);
+
+            // Extract the instruction from it
+            instruction = _decoder->DecodeThumb(opcode);
+        }
+
+        std::cout << "Instruction: " << instruction->ToString() << std::endl;
+
+        // _interpreter->RunInstruction(instruction);
     }
 }
 

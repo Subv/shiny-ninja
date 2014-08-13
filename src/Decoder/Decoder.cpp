@@ -1,16 +1,19 @@
 #include "Decoder.hpp"
+#include "Common/MathHelper.hpp"
+
+using std::shared_ptr;
 
 Decoder::Decoder()
 {
     
 }
 
-Instruction Decoder::DecodeARM(uint32_t opcode)
+shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 {
-    return Instruction();
+    std::terminate();
 }
 
-Instruction Decoder::DecodeThumb(uint16_t opcode)
+shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 {
-    return Instruction();
+    std::terminate();
 }
