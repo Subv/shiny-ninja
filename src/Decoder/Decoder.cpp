@@ -1,6 +1,7 @@
 #include "Decoder.hpp"
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
+#include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 
@@ -25,6 +26,11 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 
         return shared_ptr<Instruction>(new ARM::BranchInstruction(opcode));
     }
+
+    // PSR Transfer instructions
+    // We have to check for these before we check for data processing instructions because these are a special case of the dataproc ones.
+    if (MathHelper::CheckBits(opcode, 23, 5, 0x2) && MathHelper::CheckBits(opcode, 16, 6, 0xF) && MathHelper::CheckBits(opcode, 0, 12, 0)) // MRS Instruction
+        return shared_ptr<Instruction>(new ARM::MovePSRToRegisterInstruction(opcode));
 
     // Check for data processing instructions
     if (MathHelper::CheckBits(opcode, 26, 2, 0))

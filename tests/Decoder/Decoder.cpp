@@ -2,6 +2,7 @@
 #include "Decoder/Decoder.hpp"
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
+#include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
 
 TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructions")
 {
@@ -16,6 +17,9 @@ TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructio
 
     instruction = decoder->DecodeARM(0xE2004020);
     REQUIRE(std::dynamic_pointer_cast<ARM::DataProcessingInstruction>(instruction));
+
+    instruction = decoder->DecodeARM(0xE10F3000);
+    REQUIRE(std::dynamic_pointer_cast<ARM::MovePSRToRegisterInstruction>(instruction));
 
     delete decoder;
 }
