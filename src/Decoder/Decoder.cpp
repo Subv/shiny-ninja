@@ -1,5 +1,6 @@
 #include "Decoder.hpp"
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
+#include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 
@@ -24,6 +25,10 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 
         return shared_ptr<Instruction>(new ARM::BranchInstruction(opcode));
     }
+
+    // Check for data processing instructions
+    if (MathHelper::CheckBits(opcode, 26, 2, 0))
+        return shared_ptr<Instruction>(new ARM::DataProcessingInstruction(opcode));
 
     return shared_ptr<Instruction>(nullptr);
 }
