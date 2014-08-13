@@ -6,7 +6,7 @@
 void MMU::LoadROM(GBAHeader& header, FILE* rom)
 {
     // Zero out all 3 wait states
-    for (int i = 0; i < NUM_GAMEPAK_WAITSTATES; ++i)
+    for (int i = 0; i < NUM_WAIT_STATES; ++i)
         memset(&_pakROM[i], 0, sizeof(_pakROM[i]));
 
     // Copy the ROM to the GamePak memory
@@ -19,7 +19,7 @@ void MMU::LoadROM(GBAHeader& header, FILE* rom)
     fread(&_pakROM[0][sizeof(GBAHeader)], sizeof(uint8_t), size, rom);
 
     // Now mirror it into the other wait states
-    for (int i = 1; i < NUM_GAMEPAK_WAITSTATES; ++i)
+    for (int i = 1; i < NUM_WAIT_STATES; ++i)
         memcpy(&_pakROM[i], _pakROM[0], size + sizeof(GBAHeader));
 }
 

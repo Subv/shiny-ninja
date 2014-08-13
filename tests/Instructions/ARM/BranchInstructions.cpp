@@ -1,5 +1,5 @@
 #include "catch/catch.hpp"
-#include "Common/Instructions/ARM/BranchInstruction.hpp"
+#include "Common/Instructions/ARM/BranchInstructions.hpp"
 
 TEST_CASE("Branch Instructions", "Checks that the branch instruction structures are working")
 {

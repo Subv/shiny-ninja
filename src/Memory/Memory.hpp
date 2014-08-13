@@ -10,11 +10,12 @@ enum WaitStates
 {
     WAIT_STATE_0 = 0,
     WAIT_STATE_1 = 1,
-    WAIT_STATE_2 = 2
+    WAIT_STATE_2 = 2,
+    NUM_WAIT_STATES = 3
 };
 
 // Memory Management Unit
-class MMU
+class MMU final
 {
 public:
     static std::unique_ptr<MMU>& Instance()
@@ -41,7 +42,7 @@ private:
     uint8_t _iwram[0x8000];  // 03000000 - 03007FFF   WRAM - On-chip Work RAM   (32 KBytes)
     uint8_t _vram[0x18000];  // 06000000 - 06017FFF   VRAM - Video RAM          (96 KBytes)
 
-    uint8_t _pakROM[WAIT_STATE_2][0x2000000];
+    uint8_t _pakROM[NUM_WAIT_STATES][0x2000000];
     uint8_t _sram[0x10000];  // 0E000000 - 0E00FFFF   Game Pak SRAM    (max 64 KBytes) - 8bit Bus width
 
     bool _inBios; // Constantly set to false for now, we do not have a BIOS.

@@ -12,5 +12,17 @@ namespace MathHelper
     {
         return ((value >> start) & ((1 << bits) - 1)) == check;
     }
+
+    template <typename T>
+    T RotateLeft(T val, uint8_t moves) constexpr
+    {
+        return (val << moves) | (val >> (sizeof(T) * CHAR_BIT - moves));
+    }
+
+    template<class T>
+    T RotateRight(T x, uint8_t moves) constexpr
+    {
+        return (x >> moves) | (x << sizeof(T) * CHAR_BIT - moves);
+    }
 }
 #endif

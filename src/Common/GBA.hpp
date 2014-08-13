@@ -11,13 +11,13 @@
 //   FLASH_Vnnn     FLASH 64 Kbytes (512Kbit) (ID used in older files)
 //   FLASH512_Vnnn  FLASH 64 Kbytes (512Kbit) (ID used in newer files)
 //   FLASH1M_Vnnn   FLASH 128 Kbytes (1Mbit)
-enum SaveType
+enum class SaveType
 {
-    SAVE_EEPROM512B = 0,
-    SAVE EEPROM4KB  = 1,
-    SAVE_SRAM32KB   = 2,
-    SAVE_FLASH64KB  = 3,
-    SAVE_FLASH128KB = 4
+    EEPROM512B = 0,
+    EEPROM4KB  = 1,
+    SRAM32KB   = 2,
+    FLASH64KB  = 3,
+    FLASH128KB = 4
 };
 
 struct GBAHeader
@@ -60,8 +60,6 @@ struct GBAHeader
 
         return ChecksumComplement == check;
     }
-
-
 };
 
 #endif

@@ -1,4 +1,4 @@
-#include "BranchInstruction.hpp"
+#include "BranchInstructions.hpp"
 
 std::string ARM::BranchInstruction::ToString()
 {

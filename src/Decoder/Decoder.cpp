@@ -1,5 +1,5 @@
 #include "Decoder.hpp"
-#include "Common/Instructions/ARM/BranchInstruction.hpp"
+#include "Common/Instructions/ARM/BranchInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 

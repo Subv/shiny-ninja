@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    if (!header.VerifyChecksum())
+    if (!header.VerifyHeader())
     {
         std::cout << "The specified file is not a valid GBA ROM." << std::endl;
         return 0;

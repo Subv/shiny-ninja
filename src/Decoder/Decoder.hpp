@@ -6,7 +6,7 @@
 #include <memory>
 #include <cstdint>
 
-class Decoder
+class Decoder final
 {
 public:
     Decoder();

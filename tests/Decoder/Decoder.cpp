@@ -1,6 +1,6 @@
 #include "catch/catch.hpp"
 #include "Decoder/Decoder.hpp"
-#include "Common/Instructions/ARM/BranchInstruction.hpp"
+#include "Common/Instructions/ARM/BranchInstructions.hpp"
 
 TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructions")
 {
