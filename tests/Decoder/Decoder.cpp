@@ -10,16 +10,7 @@ TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructio
     // Verify that the instruction is correctly decoded
     REQUIRE(std::dynamic_pointer_cast<ARM::BranchInstruction>(instruction));
 
-    // Perform some validity checks
-    REQUIRE(instruction->GetOpcode() == ARMOpcodes::B);
-    REQUIRE(std::static_pointer_cast<ARMInstruction>(instruction)->GetCondition() == InstructionCondition::Always);
-
     instruction = decoder->DecodeARM(0xE12FFF10);
 
-    auto bx = std::dynamic_pointer_cast<ARM::BranchLinkExchangeRegisterInstruction>(instruction);
-    REQUIRE(bx);
-    REQUIRE(bx->GetOpcode() == ARMOpcodes::BX);
-    REQUIRE(bx->GetCondition() == InstructionCondition::Always);
-    REQUIRE(bx->GetRegister() == 0);
-    REQUIRE(bx->Link() == false);
+    REQUIRE(std::dynamic_pointer_cast<ARM::BranchLinkExchangeRegisterInstruction>(instruction));
 }
