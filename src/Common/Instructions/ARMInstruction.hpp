@@ -20,16 +20,40 @@ enum class InstructionCondition
     GreaterThan, // GT
     LessOrEqual, // LE
     Always, // AL
-    Never // NV
+    Unused
+};
+
+enum ARMOpcodes
+{
+    ADC,
+    ADD,
+    AND,
+    B,
+    BL,
+    BIC,
+    BKPT,
+    BLX_IMM,
+    BLX_REG,
+    BX,
+    CDP,
+    CLZ,
+    CMN,
+    CMP,
+    CPS,
+    CPY,
+    EOR,
+    LDC
 };
 
 class ARMInstruction : public Instruction
 {
 public:
-    ARMInstruction() : Instruction() { }
+    ARMInstruction(uint32_t instruction) : Instruction(instruction) { }
 
     InstructionSet GetInstructionSet() override { return InstructionSet::ARM; }
     
     InstructionCondition GetCondition();
+
+    std::string ToString() override = 0;
 };
 #endif

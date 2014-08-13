@@ -1,4 +1,6 @@
 #include "Decoder.hpp"
+#include "Common/Instructions/ARM/BranchInstruction.hpp"
+
 #include "Common/MathHelper.hpp"
 
 using std::shared_ptr;

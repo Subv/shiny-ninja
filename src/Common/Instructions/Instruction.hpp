@@ -13,7 +13,7 @@ enum class InstructionSet
 class Instruction
 {
 public:
-    Instruction() : _instruction(0) { }
+    Instruction(uint32_t instruction) : _instruction(instruction) { }
     virtual ~Instruction() { }
 
     virtual std::string ToString() = 0;
