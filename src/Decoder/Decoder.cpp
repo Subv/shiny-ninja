@@ -9,7 +9,7 @@ using std::shared_ptr;
 
 Decoder::Decoder()
 {
-    
+
 }
 
 shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
@@ -36,7 +36,7 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
     {
         if (MathHelper::CheckBits(opcode, 23, 5, 0x6)) // MSR_IMM
             return shared_ptr<Instruction>(new ARM::MoveRegisterToPSRImmediateInstruction(opcode));
-        
+
         if (MathHelper::CheckBits(opcode, 4, 8, 0)) // MSR_REG
             return shared_ptr<Instruction>(new ARM::MoveRegisterToPSRRegisterInstruction(opcode));
     }
@@ -50,5 +50,12 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 
 shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 {
+    // Check for Add/Substract first, because first three bits also sign "Move Shifted Register"
+    if (MathHelper::CheckBits(opcode, 11, 5, 0b00011))
+        return shared_ptr<Instruction>(new Thumb::AddSubstractRegisterInstruction(opcode));
+
+    if (MathHelper::CheckBits(opcode, 13, 2, 0b00011))
+        return shared_ptr<Instruction>(new Thumb::MoveShiftedRegisterInstruction(opcode));
+
     return shared_ptr<Instruction>(nullptr);
 }
