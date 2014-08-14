@@ -18,8 +18,17 @@ TEST_CASE("Decoder", "Tests that the decoder is correctly identifying instructio
     instruction = decoder->DecodeARM(0xE2004020);
     REQUIRE(std::dynamic_pointer_cast<ARM::DataProcessingInstruction>(instruction));
 
+    instruction = decoder->DecodeARM(0xE1100003);
+    REQUIRE(std::dynamic_pointer_cast<ARM::DataProcessingInstruction>(instruction));
+
     instruction = decoder->DecodeARM(0xE10F3000);
     REQUIRE(std::dynamic_pointer_cast<ARM::MovePSRToRegisterInstruction>(instruction));
+
+    instruction = decoder->DecodeARM(0xE328F001);
+    REQUIRE(std::dynamic_pointer_cast<ARM::MoveRegisterToPSRImmediateInstruction>(instruction));
+
+    instruction = decoder->DecodeARM(0xE128F003);
+    REQUIRE(std::dynamic_pointer_cast<ARM::MoveRegisterToPSRRegisterInstruction>(instruction));
 
     delete decoder;
 }
