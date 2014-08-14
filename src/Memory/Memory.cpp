@@ -43,7 +43,7 @@ uint32_t MMU::Read32(uint32_t address)
             // 32bit opcode at $+8 in ARM state, or the 16bit-opcode at $+4 in THUMB state,
             // in the later case the 16bit opcode is mirrored across both upper/lower 16bits
             // of the returned 32bit data.
-            return GetEWRAM()->ReadUint32(address - 0x02000000);
+            return *(uint32_t*)(&_ewram[address - 0x02000000]);
         case 0x3: // On-Chip WRAM
             if (address > 0x03007FFF) // Trying to read in an unused block (03008000-03FFFFFF)
                 return 0;
@@ -58,17 +58,17 @@ uint32_t MMU::Read32(uint32_t address)
             if (address > 0x050003FF) // Trying to read in an unused block (05000400-05FFFFFF)
                 return 0;
             // See case 0x2 comment.
-            return 0; // NYI
+            return sGPU->ReadInt32(address);
         case 0x6: // VRAM
             if (address > 0x06017FFF) // Trying to read in an unused block (06018000-06FFFFFF)
                 return 0;
             // See case 0x2 comment.
-            return 0; // NYI
+            return sGPU->ReadInt32(address);
         case 0x7: // OAM - OBJ Attributes
             if (address > 0x070003FF) // Trying to read in an unused block (07000400-07FFFFFF)
                 return 0;
             // See case 0x2 comment.
-            return 0; // NYI
+            return sGPU->ReadInt32(address);
         case 0x8: // Game Pak, State 0
         case 0x9: // Game Pak, State 0
         case 0xA: // Game Pak, State 1
