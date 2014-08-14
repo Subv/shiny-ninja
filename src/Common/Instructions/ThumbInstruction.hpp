@@ -6,7 +6,7 @@
 class ThumbInstruction : public Instruction
 {
 public:
-    ThumbInstruction() : Instruction() { }
+    ThumbInstruction(uint16_t instruction) : Instruction(instruction) { }
     InstructionSet GetInstructionSet() override { return InstructionSet::Thumb; }
 };
 #endif

@@ -4,7 +4,7 @@
 #include <iostream>
 
 CPU::CPU(CPUMode mode) : _mode(mode), _runState(CPURunState::Stopped),
-_decoder(new Decoder()), _interpreter(new Interpreter())
+_decoder(new Decoder()), _interpreter(new Interpreter(shared_from_this()))
 {
     Reset();
 }

@@ -54,7 +54,7 @@ struct CPUState
     CPSR CPSR;
 };
 
-class CPU
+class CPU final : public std::enable_shared_from_this<CPU>
 {
 public:
     CPU(CPUMode mode);
