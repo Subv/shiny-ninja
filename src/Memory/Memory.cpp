@@ -62,24 +62,19 @@ uint16_t MMU::ReadInt16(uint32_t address)
             // of the returned 32bit data.
             return *(uint16_t*)(&_ewram[address - 0x02000000]);
         case 0x3: // On-Chip WRAM
-            // (03008000-03FFFFFF)
             Utilities::Assert(address <= 0x03007FFF, "Trying to read in unused IWRAM memory");
             return *(uint16_t*)(&_iwram[address - 0x03000000]);
         case 0x4: // I/O Registers
-            // (04000400-04FFFFFF)
             Utilities::Assert(address <= 0x040003FF, "Trying to read in unused IOMAP memory");
             // See case 0x2 comment.
             return 0; // NYI
         case 0x5: // BG/OBJ Palette RAM
-            // (05000400-05FFFFFF)
             Utilities::Assert(address <= 0x050003FF, "Trying to read in unused palette memory");
             return sGPU->ReadInt16(address);
         case 0x6: // VRAM
-            // (06018000-06FFFFFF)
             Utilities::Assert(address <= 0x06017FFF, "Trying to read in unused VRAM memory");
             return sGPU->ReadInt16(address);
         case 0x7: // OAM - OBJ Attributes
-            // (07000400-07FFFFFF)
             Utilities::Assert(address <= 0x070003FF, "Trying to read in unused OBJ memory");
             return sGPU->ReadInt16(address);
         case 0x8: // Game Pak, State 0
@@ -91,10 +86,9 @@ uint16_t MMU::ReadInt16(uint32_t address)
             // ((0x8, 0x9) - 0x8) >> 1 = 0
             // ((0xA, 0xB) - 0x8) >> 1 = 1
             // ((0xC, 0xD) - 0x8) >> 1 = 2
-            return *(uint16_t*)(&_pakROM[(address - 0x08000000) >> 25][address & 0x0FFFFFFF]);
+            return *(uint16_t*)(&_pakROM[(address - 0x08000000) >> 25][address % 0x02000000]);
         case 0xE: // Game Pak SRAM
-            if (address > 0x0E00FFFF)
-                return 0;
+            Utilities::Assert(address <= 0x0E00FFFF, "Trying to read in unused SRAM memory");
             return *(uint16_t*)(&_sram[address - 0x0E000000]);
     }
     return 0;
