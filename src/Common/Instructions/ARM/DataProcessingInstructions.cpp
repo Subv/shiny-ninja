@@ -1,21 +1,21 @@
-#include "DataProcessingInstructions.hpp"
 #include "Common/Utilities.hpp"
+#include "DataProcessingInstructions.hpp"
+#include <sstream>
 
-uint8_t ARM::DataProcessingInstruction::GetSecondOperandImmediate()
+uint8_t ARM::DataProcessingInstruction::GetSecondOperand()
 {
-    Utilities::Assert(Immediate(), "Instruction must be immediate");
-    return _instruction & 0xFF;
+    return IsImmediate() ? _instruction & 0xFF : _instruction & 0xF;
 }
 
 uint8_t ARM::DataProcessingInstruction::GetShiftImmediate()
 {
-    Utilities::Assert(Immediate(), "Instruction must be immediate");
+    Utilities::Assert(IsImmediate(), "Instruction must be immediate");
     return ((_instruction >> 8) & 0xF) << 2;
 }
 
 ARM::ShiftType ARM::DataProcessingInstruction::GetShiftType()
 {
-    if (Immediate())
+    if (IsImmediate())
         return ShiftType::ROR;
 
     return ShiftType((_instruction >> 5) & 3);
@@ -23,19 +23,13 @@ ARM::ShiftType ARM::DataProcessingInstruction::GetShiftType()
 
 bool ARM::DataProcessingInstruction::ShiftByRegister()
 {
-    Utilities::Assert(!Immediate(), "Instruction must not be immediate");
+    Utilities::Assert(!IsImmediate(), "Instruction must not be immediate");
     return (_instruction >> 4) & 1;
-}
-
-uint8_t ARM::DataProcessingInstruction::GetSecondOperandRegister()
-{
-    Utilities::Assert(!Immediate(), "Instruction must not be immediate");
-    return _instruction & 0xF;
 }
 
 uint8_t ARM::DataProcessingInstruction::GetShiftRegisterOrImmediate()
 {
-    Utilities::Assert(!Immediate(), "Instruction must not be immediate");
+    Utilities::Assert(!IsImmediate(), "Instruction must not be immediate");
 
     if (ShiftByRegister())
         return (_instruction >> 8) & 0xF; // 4 bits
@@ -89,68 +83,68 @@ uint32_t ARM::DataProcessingInstruction::GetOpcode()
 
 std::string ARM::DataProcessingInstruction::ToString()
 {
-    std::string command = "";
+    std::stringstream command;
 
     switch (GetOpcode())
     {
         case ARMOpcodes::AND:
-            command = "AND ";
+            command << "AND ";
             break;
         case ARMOpcodes::EOR:
-            command = "EOR ";
+            command << "EOR ";
             break;
         case ARMOpcodes::SUB:
-            command = "SUB ";
+            command << "SUB ";
             break;
         case ARMOpcodes::RSB:
-            command = "RSB ";
+            command << "RSB ";
             break;
         case ARMOpcodes::ADD:
-            command = "ADD ";
+            command << "ADD ";
             break;
         case ARMOpcodes::ADC:
-            command = "ADC ";
+            command << "ADC ";
             break;
         case ARMOpcodes::SBC:
-            command = "SBC ";
+            command << "SBC ";
             break;
         case ARMOpcodes::RSC:
-            command = "RSC ";
+            command << "RSC ";
             break;
         case ARMOpcodes::TST:
-            command = "TST ";
+            command << "TST ";
             break;
         case ARMOpcodes::TEQ:
-            command = "TEQ ";
+            command << "TEQ ";
             break;
         case ARMOpcodes::CMP:
-            command = "CMP ";
+            command << "CMP ";
             break;
         case ARMOpcodes::CMN:
-            command = "CMN ";
+            command << "CMN ";
             break;
         case ARMOpcodes::ORR:
-            command = "ORR ";
+            command << "ORR ";
             break;
         case ARMOpcodes::MOV:
-            command = "MOV ";
+            command << "MOV ";
             break;
         case ARMOpcodes::BIC:
-            command = "BIC ";
+            command << "BIC ";
             break;
         case ARMOpcodes::MVN:
-            command = "MVN ";
+            command << "MVN ";
             break;
     }
 
     if (GetFirstOperand())
-        command += "R" + std::to_string(GetFirstOperand()) + ", ";
+        command << "R" << GetFirstOperand() << ", ";
 
     if (GetDestinationRegister())
-        command += "R" + std::to_string(GetDestinationRegister()) + ", ";
+        command << "R" << GetDestinationRegister() << ", ";
 
-    if (Immediate())
-        command += "#" + std::to_string(GetSecondOperandImmediate());
-    return command;
+    if (IsImmediate())
+        command << "#" << GetSecondOperand();
+    return command.str();
 }
 

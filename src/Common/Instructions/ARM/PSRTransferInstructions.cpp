@@ -1,8 +1,11 @@
 #include "PSRTransferInstructions.hpp"
+#include <sstream>
 
 std::string ARM::MovePSRToRegisterInstruction::ToString()
 {
-    return "MSR R" + std::to_string(GetDestinationRegister()) + (GetPSRType() == PSRType::CPSR ? "CPSR" : "SPSR");
+    std::stringstream stream;
+    stream << "MSR R" << GetDestinationRegister() << (GetPSRType() == PSRType::CPSR ? "CPSR" : "SPSR");
+    return stream.str();
 }
 
 std::string ARM::MoveRegisterToPSRRegisterInstruction::ToString()

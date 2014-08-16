@@ -22,7 +22,7 @@ enum class CPURunState
 };
 
 #pragma pack(push, 1)
-union CPSR
+union ProgramStatusRegisters
 {
     struct
     {
@@ -51,7 +51,8 @@ union CPSR
 struct CPUState
 {
     uint32_t Registers[16];
-    CPSR CPSR;
+    ProgramStatusRegisters CPSR; // Current Program Status Register
+    ProgramStatusRegisters SPSR; // Saved Program Status Register
 };
 
 class CPU final : public std::enable_shared_from_this<CPU>

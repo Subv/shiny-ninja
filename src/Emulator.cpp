@@ -1,5 +1,6 @@
 #include "Common/GBA.hpp"
 #include "CPU/CPU.hpp"
+#include "Common/Utilities.hpp"
 
 #include <iostream>
 #include <cstdio>

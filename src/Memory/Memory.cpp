@@ -3,6 +3,8 @@
 #include "Common/GBA.hpp"
 #include "Common/Files.hpp"
 
+#include <cstring>
+
 void MMU::LoadROM(GBAHeader& header, FILE* rom)
 {
     // Zero out all 3 wait states

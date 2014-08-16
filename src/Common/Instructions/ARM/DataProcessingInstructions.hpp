@@ -21,7 +21,7 @@ namespace ARM
         uint32_t GetOpcode() override;
         std::string ToString() override;
 
-        bool Immediate() { return (_instruction >> 25) & 1; }
+        bool IsImmediate() override { return (_instruction >> 25) & 1; }
         bool SetConditionCodes() { return (_instruction >> 20) & 1; }
 
         uint8_t GetFirstOperand() { return (_instruction >> 16) & 0xF; } // The first operand is always a register
@@ -31,12 +31,12 @@ namespace ARM
         ShiftType GetShiftType();
 
         // If Immediate()
-        uint8_t GetSecondOperandImmediate();
+        
+        uint8_t GetSecondOperand();
         uint8_t GetShiftImmediate();
 
         // If not Immediate()
         bool ShiftByRegister();
-        uint8_t GetSecondOperandRegister();
         uint8_t GetShiftRegisterOrImmediate();
     };
 }

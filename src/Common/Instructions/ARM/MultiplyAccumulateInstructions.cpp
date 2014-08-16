@@ -1,6 +1,7 @@
 #include "MultiplyAccumulateInstructions.h"
 
 #include "Common/Utilities.hpp"
+#include <sstream>
 
 uint8_t ARM::MultiplyAccumulateInstruction::GetThirdOperand()
 {
@@ -18,16 +19,16 @@ uint32_t ARM::MultiplyAccumulateInstruction::GetOpcode()
 
 std::string ARM::MultiplyAccumulateInstruction::ToString()
 {
-    std::string opcode = "";
+    std::stringstream opcode;
     if (GetOpcode() == ARMOpcodes::MLA)
-        opcode = "MLA";
+        opcode << "MLA";
     else
-        opcode = "MUL";
+        opcode << "MUL";
 
-    opcode += " R" + std::to_string(GetDestinationRegister()) + ", " + std::to_string(GetFirstOperand()) + ", " + std::to_string(GetSecondOperand());
+    opcode << " R" << GetDestinationRegister() << ", " << GetFirstOperand() << ", " << GetSecondOperand();
 
     if (GetOpcode() == ARMOpcodes::MLA)
-        opcode += ", " + std::to_string(GetThirdOperand());
+        opcode << ", " << GetThirdOperand();
 
-    return opcode;
+    return opcode.str();
 }

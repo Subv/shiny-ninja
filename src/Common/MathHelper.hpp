@@ -2,6 +2,7 @@
 #define MATH_HPP
 
 #include <cstdint>
+#include <limits.h>
 
 namespace MathHelper
 {

@@ -93,5 +93,6 @@ public:
 
     virtual uint32_t GetOpcode() override = 0;
     virtual std::string ToString() override = 0;
+    virtual bool IsImmediate() { return false; }
 };
 #endif

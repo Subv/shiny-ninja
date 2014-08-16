@@ -20,6 +20,7 @@ public:
     virtual InstructionSet GetInstructionSet() = 0;
 
     virtual uint32_t GetOpcode() = 0;
+    virtual bool IsImmediate() = 0;
 
 protected:
     uint32_t _instruction;

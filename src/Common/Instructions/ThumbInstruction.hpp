@@ -53,5 +53,10 @@ class ThumbInstruction : public Instruction
 public:
     ThumbInstruction(uint16_t instruction) : Instruction(instruction) { }
     InstructionSet GetInstructionSet() override { return InstructionSet::Thumb; }
+    
+    virtual uint32_t GetOpcode() override = 0;
+    virtual std::string ToString() override = 0;
+    
+    virtual bool IsImmediate() override { return false; }
 };
 #endif

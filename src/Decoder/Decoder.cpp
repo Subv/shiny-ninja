@@ -2,6 +2,7 @@
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 #include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
+#include "Common/Instructions/ARM/MultiplyAccumulateInstructions.h"
 
 #include "Common/Instructions/Thumb/RegisterInstructions.hpp"
 

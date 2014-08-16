@@ -25,7 +25,8 @@ public:
 
 private:
     std::shared_ptr<CPU> _cpu;
-    std::unordered_map<ARM::ARMOpcodes, std::function<void(std::shared_ptr<ARMInstruction>)>> _armHandlers;
+    std::unordered_map<ARM::ARMOpcodes, std::function<void(std::shared_ptr<ARMInstruction>)>, std::hash<int>> _armHandlers;
+    std::unordered_map<Thumb::ThumbOpcodes, std::function<void(std::shared_ptr<ThumbInstruction>)>, std::hash<int>> _thumbHandlers;
     void InitializeHandlers();
 };
 #endif
