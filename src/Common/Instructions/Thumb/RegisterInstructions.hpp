@@ -74,6 +74,8 @@ namespace Thumb
         // allowed to be used as source/dest: H2 controls source, H1 controls dest.
         uint32_t GetH1() { return (_instruction >> 7) & 0xF; }
         uint32_t GetH2() { return (_instruction >> 6) & 0xF; }
+        
+        bool Link() { return GetH1() == 1; }
     };
 }
 
