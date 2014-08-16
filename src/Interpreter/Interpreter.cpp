@@ -26,8 +26,10 @@ void Interpreter::RunInstruction(std::shared_ptr<Instruction> instruction)
 
 void Interpreter::HandleARM(std::shared_ptr<ARMInstruction> instruction)
 {
-    auto handler = _armHandlers[ARM::ARMOpcodes(instruction->GetOpcode())];
-    handler(instruction);
+    auto handler = _armHandlers.find(ARM::ARMOpcodes(instruction->GetOpcode()));
+
+    if (handler != _armHandlers.end())
+        handler->second(instruction);
 }
 
 void Interpreter::HandleThumb(std::shared_ptr<ThumbInstruction> instruction)

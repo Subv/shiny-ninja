@@ -38,12 +38,12 @@ int main(int argc, char* argv[])
         return -2;
     }
 
-    CPU arm7(CPUMode::Interpreter);
-    arm7.LoadROM(header, rom);
+    std::shared_ptr<CPU> arm7(new CPU(CPUMode::Interpreter));
+    arm7->LoadROM(header, rom);
 
     fclose(rom);
 
-    arm7.Run();
+    arm7->Run();
 
     return 0;
 }

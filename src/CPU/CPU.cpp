@@ -3,8 +3,7 @@
 
 #include <iostream>
 
-CPU::CPU(CPUMode mode) : _mode(mode),
-_runState(CPURunState::Stopped), _interpreter(new Interpreter(shared_from_this())),
+CPU::CPU(CPUMode mode) : _mode(mode), _runState(CPURunState::Stopped), 
 _decoder(new Decoder()), _memory(new MMU(shared_from_this()))
 {
     Reset();
@@ -22,6 +21,8 @@ void CPU::Reset()
 
 void CPU::Run()
 {
+    _interpreter = std::unique_ptr<Interpreter>(new Interpreter(shared_from_this()));
+
     // Ignore this call if we are already running
     if (_runState == CPURunState::Running)
         return;
@@ -36,7 +37,7 @@ void CPU::Run()
         if (GetCurrentInstructionSet() == InstructionSet::ARM)
         {
             // Read the opcode from memory, 4 bytes in ARM mode
-            uint32_t opcode = _memory->ReadInt32(PC);
+            uint32_t opcode = sMemory->ReadInt32(GetRegister(PC));
 
             GetRegister(PC) += 4; // Increment the PC 4 bytes
 
@@ -46,7 +47,7 @@ void CPU::Run()
         else
         {
             // Read the opcode from memory, 2 bytes in Thumb mode
-            uint16_t opcode = _memory->ReadInt16(PC);
+            uint16_t opcode = sMemory->ReadInt16(GetRegister(PC));
 
             GetRegister(PC) += 2; // Increment the PC 2 bytes
 
@@ -54,7 +55,7 @@ void CPU::Run()
             instruction = _decoder->DecodeThumb(opcode);
         }
 
-        std::cout << "Instruction: " << instruction->ToString() << std::endl;
+        std::cout << "Set: " << uint32_t(instruction->GetInstructionSet()) << ". Instruction: " << instruction->ToString() << std::endl;
 
         _interpreter->RunInstruction(instruction);
     }
