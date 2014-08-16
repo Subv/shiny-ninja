@@ -27,7 +27,7 @@ namespace Thumb
 
         std::string ToString() override;
         uint32_t GetOpcode() override;
-        bool IsImmediate() override { return MathHelper::GetBits(_instruction, 9, 2) > 2; }
+        bool IsImmediate() override { return MathHelper::GetBits(_instruction, 9, 2) >= 2; }
 
         uint32_t GetDestinationRegister() { return MathHelper::GetBits(_instruction, 0, 2); }
         uint32_t GetSourceRegister() { return MathHelper::GetBits(_instruction, 3, 2); }
