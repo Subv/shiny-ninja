@@ -46,6 +46,18 @@ namespace Thumb
         uint32_t GetDestinationRegister() { return MathHelper::GetBits(_instruction, 8, 2); }
         uint32_t GetImmediateValue() { return MathHelper::GetBits(_instruction, 0, 7); }
     };
+    
+    class AluInstruction : public ThumbInstruction
+    {
+    public:
+        AluInstruction(uint16_t opcode) : ThumbInstruction(opcode) { }
+        
+        std::string ToString() override;
+        uint32_t GetOpcode() override;
+        
+        uint32_t GetSourceRegister() { return MathHelper::GetBits(_instruction, 3, 2); }
+        uint32_t GetDestinationRegister() { return MathHelper::GetBits(_instruction, 0, 2); }
+    };
 }
 
 #endif // THUMB_REGISTER_INSTR_H

@@ -57,7 +57,9 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 
 shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 {
-    // Check for Add/Substract first, because first three bits also sign "Move Shifted Register"
+    if (MathHelper::CheckBits(opcode, 10, 6, 0x10))
+        return shared_ptr<Instruction>(new Thumb::AluInstruction(opcode));
+    
     if (MathHelper::CheckBits(opcode, 11, 5, 0x3))
         return shared_ptr<Instruction>(new Thumb::AddSubstractRegisterInstruction(opcode));
 

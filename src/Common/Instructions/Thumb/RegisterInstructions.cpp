@@ -97,3 +97,38 @@ std::string Thumb::MovCmpAddSubImmediateInstruction::ToString()
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister() << ", #" << GetImmediateValue();
     return stream.str();
 }
+
+uint32_t Thumb::AluInstruction::GetOpcode()
+{
+    switch (MathHelper::GetBits(_instruction, 6, 3))
+    {
+        case 0: return ThumbOpcodes::AND;
+        case 1: return ThumbOpcodes::EOR;
+        case 2: return ThumbOpcodes::LSL;
+        case 3: return ThumbOpcodes::LSR;
+        case 4: return ThumbOpcodes::ASR;
+        case 5: return ThumbOpcodes::ADC;
+        case 6: return ThumbOpcodes::SBC;
+        case 7: return ThumbOpcodes::ROR;
+        case 8: return ThumbOpcodes::TST;
+        case 9: return ThumbOpcodes::NEG;
+        case 10: return ThumbOpcodes::CMP;
+        case 11: return ThumbOpcodes::CMN;
+        case 12: return ThumbOpcodes::ORR;
+        case 13: return ThumbOpcodes::MUL;
+        case 14: return ThumbOpcodes::BIC;
+        case 15: return ThumbOpcodes::MVN;
+        default:
+            Utilities::Assert(false, "Thumb::AluInstruction has invalid opcode");
+            break;
+    }
+    return 0;
+}
+
+std::string Thumb::AluInstruction::ToString()
+{
+    std::stringstream stream;
+    stream << Thumb::ToString(GetOpcode()) << " ";
+    stream << GetDestinationRegister() << ", " << GetSourceRegister();
+    return stream.str();
+}
