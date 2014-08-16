@@ -132,3 +132,30 @@ std::string Thumb::AluInstruction::ToString()
     stream << GetDestinationRegister() << ", " << GetSourceRegister();
     return stream.str();
 }
+
+uint32_t Thumb::HiRegisterOperandBxInstruction::GetOpcode()
+{
+    switch (MathHelper::GetBits(_instruction, 8, 2))
+    {
+        case 0: return ThumbOpcodes::ADD;
+        case 1: return ThumbOpcodes::CMP;
+        case 2: return ThumbOpcodes::MOV;
+        case 3: return ThumbOpcodes::BX;
+        default:
+            Utilities::Assert(false, "Thumb::HiRegisterOperandBxInstruction has invalid opcode");
+            break;
+    }
+}
+
+std::string Thumb::HiRegisterOperandBxInstruction::ToString()
+{
+    if (GetOpcode() == ThumbOpcodes::MOV && GetDestinationRegister() == 8 && GetSourceRegister() == 8)
+        return "NOP";
+    
+    std::stringstream stream;
+    
+    stream << Thumb::ToString(GetOpcode()) << " " << GetDestinationRegister();
+    if (GetOpcode() != ThumbOpcodes::BX)
+        stream << ", " << GetSourceRegister();
+    return stream.str();
+}
