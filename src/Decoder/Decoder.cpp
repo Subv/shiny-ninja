@@ -47,6 +47,10 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
     if (MathHelper::CheckBits(opcode, 26, 2, 0))
         return shared_ptr<Instruction>(new ARM::DataProcessingInstruction(opcode));
 
+    // Check for multiply / multiply accumulate instructions
+    if (MathHelper::CheckBits(opcode, 22, 6, 0) && MathHelper::CheckBits(opcode, 4, 4, 9))
+        return shared_ptr<Instruction>(new ARM::MultiplyAccumulateInstruction(opcode));
+
     return shared_ptr<Instruction>(nullptr);
 }
 
