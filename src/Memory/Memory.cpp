@@ -45,7 +45,7 @@ uint16_t MMU::ReadInt16(uint32_t address)
         case 0x0: // Bios - System ROM
             // (00004000-01FFFFFF)
             Utilities::Assert(address <= 0x3FFF, "Trying to read in unused BIOS memory");
-            if (_cpu.get()->GetRegister(PC) < 0x400) // Reading here is allowed.
+            if (_cpu->GetRegister(PC) < 0x400) // Reading here is allowed.
                 return _bios[address];
             // Reading from the BIOS is allowed IFF the Program Counter is located inside
             // the BIOS. If not, reading will return the most recent successfully fetched
@@ -91,7 +91,7 @@ uint16_t MMU::ReadInt16(uint32_t address)
             // ((0x8, 0x9) - 0x8) >> 1 = 0
             // ((0xA, 0xB) - 0x8) >> 1 = 1
             // ((0xC, 0xD) - 0x8) >> 1 = 2
-            return *(uint16_t*)(&_pakROM[(address - 0x08000000) >> 25][address & 0x0F000000]);
+            return *(uint16_t*)(&_pakROM[(address - 0x08000000) >> 25][address & 0x0FFFFFFF]);
         case 0xE: // Game Pak SRAM
             if (address > 0x0E00FFFF)
                 return 0;

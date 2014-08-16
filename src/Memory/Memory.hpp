@@ -5,7 +5,7 @@
 #include <cstdint>
 
 struct GBAHeader;
-struct CPU;
+class CPU;
 
 enum WaitStates
 {

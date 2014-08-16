@@ -7,9 +7,9 @@ void GPU::ExtractColorValues(uint16_t input, uint8_t& red, uint8_t& green, uint8
 {
     // F E D C  B A 9 8  7 6 5 4  3 2 1 0
     // X B B B  B B G G  G G G R  R R R R
-    blue = (input >> 10) & 0b11111;
-    green = (input >> 5) & 0b11111;
-    red = input & 0b11111;
+    blue = (input >> 10) & 0x1F;
+    green = (input >> 5) & 0x1F;
+    red = input & 0x1F;
 }
 
 uint16_t GPU::ReadInt16(uint32_t offset)
