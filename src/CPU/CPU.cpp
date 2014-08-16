@@ -21,10 +21,6 @@ void CPU::Reset()
 
 void CPU::Run()
 {
-    // These are here because shared_from_this() will throw if called from the constructor
-    _interpreter = std::unique_ptr<Interpreter>(new Interpreter(shared_from_this()));
-    _memory = std::unique_ptr<MMU>(new MMU(shared_from_this()));
-
     // Ignore this call if we are already running
     if (_runState == CPURunState::Running)
         return;
@@ -65,5 +61,9 @@ void CPU::Run()
 
 void CPU::LoadROM(GBAHeader& header, FILE* rom)
 {
+    // These are here because shared_from_this() will throw if called from the constructor
+    _interpreter = std::unique_ptr<Interpreter>(new Interpreter(shared_from_this()));
+    _memory = std::unique_ptr<MMU>(new MMU(shared_from_this()));
+
     _memory->LoadROM(header, rom);
 }
