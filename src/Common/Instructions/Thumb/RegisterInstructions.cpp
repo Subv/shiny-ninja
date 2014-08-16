@@ -8,21 +8,8 @@
 std::string Thumb::MoveShiftedRegisterInstruction::ToString()
 {
     std::ostringstream stream;
-    switch (GetOpcode())
-    {
-        case ThumbOpcodes::LSL:
-            stream << "LSL R";
-            break;
-        case ThumbOpcodes::LSR:
-            stream << "LSR R";
-            break;
-        case ThumbOpcodes::ASR:
-        default: // Should never happen
-            stream << "ASR R";
-            break;
-    }
-
-    stream << GetDestinationRegister() << ", R" << GetSourceRegister() << " #" << GetOffset();
+    stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
+    stream << ", R" << GetSourceRegister() << " #" << GetOffset();
     return stream.str();
 }
 
@@ -35,8 +22,10 @@ uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode()
         case 0x1: // LSR
             return ThumbOpcodes::LSR;
         case 0x2: // ASR
-        default: // Should never happen
             return ThumbOpcodes::ASR;
+        default:
+            Utilities::Assert(false, "Thumb::MoveShiftedRegisterInstruction has invalid opcode");
+            return 0;
     }
 }
 
@@ -48,7 +37,7 @@ std::string Thumb::AddSubstractRegisterInstruction::ToString()
                1: SUB Rd,Rs,Rn   ;subtract register   Rd=Rs-Rn
                2: ADD Rd,Rs,#nn  ;add immediate       Rd=Rs+nn
                3: SUB Rd,Rs,#nn  ;subtract immediate  Rd=Rs-nn
-             Pseudo/alias opcode with Imm=0:                              //! TODO No clue what this means!
+             Pseudo/alias opcode with Imm=0:
                2: MOV Rd,Rs      ;move (affects cpsr) Rd=Rs+0
     */
     std::ostringstream stream;
@@ -58,14 +47,18 @@ std::string Thumb::AddSubstractRegisterInstruction::ToString()
             stream << "ADD ";
             break;
         case ThumbOpcodes::SUB:
-            stream << "SUB ";
+            stream << ((IsImmediate() && GetOperand() == 0) ? "MOV " : "SUB ");
+            break;
     }
 
-    stream << "R" << GetDestinationRegister() << ", R" << GetSourceRegister() << (!IsImmediate() ? ", R" : ", #") << GetOperand();
+    stream << "R" << GetDestinationRegister() << ", R" << GetSourceRegister();
+    if (IsImmediate() && GetOperand() == 0)
+        return stream.str();
+    stream << (!IsImmediate() ? ", R" : ", #") << GetOperand();
     return stream.str();
 }
 
-uint32_t  Thumb::AddSubstractRegisterInstruction::GetOpcode()
+uint32_t Thumb::AddSubstractRegisterInstruction::GetOpcode()
 {
     switch (GetOpcode())
     {
@@ -81,4 +74,26 @@ uint32_t  Thumb::AddSubstractRegisterInstruction::GetOpcode()
     }
 
     return 0;
+}
+
+uint32_t Thumb::MovCmpAddSubImmediateInstruction::GetOpcode()
+{
+    switch (MathHelper::GetBits(_instruction, 11, 2))
+    {
+        case 0: return ThumbOpcodes::MOV;
+        case 1: return ThumbOpcodes::CMP;
+        case 2: return ThumbOpcodes::ADD;
+        case 3: return ThumbOpcodes::SUB;
+        default:
+            Utilities::Assert(false, "Thumb::MovCmpAddSubImmediateInstruction has invalid opcode");
+            break;
+    }
+    return 0;
+}
+
+std::string Thumb::MovCmpAddSubImmediateInstruction::ToString()
+{
+    std::stringstream stream;
+    stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister() << ", #" << GetImmediateValue();
+    return stream.str();
 }

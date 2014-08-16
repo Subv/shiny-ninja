@@ -64,5 +64,8 @@ shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
     if (MathHelper::CheckBits(opcode, 13, 2, 0x3))
         return shared_ptr<Instruction>(new Thumb::MoveShiftedRegisterInstruction(opcode));
 
+    if (MathHelper::CheckBits(opcode, 13, 3, 0x1))
+        return shared_ptr<Instruction>(new Thumb::MovCmpAddSubImmediateInstruction(opcode));
+
     return shared_ptr<Instruction>(nullptr);
 }
