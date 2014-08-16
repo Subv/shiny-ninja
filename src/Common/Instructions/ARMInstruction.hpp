@@ -33,8 +33,7 @@ namespace ARM
         B,
         BL,
         BIC,
-        BLX_IMM,
-        BLX_REG,
+        BLX,
         BX,
         CDP,
         CMN,
@@ -54,8 +53,7 @@ namespace ARM
         MOV,
         MRC,
         MRS,
-        MSR_IMM,
-        MSR_REG,
+        MSR,
         MUL,
         MVN,
         ORR,
@@ -80,6 +78,8 @@ namespace ARM
         UMLAL,
         UMULL
     };
+    
+    std::string ToString(uint32_t opcode);
 }
 
 class ARMInstruction : public Instruction

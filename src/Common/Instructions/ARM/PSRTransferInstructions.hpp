@@ -32,9 +32,10 @@ namespace ARM
 
         PSRType GetPSRType() { return PSRType((_instruction >> 22) & 1); }
 
-        uint32_t GetOpcode() override { return ARMOpcodes::MSR_IMM; }
+        uint32_t GetOpcode() override { return ARMOpcodes::MSR; }
 
         std::string ToString() override;
+        bool IsImmediate() override { return true; }
 
         uint8_t GetFieldsMask() { return (_instruction >> 16) & 0xF; }
 
@@ -49,7 +50,7 @@ namespace ARM
 
         PSRType GetPSRType() { return PSRType((_instruction >> 22) & 1); }
 
-        uint32_t GetOpcode() override { return ARMOpcodes::MSR_REG; }
+        uint32_t GetOpcode() override { return ARMOpcodes::MSR; }
 
         std::string ToString() override;
 

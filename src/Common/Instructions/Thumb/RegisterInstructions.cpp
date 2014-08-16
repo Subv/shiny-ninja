@@ -139,6 +139,7 @@ uint32_t Thumb::HiRegisterOperandBxInstruction::GetOpcode()
             Utilities::Assert(false, "Thumb::HiRegisterOperandBxInstruction has invalid opcode");
             break;
     }
+    return 0;
 }
 
 std::string Thumb::HiRegisterOperandBxInstruction::ToString()

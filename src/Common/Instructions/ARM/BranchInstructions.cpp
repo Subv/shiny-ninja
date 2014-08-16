@@ -6,7 +6,7 @@
 std::string ARM::BranchInstruction::ToString()
 {
     std::stringstream stream;
-    stream << (Link() ? "BL PC + " : "B PC + ") << (GetSignedOffset() + 8);
+    stream << ARM::ToString(GetOpcode()) << " PC + " << (GetSignedOffset() + 8);
     return stream.str();
 }
 
@@ -24,17 +24,17 @@ std::string ARM::BranchLinkExchangeImmediateInstruction::ToString()
 
 uint32_t ARM::BranchLinkExchangeImmediateInstruction::GetOpcode()
 {
-    return ARMOpcodes::BLX_IMM;
+    return ARMOpcodes::BLX;
 }
 
 std::string ARM::BranchLinkExchangeRegisterInstruction::ToString()
 {
     std::stringstream stream;
-    stream << (Link() ? "BLX R" : "BX R") << GetRegister() << " + 8";
+    stream << ARM::ToString(GetOpcode()) << " R" << GetRegister() << " + 8";
     return stream.str();
 }
 
 uint32_t ARM::BranchLinkExchangeRegisterInstruction::GetOpcode()
 {
-    return Link() ? ARMOpcodes::BLX_REG : ARMOpcodes::BX;
+    return Link() ? ARMOpcodes::BLX : ARMOpcodes::BX;
 }

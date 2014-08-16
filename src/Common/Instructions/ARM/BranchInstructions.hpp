@@ -13,6 +13,7 @@ namespace ARM
         int32_t GetSignedOffset() { return (_instruction & 0xFFFFFF) << 2; }
 
         uint32_t GetOpcode() override;
+        bool IsImmediate() override { return true; }
 
         std::string ToString() override;
     };

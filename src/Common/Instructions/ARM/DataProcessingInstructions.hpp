@@ -31,7 +31,6 @@ namespace ARM
         ShiftType GetShiftType();
 
         // If Immediate()
-        
         uint8_t GetSecondOperand();
         uint8_t GetShiftImmediate();
 

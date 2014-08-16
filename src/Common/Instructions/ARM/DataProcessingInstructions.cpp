@@ -84,58 +84,7 @@ uint32_t ARM::DataProcessingInstruction::GetOpcode()
 std::string ARM::DataProcessingInstruction::ToString()
 {
     std::stringstream command;
-
-    switch (GetOpcode())
-    {
-        case ARMOpcodes::AND:
-            command << "AND ";
-            break;
-        case ARMOpcodes::EOR:
-            command << "EOR ";
-            break;
-        case ARMOpcodes::SUB:
-            command << "SUB ";
-            break;
-        case ARMOpcodes::RSB:
-            command << "RSB ";
-            break;
-        case ARMOpcodes::ADD:
-            command << "ADD ";
-            break;
-        case ARMOpcodes::ADC:
-            command << "ADC ";
-            break;
-        case ARMOpcodes::SBC:
-            command << "SBC ";
-            break;
-        case ARMOpcodes::RSC:
-            command << "RSC ";
-            break;
-        case ARMOpcodes::TST:
-            command << "TST ";
-            break;
-        case ARMOpcodes::TEQ:
-            command << "TEQ ";
-            break;
-        case ARMOpcodes::CMP:
-            command << "CMP ";
-            break;
-        case ARMOpcodes::CMN:
-            command << "CMN ";
-            break;
-        case ARMOpcodes::ORR:
-            command << "ORR ";
-            break;
-        case ARMOpcodes::MOV:
-            command << "MOV ";
-            break;
-        case ARMOpcodes::BIC:
-            command << "BIC ";
-            break;
-        case ARMOpcodes::MVN:
-            command << "MVN ";
-            break;
-    }
+    command << ARM::ToString(GetOpcode()) << " ";
 
     if (GetFirstOperand())
         command << "R" << GetFirstOperand() << ", ";
