@@ -14,8 +14,6 @@ void CPU::Reset()
     for (int i = 0; i < 16; ++i)
         _state.Registers[i] = 0;
 
-    GetRegister(PC) = 0x8000000; // Default entry point.
-
     _state.CPSR.Full = 0;
 }
 
@@ -53,8 +51,7 @@ void CPU::Run()
             instruction = _decoder->DecodeThumb(opcode);
         }
 
-        std::cout << "Set: " << uint32_t(instruction->GetInstructionSet()) << ". Instruction: " << instruction->ToString() << std::endl;
-
+        std::cout << "Set: " << (instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") << ". Instruction: " << instruction->ToString() << std::endl;
         _interpreter->RunInstruction(instruction);
     }
 }
