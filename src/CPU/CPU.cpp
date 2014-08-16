@@ -15,6 +15,8 @@ void CPU::Reset()
     for (int i = 0; i < 16; ++i)
         _state.Registers[i] = 0;
 
+    GetRegister(PC) = 0x8000000; // Default entry point.
+
     _state.CPSR.Full = 0;
 }
 
