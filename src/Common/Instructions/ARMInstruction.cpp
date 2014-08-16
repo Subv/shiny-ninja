@@ -62,4 +62,6 @@ std::string ARM::ToString(uint32_t opcode)
         case UMLAL: return "UMLAL";
         case UMULL: return "UMULL";
     }
+
+    return "UNKNOWN";
 }
