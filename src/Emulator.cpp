@@ -27,13 +27,15 @@ int main(int argc, char* argv[])
     if (!read)
     {
         std::cout << "Could not read ROM header." << std::endl;
-        return 0;
+        fclose(rom);
+        return -1;
     }
 
     if (!header.VerifyHeader())
     {
         std::cout << "The specified file is not a valid GBA ROM." << std::endl;
-        return 0;
+        fclose(rom);
+        return -2;
     }
 
     CPU arm7(CPUMode::Interpreter);
