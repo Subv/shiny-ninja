@@ -33,7 +33,12 @@ void MMU::LoadROM(GBAHeader& header, FILE* rom)
         memcpy(&_pakROM[i], _pakROM[0], size + sizeof(GBAHeader));
 }
 
-uint32_t MMU::Read32(uint32_t address)
+uint32_t MMU::ReadInt32(uint32_t offset)
+{
+    return ReadInt16(offset) | (ReadInt16(offset + 4) << 16);
+}
+
+uint16_t MMU::ReadInt16(uint32_t address)
 {
     switch ((address & 0x0F000000) >> 24)
     {
@@ -49,37 +54,34 @@ uint32_t MMU::Read32(uint32_t address)
             // execution, and opcode at [0188h+8] after SWI execution).
             return 0;
         case 0x2: // On-Board WRAM
-            if (address > 0x0203FFFF) // Trying to read in an unused block (02040000-02FFFFFF)
-                return 0;
+            // (02040000-02FFFFFF)
+            Utilities::Assert(address <= 0x0203FFFF, "Trying to read in unused EWRAM memory");
             // Accessing unused memory returns the recently pre-fetched opcode, ie. the
             // 32bit opcode at $+8 in ARM state, or the 16bit-opcode at $+4 in THUMB state,
             // in the later case the 16bit opcode is mirrored across both upper/lower 16bits
             // of the returned 32bit data.
-            return *(uint32_t*)(&_ewram[address - 0x02000000]);
+            return *(uint16_t*)(&_ewram[address - 0x02000000]);
         case 0x3: // On-Chip WRAM
-            if (address > 0x03007FFF) // Trying to read in an unused block (03008000-03FFFFFF)
-                return 0;
-            // See case 0x2 comment.
-            return *(uint32_t*)(&_iwram[address - 0x03000000]);
+            // (03008000-03FFFFFF)
+            Utilities::Assert(address <= 0x03007FFF, "Trying to read in unused IWRAM memory");
+            return *(uint16_t*)(&_iwram[address - 0x03000000]);
         case 0x4: // I/O Registers
-            if (address > 0x040003FF) // Trying to read in an unused block (04000400-04FFFFFF)
-                return 0;
+            // (04000400-04FFFFFF)
+            Utilities::Assert(address <= 0x040003FF, "Trying to read in unused IOMAP memory");
             // See case 0x2 comment.
             return 0; // NYI
         case 0x5: // BG/OBJ Palette RAM
-            if (address > 0x050003FF) // Trying to read in an unused block (05000400-05FFFFFF)
-                return 0;
-            return sGPU->ReadInt32(address);
+            // (05000400-05FFFFFF)
+            Utilities::Assert(address <= 0x050003FF, "Trying to read in unused palette memory");
+            return sGPU->ReadInt16(address);
         case 0x6: // VRAM
-            if (address > 0x06017FFF) // Trying to read in an unused block (06018000-06FFFFFF)
-                return 0;
-            // See case 0x2 comment.
-            return sGPU->ReadInt32(address);
+            // (06018000-06FFFFFF)
+            Utilities::Assert(address <= 0x06017FFF, "Trying to read in unused VRAM memory");
+            return sGPU->ReadInt16(address);
         case 0x7: // OAM - OBJ Attributes
-            if (address > 0x070003FF) // Trying to read in an unused block (07000400-07FFFFFF)
-                return 0;
-            // See case 0x2 comment.
-            return sGPU->ReadInt32(address);
+            // (07000400-07FFFFFF)
+            Utilities::Assert(address <= 0x070003FF, "Trying to read in unused OBJ memory");
+            return sGPU->ReadInt16(address);
         case 0x8: // Game Pak, State 0
         case 0x9: // Game Pak, State 0
         case 0xA: // Game Pak, State 1
@@ -89,25 +91,12 @@ uint32_t MMU::Read32(uint32_t address)
             // ((0x8, 0x9) - 0x8) >> 1 = 0
             // ((0xA, 0xB) - 0x8) >> 1 = 1
             // ((0xC, 0xD) - 0x8) >> 1 = 2
-            return *(uint32_t*)(&_pakROM[(address - 0x08000000) >> 25][address & 0x0F000000]);
+            return *(uint16_t*)(&_pakROM[(address - 0x08000000) >> 25][address & 0x0F000000]);
         case 0xE: // Game Pak SRAM
             if (address > 0x0E00FFFF)
                 return 0;
-            return *(uint32_t*)(&_sram[address - 0x0E000000]);
+            return *(uint16_t*)(&_sram[address - 0x0E000000]);
     }
-
-    return 0;
-}
-
-uint16_t MMU::Read16(uint32_t address)
-{
-    if (address >= 0x0C000000) // We're trying to read from Wait State 2
-        return *(uint16_t*)(&_pakROM[2][address - 0x0C000000]); // Read 2 bytes from there
-    else if (address >= 0x0A000000) // We're reading from Wait State 1
-        return *(uint16_t*)(&_pakROM[1][address - 0x0A000000]); // Read 2 bytes from there
-    else if (address >= 0x08000000) // We're trying to read from Wait State 0
-        return *(uint16_t*)(&_pakROM[0][address - 0x08000000]); // Read 2 bytes from there
-
     return 0;
 }
 
