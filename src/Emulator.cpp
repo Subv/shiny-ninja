@@ -14,6 +14,7 @@ int main(int argc, char* argv[])
     }
 
     FILE* rom = fopen(argv[1], "rb");
+    // FILE* rom = fopen("pkmn.gba", "rb"); // Fo' testin'
 
     if (!rom)
     {

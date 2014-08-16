@@ -32,8 +32,7 @@ void CPU::Run()
 
         if (GetCurrentInstructionSet() == InstructionSet::ARM)
         {
-            // Read the opcode from memory, 4 bytes in ARM mode
-            uint32_t opcode = _memory->ReadInt32(GetRegister(PC));
+            uint32_t opcode = _memory->ReadInt32(GetRegister(PC)); // Read the opcode from memory, 4 bytes in ARM mode
 
             GetRegister(PC) += 4; // Increment the PC 4 bytes
 
@@ -42,8 +41,7 @@ void CPU::Run()
         }
         else
         {
-            // Read the opcode from memory, 2 bytes in Thumb mode
-            uint16_t opcode = _memory->ReadInt16(GetRegister(PC));
+            uint16_t opcode = _memory->ReadInt16(GetRegister(PC)); // Read the opcode from memory, 2 bytes in Thumb mode
 
             GetRegister(PC) += 2; // Increment the PC 2 bytes
 
@@ -51,8 +49,11 @@ void CPU::Run()
             instruction = _decoder->DecodeThumb(opcode);
         }
 
-        std::cout << "Set: " << (instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") << ". Instruction: " << instruction->ToString() << std::endl;
-        _interpreter->RunInstruction(instruction);
+        if (instruction)
+        {
+            std::cout << "Set: " << (instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") << ". Instruction: " << instruction->ToString() << std::endl;
+            _interpreter->RunInstruction(instruction);
+        }
     }
 }
 
