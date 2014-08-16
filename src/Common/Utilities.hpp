@@ -1,7 +1,7 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 
-#undef _GLIBCXX_HAVE_BROKEN_VSWPRINTF
+// #undef _GLIBCXX_HAVE_BROKEN_VSWPRINTF
 
 namespace Utilities
 {

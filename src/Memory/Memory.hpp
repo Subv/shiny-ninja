@@ -5,6 +5,7 @@
 #include <cstdint>
 
 struct GBAHeader;
+struct CPU;
 
 enum WaitStates
 {
@@ -18,11 +19,7 @@ enum WaitStates
 class MMU final
 {
 public:
-    static std::unique_ptr<MMU>& Instance()
-    {
-        static std::unique_ptr<MMU> _instance(new MMU());
-        return _instance;
-    }
+    MMU(std::shared_ptr<CPU> arm);
 
     void LoadROM(GBAHeader& header, FILE* rom);
 
@@ -35,7 +32,6 @@ public:
     bool IsInBios() const { return _inBios; }
 
 private:
-    MMU() : _inBios(false) { }
 
     uint8_t _bios[0x4000];   // 00000000 - 00003FFF   BIOS - System ROM         (16 KBytes)
     uint8_t _ewram[0x40000]; // 02000000 - 0203FFFF   WRAM - On-board Work RAM  (256 KBytes) 2 Wait
@@ -45,8 +41,8 @@ private:
     uint8_t _pakROM[NUM_WAIT_STATES][0x2000000];
     uint8_t _sram[0x10000];  // 0E000000 - 0E00FFFF   Game Pak SRAM    (max 64 KBytes) - 8bit Bus width
 
+    std::shared_ptr<CPU> _cpu;
     bool _inBios; // Constantly set to false for now, we do not have a BIOS.
 };
 
-#define sMemory MMU::Instance()
 #endif

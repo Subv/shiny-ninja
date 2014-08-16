@@ -3,6 +3,7 @@
 
 #include "Decoder/Decoder.hpp"
 #include "Interpreter/Interpreter.hpp"
+#include "Memory/Memory.hpp"
 
 #include <cstdio>
 
@@ -48,6 +49,11 @@ union ProgramStatusRegisters
 };
 #pragma pack(pop)
 
+// Define shorthands for the most commonly used registers
+#define SP 13
+#define LR 14
+#define PC 15
+
 struct CPUState
 {
     uint32_t Registers[16];
@@ -59,7 +65,6 @@ class CPU final : public std::enable_shared_from_this<CPU>
 {
 public:
     CPU(CPUMode mode);
-
     void LoadROM(GBAHeader& header, FILE* rom);
     void Reset();
     void Run();
@@ -73,11 +78,7 @@ private:
     CPUState _state;
     std::unique_ptr<Interpreter> _interpreter;
     std::unique_ptr<Decoder> _decoder;
+    std::unique_ptr<MMU> _memory;
 };
-
-// Define shorthands for the most commonly used registers
-#define LR 14
-#define SP 13
-#define PC 15
 
 #endif
