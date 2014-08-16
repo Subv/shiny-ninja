@@ -1,9 +1,18 @@
 #include "Interpreter.hpp"
 
+#include "CPU/CPU.hpp"
+
 #include "Common/Instructions/ARMInstruction.hpp"
 #include "Common/Instructions/ThumbInstruction.hpp"
 
+#include "Common/Instructions/ARM/BranchInstructions.hpp"
+
 #include "Common/Utilities.hpp"
+
+Interpreter::Interpreter(std::shared_ptr<CPU> arm)  : _cpu(arm)
+{
+    InitializeHandlers();
+}
 
 void Interpreter::RunInstruction(std::shared_ptr<Instruction> instruction)
 {
@@ -32,6 +41,6 @@ void Interpreter::InitializeHandlers()
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)
 {
-
+    auto branch = std::static_pointer_cast<ARM::BranchInstruction>(instruction);
 }
 

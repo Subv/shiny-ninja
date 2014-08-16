@@ -13,7 +13,7 @@ class CPU;
 class Interpreter
 {
 public:
-    Interpreter(std::shared_ptr<CPU> arm) : _cpu(arm) { InitializeHandlers(); }
+    Interpreter(std::shared_ptr<CPU> arm);
 
     void RunInstruction(std::shared_ptr<Instruction> instruction);
     

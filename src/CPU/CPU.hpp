@@ -65,6 +65,7 @@ public:
     void Run();
 
     InstructionSet GetCurrentInstructionSet() { return InstructionSet(_state.CPSR.Flags.I); }
+    uint32_t& GetRegister(uint8_t reg) { return _state.Registers[reg]; }
 
 private:
     CPUMode _mode;
@@ -75,8 +76,8 @@ private:
 };
 
 // Define shorthands for the most commonly used registers
-#define PC _state.Registers[15]
-#define LR _state.Registers[14]
-#define SP _state.Registers[13]:
+#define LR 14
+#define SP 13
+#define PC 15
 
 #endif

@@ -37,7 +37,7 @@ void CPU::Run()
             // Read the opcode from memory, 4 bytes in ARM mode
             uint32_t opcode = sMemory->Read32(PC);
 
-            PC += 4; // Increment the PC 4 bytes
+            GetRegister(PC) += 4; // Increment the PC 4 bytes
 
             // Extract the instruction from it
             instruction = _decoder->DecodeARM(opcode);
@@ -47,7 +47,7 @@ void CPU::Run()
             // Read the opcode from memory, 2 bytes in Thumb mode
             uint16_t opcode = sMemory->Read16(PC);
 
-            PC += 2; // Increment the PC 2 bytes
+            GetRegister(PC) += 2; // Increment the PC 2 bytes
 
             // Extract the instruction from it
             instruction = _decoder->DecodeThumb(opcode);
