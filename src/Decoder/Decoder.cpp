@@ -3,6 +3,8 @@
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 #include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
 
+#include "Common/Instructions/Thumb/RegisterInstructions.hpp"
+
 #include "Common/MathHelper.hpp"
 
 using std::shared_ptr;
@@ -51,10 +53,10 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 {
     // Check for Add/Substract first, because first three bits also sign "Move Shifted Register"
-    if (MathHelper::CheckBits(opcode, 11, 5, 0b00011))
+    if (MathHelper::CheckBits(opcode, 11, 5, 0x3))
         return shared_ptr<Instruction>(new Thumb::AddSubstractRegisterInstruction(opcode));
 
-    if (MathHelper::CheckBits(opcode, 13, 2, 0b00011))
+    if (MathHelper::CheckBits(opcode, 13, 2, 0x3))
         return shared_ptr<Instruction>(new Thumb::MoveShiftedRegisterInstruction(opcode));
 
     return shared_ptr<Instruction>(nullptr);

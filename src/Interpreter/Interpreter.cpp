@@ -17,7 +17,7 @@ void Interpreter::RunInstruction(std::shared_ptr<Instruction> instruction)
 
 void Interpreter::HandleARM(std::shared_ptr<ARMInstruction> instruction)
 {
-    auto handler = _armHandlers[ARMOpcodes(instruction->GetOpcode())];
+    auto handler = _armHandlers[ARM::ARMOpcodes(instruction->GetOpcode())];
 }
 
 void Interpreter::HandleThumb(std::shared_ptr<ThumbInstruction> instruction)
@@ -27,7 +27,7 @@ void Interpreter::HandleThumb(std::shared_ptr<ThumbInstruction> instruction)
 
 void Interpreter::InitializeHandlers()
 {
-    _armHandlers[ARMOpcodes::B] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::B] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)

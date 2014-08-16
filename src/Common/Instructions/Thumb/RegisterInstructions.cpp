@@ -1,8 +1,11 @@
 #include "RegisterInstructions.hpp"
 
-#include <cstdint>
+#include "Common/Utilities.hpp"
 
-std::string Thumb::MoveShiftedRegisterInstruction::ToString() override
+#include <cstdint>
+#include <sstream>
+
+std::string Thumb::MoveShiftedRegisterInstruction::ToString()
 {
     std::ostringstream stream;
     switch (GetOpcode())
@@ -23,7 +26,7 @@ std::string Thumb::MoveShiftedRegisterInstruction::ToString() override
     return stream.str();
 }
 
-uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode() override
+uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode()
 {
     switch (MathHelper::GetBits(_instruction, 11, 2))
     {
@@ -37,7 +40,7 @@ uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode() override
     }
 }
 
-std::string Thumb::AddSubstractRegisterInstruction::ToString() override
+std::string Thumb::AddSubstractRegisterInstruction::ToString()
 {
     /*
     10-9   Opcode (0-3)
@@ -54,7 +57,7 @@ std::string Thumb::AddSubstractRegisterInstruction::ToString() override
         case ThumbOpcodes::ADD:
             stream << "ADD ";
             break;
-        case ThumbOpcodes::SUB;
+        case ThumbOpcodes::SUB:
             stream << "SUB ";
     }
 
@@ -62,7 +65,7 @@ std::string Thumb::AddSubstractRegisterInstruction::ToString() override
     return stream.str();
 }
 
-uint32_t  Thumb::AddSubstractRegisterInstruction::GetOpcode() override
+uint32_t  Thumb::AddSubstractRegisterInstruction::GetOpcode()
 {
     switch (GetOpcode())
     {
@@ -72,5 +75,10 @@ uint32_t  Thumb::AddSubstractRegisterInstruction::GetOpcode() override
         case 0x1:
         case 0x3:
             return ThumbOpcodes::SUB;
+        default:
+            Utilities::Assert(false, "Thumb::AddSubstractRegisterInstruction has invalid opcode");
+            break;
     }
+
+    return 0;
 }

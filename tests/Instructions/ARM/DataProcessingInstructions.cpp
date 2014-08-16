@@ -6,7 +6,7 @@ TEST_CASE("Data Processing Instructions", "Checks that the data processing instr
 {
     auto and = new ARM::DataProcessingInstruction(0xE2004020);
 
-    REQUIRE(and->GetOpcode() == ARMOpcodes::AND);
+    REQUIRE(and->GetOpcode() == ARM::ARMOpcodes::AND);
     REQUIRE(and->GetFirstOperand() == 0);
     REQUIRE(and->Immediate() == true);
     REQUIRE(and->GetDestinationRegister() == 4);
@@ -14,7 +14,7 @@ TEST_CASE("Data Processing Instructions", "Checks that the data processing instr
     delete and;
 
     auto mov = new ARM::DataProcessingInstruction(0xE1A00005);
-    REQUIRE(mov->GetOpcode() == ARMOpcodes::MOV);
+    REQUIRE(mov->GetOpcode() == ARM::ARMOpcodes::MOV);
     REQUIRE(mov->GetFirstOperand() == 0);
     REQUIRE(mov->Immediate() == false);
     REQUIRE(mov->GetSecondOperandRegister() == 5);

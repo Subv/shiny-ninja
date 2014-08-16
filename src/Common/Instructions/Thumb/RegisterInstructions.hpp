@@ -1,7 +1,8 @@
 #ifndef THUMB_REGISTER_INSTR_H
 #define THUMB_REGISTER_INSTR_H
 
-#include "Common/Instructions/ARMInstruction.hpp"
+#include "Common/Instructions/ThumbInstruction.hpp"
+#include "Common/MathHelper.hpp"
 
 namespace Thumb
 {

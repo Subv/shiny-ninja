@@ -23,61 +23,64 @@ enum class InstructionCondition
     Unused
 };
 
-enum ARMOpcodes
+namespace ARM
 {
-    ADC,
-    ADD,
-    AND,
-    B,
-    BL,
-    BIC,
-    BLX_IMM,
-    BLX_REG,
-    BX,
-    CDP,
-    CMN,
-    CMP,
-    EOR,
-    LDC,
-    LDM, // TODO: Multiple forms
-    LDR,
-    LDRB,
-    LDRBT,
-    LDRH,
-    LDRSB,
-    LDRSH,
-    LDRT,
-    MCR,
-    MLA,
-    MOV,
-    MRC,
-    MRS,
-    MSR_IMM,
-    MSR_REG,
-    MUL,
-    MVN,
-    ORR,
-    RSB,
-    RSC,
-    SBC,
-    SMLAL,
-    SMULL,
-    STC,
-    STM, // TODO: Multiple forms
-    STR,
-    STRB,
-    STRBT,
-    STRH,
-    STRT,
-    SUB,
-    SWI,
-    SWP,
-    SWPB,
-    TEQ,
-    TST,
-    UMLAL,
-    UMULL
-};
+    enum ARMOpcodes
+    {
+        ADC,
+        ADD,
+        AND,
+        B,
+        BL,
+        BIC,
+        BLX_IMM,
+        BLX_REG,
+        BX,
+        CDP,
+        CMN,
+        CMP,
+        EOR,
+        LDC,
+        LDM, // TODO: Multiple forms
+        LDR,
+        LDRB,
+        LDRBT,
+        LDRH,
+        LDRSB,
+        LDRSH,
+        LDRT,
+        MCR,
+        MLA,
+        MOV,
+        MRC,
+        MRS,
+        MSR_IMM,
+        MSR_REG,
+        MUL,
+        MVN,
+        ORR,
+        RSB,
+        RSC,
+        SBC,
+        SMLAL,
+        SMULL,
+        STC,
+        STM, // TODO: Multiple forms
+        STR,
+        STRB,
+        STRBT,
+        STRH,
+        STRT,
+        SUB,
+        SWI,
+        SWP,
+        SWPB,
+        TEQ,
+        TST,
+        UMLAL,
+        UMULL
+    };
+}
 
 class ARMInstruction : public Instruction
 {
@@ -88,6 +91,7 @@ public:
     
     InstructionCondition GetCondition();
 
-    std::string ToString() override = 0;
+    virtual uint32_t GetOpcode() override = 0;
+    virtual std::string ToString() override = 0;
 };
 #endif
