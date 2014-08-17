@@ -9,7 +9,7 @@
 #include <memory>
 #include <cstdint>
 
-MMU::MMU(std::shared_ptr<CPU> arm) : _cpu(arm), _inBios(false)
+MMU::MMU(CPU* arm) : _cpu(arm), _inBios(false)
 {
 }
 

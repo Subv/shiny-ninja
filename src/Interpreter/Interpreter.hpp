@@ -13,7 +13,7 @@ class CPU;
 class Interpreter
 {
 public:
-    Interpreter(std::shared_ptr<CPU> arm);
+    Interpreter(CPU* arm);
 
     void RunInstruction(std::shared_ptr<Instruction> instruction);
     
@@ -25,7 +25,7 @@ public:
     void HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruction> instruction);
 
 private:
-    std::shared_ptr<CPU> _cpu;
+    CPU* _cpu;
     std::unordered_map<ARM::ARMOpcodes, std::function<void(std::shared_ptr<ARMInstruction>)>, std::hash<int>> _armHandlers;
     std::unordered_map<Thumb::ThumbOpcodes, std::function<void(std::shared_ptr<ThumbInstruction>)>, std::hash<int>> _thumbHandlers;
     void InitializeHandlers();

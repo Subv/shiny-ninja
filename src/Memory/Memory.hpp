@@ -19,7 +19,7 @@ enum WaitStates
 class MMU final
 {
 public:
-    MMU(std::shared_ptr<CPU> arm);
+    MMU(CPU* arm);
 
     void LoadROM(GBAHeader& header, FILE* rom);
 
@@ -41,7 +41,7 @@ private:
     uint8_t _pakROM[NUM_WAIT_STATES][0x2000000];
     uint8_t _sram[0x10000];  // 0E000000 - 0E00FFFF   Game Pak SRAM    (max 64 KBytes) - 8bit Bus width
 
-    std::shared_ptr<CPU> _cpu;
+    CPU* _cpu;
     bool _inBios; // Constantly set to false for now, we do not have a BIOS.
 };
 

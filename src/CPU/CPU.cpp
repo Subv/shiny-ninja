@@ -11,6 +11,9 @@ _decoder(new Decoder())
 
 void CPU::Reset()
 {
+    _interpreter = std::unique_ptr<Interpreter>(new Interpreter(this));
+    _memory = std::unique_ptr<MMU>(new MMU(this));
+
     for (int i = 0; i < 16; ++i)
         _state.Registers[i] = 0;
 
@@ -63,9 +66,5 @@ void CPU::Run()
 
 void CPU::LoadROM(GBAHeader& header, FILE* rom)
 {
-    // These are here because shared_from_this() will throw if called from the constructor
-    _interpreter = std::unique_ptr<Interpreter>(new Interpreter(shared_from_this()));
-    _memory = std::unique_ptr<MMU>(new MMU(shared_from_this()));
-
     _memory->LoadROM(header, rom);
 }

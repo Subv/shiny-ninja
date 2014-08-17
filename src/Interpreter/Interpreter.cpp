@@ -11,7 +11,7 @@
 #include "Common/MathHelper.hpp"
 #include "Common/Utilities.hpp"
 
-Interpreter::Interpreter(std::shared_ptr<CPU> arm)  : _cpu(arm)
+Interpreter::Interpreter(CPU* arm)  : _cpu(arm)
 {
     InitializeHandlers();
 }
