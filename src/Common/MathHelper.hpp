@@ -2,7 +2,12 @@
 #define MATH_HPP
 
 #include <cstdint>
-#include <limits.h>
+#include <type_traits>
+#include <limits>
+
+#ifndef CHAR_BIT // Defined in <limits.h>, buuuut we already have <limits>
+# define CHAR_BIT sizeof(char)
+#endif
 
 namespace MathHelper
 {

@@ -6,7 +6,7 @@
 
 enum class InstructionSet
 {
-    ARM,
+    ARM  = 0,
     Thumb
 };
 
