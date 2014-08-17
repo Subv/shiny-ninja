@@ -76,6 +76,7 @@ public:
     void SetInstructionSet(InstructionSet set) { _state.CPSR.Flags.T = uint8_t(set); }
     void ToggleInstructionSet() { _state.CPSR.Flags.T ^= 1; }
     ProgramStatusRegisters::FlagsStruct& GetCurrentStatusFlags() { return _state.CPSR.Flags; }
+    std::unique_ptr<MMU>& GetMemory() { return _memory; }
 
 private:
     CPUMode _mode;

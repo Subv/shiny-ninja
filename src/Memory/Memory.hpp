@@ -23,11 +23,12 @@ public:
 
     void LoadROM(GBAHeader& header, FILE* rom);
 
-    uint32_t ReadInt32(uint32_t address);
-    uint16_t ReadInt16(uint32_t address);
+    uint32_t ReadUInt32(uint32_t address);
+    uint16_t ReadUInt16(uint32_t address);
+    uint8_t ReadUInt8(uint32_t address);
 
-    void WriteInt32(uint32_t address, uint32_t value);
-    void WriteInt16(uint32_t address, uint16_t value);
+    void WriteUInt32(uint32_t address, uint32_t value);
+    void WriteUInt16(uint32_t address, uint16_t value);
 
     bool IsInBios() const { return _inBios; }
 

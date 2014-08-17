@@ -7,7 +7,7 @@
 
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
-#include "Common/Instructions/ARM/LoadStoreInstructions.h"
+#include "Common/Instructions/ARM/LoadStoreInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 #include "Common/Utilities.hpp"
@@ -293,6 +293,11 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
     auto instruction = std::static_pointer_cast<ARM::LoadStoreInstruction>(instr);
 
     uint32_t address = _cpu->GetRegister(instruction->GetBaseRegister());
+    
+    // Account for CPU prefetch, the code expects the PC to be at <CurrentInstruction> + 8, but we're currently at <CurrentInstruction> + 4
+    if (instruction->GetBaseRegister() == PC)
+        address += 4;
+
     uint32_t secondAddressValue = 0;
 
     if (instruction->IsImmediate())
@@ -300,6 +305,11 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
     else
     {
         int32_t registerValue = _cpu->GetRegister(instruction->GetIndexRegister());
+        
+        // Account for CPU prefetch, the code expects the PC to be at <CurrentInstruction> + 8, but we're currently at <CurrentInstruction> + 4
+        if (instruction->GetIndexRegister() == PC)
+            address += 4;
+
         uint32_t shiftValue = instruction->GetShiftImmediate();
 
         switch (instruction->GetShiftType())
@@ -355,7 +365,12 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
     switch (instruction->GetOpcode())
     {
         case ARM::ARMOpcodes::LDR:
-
+        case ARM::ARMOpcodes::LDRB:
+        case ARM::ARMOpcodes::LDRBT:
+            if (instruction->IsUnsignedByte())
+                _cpu->GetRegister(instruction->GetRegister()) = _cpu->GetMemory()->ReadUInt8(address);
+            else
+                _cpu->GetRegister(instruction->GetRegister()) = _cpu->GetMemory()->ReadUInt32(address);
             break;
     }
 }

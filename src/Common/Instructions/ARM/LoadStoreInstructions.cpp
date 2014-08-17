@@ -1,4 +1,4 @@
-#include "LoadStoreInstructions.h"
+#include "LoadStoreInstructions.hpp"
 #include "Common/Utilities.hpp"
 
 bool ARM::LoadStoreInstruction::IsUnprivileged() const

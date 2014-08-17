@@ -1,4 +1,4 @@
-#include "MultiplyAccumulateInstructions.h"
+#include "MultiplyAccumulateInstructions.hpp"
 
 #include "Common/Utilities.hpp"
 #include <sstream>

@@ -34,6 +34,7 @@ class GPU final
         
         uint32_t ReadInt32(uint32_t offset);
         uint16_t ReadInt16(uint32_t offset);
+        uint8_t ReadInt8(uint32_t offset);
         
         /**
          * @description A Helper function that reads color data from palette u16

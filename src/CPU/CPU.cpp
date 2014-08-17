@@ -37,7 +37,7 @@ void CPU::Run()
 
         if (GetCurrentInstructionSet() == InstructionSet::ARM)
         {
-            uint32_t opcode = _memory->ReadInt32(GetRegister(PC)); // Read the opcode from memory, 4 bytes in ARM mode
+            uint32_t opcode = _memory->ReadUInt32(GetRegister(PC)); // Read the opcode from memory, 4 bytes in ARM mode
 
             GetRegister(PC) += 4; // Increment the PC 4 bytes
 
@@ -46,7 +46,7 @@ void CPU::Run()
         }
         else
         {
-            uint16_t opcode = _memory->ReadInt16(GetRegister(PC)); // Read the opcode from memory, 2 bytes in Thumb mode
+            uint16_t opcode = _memory->ReadUInt16(GetRegister(PC)); // Read the opcode from memory, 2 bytes in Thumb mode
 
             GetRegister(PC) += 2; // Increment the PC 2 bytes
 
