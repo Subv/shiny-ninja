@@ -22,6 +22,7 @@ public:
     
     // ARM Instruction handlers
     void HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction);
+    void HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruction> instruction);
 
 private:
     std::shared_ptr<CPU> _cpu;

@@ -6,7 +6,9 @@
 #include "Common/Instructions/ThumbInstruction.hpp"
 
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
+#include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 
+#include "Common/MathHelper.hpp"
 #include "Common/Utilities.hpp"
 
 Interpreter::Interpreter(std::shared_ptr<CPU> arm)  : _cpu(arm)
@@ -87,5 +89,65 @@ void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> ins
 
     // We have to add 4 because the CPU pipeline prefetches the next opcode.
     _cpu->GetRegister(PC) += branch->GetSignedOffset() + 4;
+}
+
+void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruction> instruction)
+{
+    auto dataproc = std::static_pointer_cast<ARM::DataProcessingInstruction>(instruction);
+
+    uint32_t secondOperand = 0;
+    uint32_t result = 0;
+
+    if (dataproc->IsImmediate())
+        secondOperand = dataproc->GetShiftedSecondOperandImmediate();
+    else
+    {
+        uint32_t registerValue = _cpu->GetRegister(dataproc->GetSecondOperand());
+        // If the instruction must shift the second operand by a register value, then only the lower 8 bits of that register are used.
+        uint8_t shiftValue = dataproc->ShiftByRegister() ? (_cpu->GetRegister(dataproc->GetShiftRegisterOrImmediate()) & 0xFF) : dataproc->GetShiftRegisterOrImmediate();
+
+        switch (dataproc->GetShiftType())
+        {
+            case ARM::ShiftType::LSL:
+                secondOperand = registerValue << shiftValue;
+                break;
+            case ARM::ShiftType::LSR:
+                secondOperand = registerValue >> shiftValue;
+                break;
+            case ARM::ShiftType::ASR:
+                // We need to convert it to int32_t in order to perform an Arithmetic Shift Right (ASR)
+                secondOperand = uint32_t((int32_t)registerValue >> (int32_t)shiftValue);
+                break;
+            case ARM::ShiftType::ROR:
+                secondOperand = MathHelper::RotateRight(registerValue, shiftValue);
+                break;
+        }
+
+    }
+
+    switch (dataproc->GetOpcode())
+    {
+        case ARM::ARMOpcodes::AND:
+            result = _cpu->GetRegister(dataproc->GetFirstOperand()) & secondOperand;
+            break;
+        case ARM::ARMOpcodes::EOR:
+            result = _cpu->GetRegister(dataproc->GetFirstOperand()) ^ secondOperand;
+            break;
+        case ARM::ARMOpcodes::SUB:
+            result = _cpu->GetRegister(dataproc->GetFirstOperand()) - secondOperand;
+            break;
+        case ARM::ARMOpcodes::RSB: // Reversed Substract
+            result = secondOperand - _cpu->GetRegister(dataproc->GetFirstOperand());
+            break;
+        case ARM::ARMOpcodes::ADD:
+            result = _cpu->GetRegister(dataproc->GetFirstOperand()) + secondOperand;
+            break;
+        case ARM::ARMOpcodes::ADC: // Add with carry
+            result = _cpu->GetRegister(dataproc->GetFirstOperand()) + secondOperand;
+            break;
+    }
+
+    if (dataproc->HasDestinationRegister())
+        _cpu->GetRegister(dataproc->GetDestinationRegister()) = result;
 }
 

@@ -1,5 +1,8 @@
-#include "Common/Utilities.hpp"
 #include "DataProcessingInstructions.hpp"
+
+#include "Common/Utilities.hpp"
+#include "Common/MathHelper.hpp"
+
 #include <sstream>
 
 uint8_t ARM::DataProcessingInstruction::GetSecondOperand() const
@@ -128,4 +131,12 @@ bool ARM::DataProcessingInstruction::HasDestinationRegister() const
     }
 
     return true;
+}
+
+uint8_t ARM::DataProcessingInstruction::GetShiftedSecondOperandImmediate() const
+{
+    Utilities::Assert(IsImmediate(), "Opcode must be immediate");
+
+    // Performs the ROR shift as defined in the opcode encoding.
+    return MathHelper::RotateRight(GetSecondOperand(), GetShiftImmediate());
 }

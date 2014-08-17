@@ -15,12 +15,14 @@ namespace MathHelper
     template <typename T>
     inline T RotateLeft(T val, uint8_t moves)
     {
+        static_assert(std::is_arithmetic<T>::value, "T must be a number type");
         return (val << moves) | (val >> (sizeof(T) * CHAR_BIT - moves));
     }
 
     template<typename T>
     inline T RotateRight(T x, uint8_t moves)
     {
+        static_assert(std::is_arithmetic<T>::value, "T must be a number type");
         return (x >> moves) | (x << sizeof(T) * CHAR_BIT - moves);
     }
 }

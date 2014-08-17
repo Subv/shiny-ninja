@@ -33,9 +33,11 @@ namespace ARM
         bool HasFirstOperand() const;
         bool HasDestinationRegister() const;
 
-        // If Immediate()
         uint8_t GetSecondOperand() const;
+
+        // If Immediate()
         uint8_t GetShiftImmediate() const;
+        uint8_t GetShiftedSecondOperandImmediate() const; // Returns GetSecondOperand() with the specified shift by GetShiftImmediate() applied
 
         // If not Immediate()
         bool ShiftByRegister() const;
