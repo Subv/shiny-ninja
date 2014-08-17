@@ -6,7 +6,7 @@
 
 namespace MathHelper
 {
-    bool CheckBit(uint8_t bit, uint32_t val);
+    bool CheckBit(uint8_t val, uint32_t bit);
 
     bool CheckBits(uint32_t value, uint8_t start, uint8_t bitCount, uint32_t check);
 

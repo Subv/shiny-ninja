@@ -90,7 +90,7 @@ void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> ins
 
             // The value of the T bit will be that of the first bit of the value stored in the specified register
             uint32_t reg = _cpu->GetRegister(branch->GetRegister());
-            bool thumb = MathHelper::CheckBit(0, reg);
+            bool thumb = MathHelper::CheckBit(reg, 0);
 
             // The branch location is stored in a register, with the first bit set to 0
             _cpu->GetRegister(PC) = reg & 0xFFFFFFFE;
@@ -124,25 +124,62 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
     int64_t secondOperand = 0;
     int64_t result = 0;
 
+    // Default to the previous Carry value
+    bool carryOut = _cpu->GetCurrentStatusFlags().C;
+
     if (dataproc->IsImmediate())
         secondOperand = dataproc->GetShiftedSecondOperandImmediate();
     else
     {
         int32_t registerValue = _cpu->GetRegister(dataproc->GetSecondOperand());
+        
+        if (dataproc->GetSecondOperand() == PC)
+            registerValue += 4;
+
         // If the instruction must shift the second operand by a register value, then only the lower 8 bits of that register are used.
-        uint8_t shiftValue = dataproc->ShiftByRegister() ? (_cpu->GetRegister(dataproc->GetShiftRegisterOrImmediate()) & 0xFF) : dataproc->GetShiftRegisterOrImmediate();
+        uint8_t shiftValue = dataproc->ShiftByRegister() ? ((_cpu->GetRegister(dataproc->GetShiftRegisterOrImmediate()) + (dataproc->GetShiftRegisterOrImmediate() == PC ? 4 : 0)) & 0xFF) : dataproc->GetShiftRegisterOrImmediate();
 
         switch (dataproc->GetShiftType())
         {
             case ARM::ShiftType::LSL:
                 secondOperand = registerValue << shiftValue;
+                if (shiftValue)
+                    carryOut = MathHelper::CheckBit(registerValue, 32 - shiftValue);
                 break;
-            case ARM::ShiftType::LSR:
             case ARM::ShiftType::ASR:
+                // Handle a special case for the ASR shifter as defined in the ARM Reference Manual
+                if ((!dataproc->ShiftByRegister() && shiftValue == 0) || (dataproc->ShiftByRegister() && shiftValue >= 32))
+                {
+                    carryOut = MathHelper::CheckBit(registerValue, 31);
+                    if (carryOut)
+                        secondOperand = 0xFFFFFFFF;
+                    else
+                        secondOperand = 0;
+                    break;
+                }
+                // No break
+            case ARM::ShiftType::LSR:
+                if (shiftValue)
+                    carryOut = MathHelper::CheckBit(registerValue, shiftValue - 1);
+                else if (!dataproc->ShiftByRegister())
+                    carryOut = MathHelper::CheckBit(registerValue, 31);
+
                 secondOperand = registerValue >> shiftValue;
                 break;
             case ARM::ShiftType::ROR:
                 secondOperand = MathHelper::RotateRight(registerValue, shiftValue);
+                if (shiftValue)
+                {
+                    if (dataproc->ShiftByRegister())
+                    {
+                        if (MathHelper::CheckBits(shiftValue, 0, 4, 0))
+                            carryOut = MathHelper::CheckBit(registerValue, 31);
+                        else
+                            carryOut = MathHelper::CheckBit(registerValue, (shiftValue & 0xF) - 1);
+                    }
+                    else
+                        carryOut = MathHelper::CheckBit(registerValue, shiftValue - 1);
+                }
                 break;
         }
     }
@@ -199,19 +236,22 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
             return;
         }
 
-        _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(31, uint32_t(result));
+        _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(uint32_t(result), 31);
         _cpu->GetCurrentStatusFlags().Z = result == 0;
         
         if (dataproc->AffectsOverflow())
         {
             _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<int32_t>(result);
             // For these opcodes, the carry is set based on the result of the shift operation
-            _cpu->GetCurrentStatusFlags().C = 0;
+            if (dataproc->IsImmediate() && dataproc->GetShiftImmediate() != 0)
+                _cpu->GetCurrentStatusFlags().C = MathHelper::CheckBit(dataproc->GetShiftedSecondOperandImmediate(), 31);
+            else
+                _cpu->GetCurrentStatusFlags().C = carryOut;
         }
         else
         {
             // The carry depends on the value of the result for these opcodes
-            _cpu->GetCurrentStatusFlags().C = 0;
+            _cpu->GetCurrentStatusFlags().C = 0; // TODO
         }
     }
 

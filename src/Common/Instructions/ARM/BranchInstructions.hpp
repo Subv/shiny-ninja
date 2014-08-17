@@ -32,7 +32,7 @@ namespace ARM
 
         std::string ToString() const override;
 
-        bool Link() const { return MathHelper::CheckBit(5, _instruction); }
+        bool Link() const { return MathHelper::CheckBit(_instruction, 5); }
     };
 
     class BranchInstruction : public ARMInstruction
@@ -46,7 +46,7 @@ namespace ARM
 
         std::string ToString() const override;
 
-        bool Link() const { return MathHelper::CheckBit(24, _instruction); }
+        bool Link() const { return MathHelper::CheckBit(_instruction, 24); }
     };
 }
 #endif
