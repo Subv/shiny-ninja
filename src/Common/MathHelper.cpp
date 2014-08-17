@@ -1,6 +1,6 @@
 #include "MathHelper.hpp"
 
-bool MathHelper::CheckBit(uint8_t val, uint32_t bit)
+bool MathHelper::CheckBit(uint64_t val, uint8_t bit)
 {
     return (val & (1 << bit));
 }

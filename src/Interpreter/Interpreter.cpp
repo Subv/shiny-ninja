@@ -241,7 +241,6 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
         
         if (dataproc->AffectsOverflow())
         {
-            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<int32_t>(result);
             // For these opcodes, the carry is set based on the result of the shift operation
             if (dataproc->IsImmediate() && dataproc->GetShiftImmediate() != 0)
                 _cpu->GetCurrentStatusFlags().C = MathHelper::CheckBit(dataproc->GetShiftedSecondOperandImmediate(), 31);
@@ -251,8 +250,12 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
         else
         {
             // The carry depends on the value of the result for these opcodes
-            _cpu->GetCurrentStatusFlags().C = 0; // TODO
+            _cpu->GetCurrentStatusFlags().C = MathHelper::CheckBit(result, 32); // Check the 32th bit of the result, it's set only if the operation had a carry
         }
+
+        // Now that the carry is set, we can compute the overflow
+        if (dataproc->AffectsOverflow())
+            _cpu->GetCurrentStatusFlags().V = _cpu->GetCurrentStatusFlags().C ^ _cpu->GetCurrentStatusFlags().N;
     }
 
     if (dataproc->HasDestinationRegister())

@@ -25,6 +25,14 @@ enum class InstructionCondition
 
 namespace ARM
 {
+    enum class ShiftType
+    {
+        LSL,
+        LSR,
+        ASR,
+        ROR
+    };
+
     enum ARMOpcodes
     {
         ADC,

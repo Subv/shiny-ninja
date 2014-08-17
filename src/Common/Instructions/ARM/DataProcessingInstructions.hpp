@@ -5,14 +5,6 @@
 
 namespace ARM
 {
-    enum class ShiftType
-    {
-        LSL,
-        LSR,
-        ASR,
-        ROR
-    };
-
     class DataProcessingInstruction : public ARMInstruction
     {
     public:

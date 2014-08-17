@@ -3,6 +3,7 @@
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 #include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
 #include "Common/Instructions/ARM/MultiplyAccumulateInstructions.h"
+#include "Common/Instructions/ARM/LoadStoreInstructions.h"
 
 #include "Common/Instructions/Thumb/RegisterInstructions.hpp"
 
@@ -51,6 +52,9 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
     // Check for multiply / multiply accumulate instructions
     if (MathHelper::CheckBits(opcode, 22, 6, 0) && MathHelper::CheckBits(opcode, 4, 4, 9))
         return shared_ptr<Instruction>(new ARM::MultiplyAccumulateInstruction(opcode));
+
+    if (MathHelper::CheckBits(opcode, 26, 2, 1))
+        return shared_ptr<Instruction>(new ARM::LoadStoreInstruction(opcode));
 
     return shared_ptr<Instruction>(nullptr);
 }
