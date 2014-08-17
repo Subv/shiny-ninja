@@ -1,7 +1,6 @@
 project(ShinyNinja)
 
-add_subdirectory(src)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -O0")
 
-if (TESTS)
-	add_subdirectory(tests)
-endif()
+add_subdirectory(src)
+add_subdirectory(tests)

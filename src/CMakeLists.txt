@@ -1,14 +1,16 @@
-file(GLOB_RECURSE sources *.cpp *.hpp)
+file(GLOB_RECURSE sources 
+	Common/*.cpp Common/*.hpp
+	CPU/*.cpp CPU/*.hpp
+	Decoder/*.cpp Decoder/*.hpp
+	GPU/*.cpp GPU/*.hpp
+	Interpreter/*.cpp Interpreter/*.hpp
+	Memory/*.cpp Memory/*.hpp)
 
 include_directories(
 	${CMAKE_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR})
 	
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -O0")
+add_library(ShinyNinja ${sources})
 
-if (TESTS)
-	add_library(ShinyNinja ${sources})
-else(TESTS)
-	add_executable(ShinyNinja ${sources})
-endif(TESTS)
+add_subdirectory(Platform)

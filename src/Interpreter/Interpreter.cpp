@@ -338,12 +338,12 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
         else
             address -= secondAddressValue;
 
-        if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition))
+        if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition()))
             _cpu->GetRegister(instruction->GetBaseRegister()) = address;
     }
     else
     {
-        if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition))
+        if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition()))
         {
             if (instruction->IsBaseAdded())
                 _cpu->GetRegister(instruction->GetBaseRegister()) += secondAddressValue;
