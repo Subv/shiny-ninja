@@ -54,6 +54,16 @@ void Interpreter::InitializeHandlers()
     _armHandlers[ARM::ARMOpcodes::RSB] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::ADD] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::ADC] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::SBC] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::RSC] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::TST] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::TEQ] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::CMP] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::CMN] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::ORR] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::MOV] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::BIC] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::MVN] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)
@@ -143,22 +153,44 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
     switch (dataproc->GetOpcode())
     {
         case ARM::ARMOpcodes::AND:
+        case ARM::ARMOpcodes::TST:
             result = firstOperand & secondOperand;
             break;
         case ARM::ARMOpcodes::EOR:
+        case ARM::ARMOpcodes::TEQ:
             result = firstOperand ^ secondOperand;
             break;
         case ARM::ARMOpcodes::SUB:
+        case ARM::ARMOpcodes::CMP:
             result = firstOperand - secondOperand;
             break;
         case ARM::ARMOpcodes::RSB: // Reversed Subtract
             result = secondOperand - firstOperand;
             break;
         case ARM::ARMOpcodes::ADD:
+        case ARM::ARMOpcodes::CMN:
             result = firstOperand + secondOperand;
             break;
         case ARM::ARMOpcodes::ADC: // Add with carry
-            result = firstOperand + secondOperand;
+            // result = firstOperand + secondOperand + carry;
+            break;
+        case ARM::ARMOpcodes::SBC: // Sub with carry
+            // result = firstOperand - secondOperand + carry - 1;
+            break;
+        case ARM::ARMOpcodes::RSC: // Reversed Sub with Carry
+            // result = secondOperand - firstOperand + carry - 1;
+            break;
+        case ARM::ARMOpcodes::ORR:
+            result = firstOperand | secondOperand;
+            break;
+        case ARM::ARMOpcodes::MOV:
+            result = secondOperand;
+            break;
+        case ARM::ARMOpcodes::BIC:
+            result = firstOperand & ~secondOperand;
+            break;
+        case ARM::ARMOpcodes::MVN:
+            result = ~secondOperand;
             break;
     }
 
