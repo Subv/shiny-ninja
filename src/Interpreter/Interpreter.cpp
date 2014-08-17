@@ -41,10 +41,19 @@ void Interpreter::HandleThumb(std::shared_ptr<ThumbInstruction> instruction)
 
 void Interpreter::InitializeHandlers()
 {
+    // Branch Instructions
     _armHandlers[ARM::ARMOpcodes::B] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BL] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BX] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BLX] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
+
+    // Data Processing Instructions
+    _armHandlers[ARM::ARMOpcodes::AND] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::EOR] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::SUB] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::RSB] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::ADD] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::ADC] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)

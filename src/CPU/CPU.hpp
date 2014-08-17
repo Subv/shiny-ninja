@@ -61,7 +61,7 @@ struct CPUState
     ProgramStatusRegisters SPSR; // Saved Program Status Register
 };
 
-class CPU final : public std::enable_shared_from_this<CPU>
+class CPU final
 {
 public:
     CPU(CPUMode mode);
