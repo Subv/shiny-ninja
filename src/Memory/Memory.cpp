@@ -35,7 +35,7 @@ void MMU::LoadROM(GBAHeader& header, FILE* rom)
 
 uint32_t MMU::ReadInt32(uint32_t offset)
 {
-    return ReadInt16(offset) | (ReadInt16(offset + 4) << 16);
+    return ReadInt16(offset) | (ReadInt16(offset + 2) << 16);
 }
 
 uint16_t MMU::ReadInt16(uint32_t address)

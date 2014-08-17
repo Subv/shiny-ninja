@@ -71,6 +71,7 @@ public:
 
     InstructionSet GetCurrentInstructionSet() { return InstructionSet(_state.CPSR.Flags.I); }
     uint32_t& GetRegister(uint8_t reg) { return _state.Registers[reg]; }
+    void SetInstructionSet(InstructionSet set) { _state.CPSR.Flags.T = uint8_t(set); }
 
 private:
     CPUMode _mode;

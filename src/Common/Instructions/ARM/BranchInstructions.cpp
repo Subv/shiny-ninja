@@ -30,7 +30,7 @@ uint32_t ARM::BranchLinkExchangeImmediateInstruction::GetOpcode()
 std::string ARM::BranchLinkExchangeRegisterInstruction::ToString()
 {
     std::stringstream stream;
-    stream << ARM::ToString(GetOpcode()) << " R" << GetRegister() << " + 8";
+    stream << ARM::ToString(GetOpcode()) << " R" << +GetRegister() << " + 8";
     return stream.str();
 }
 

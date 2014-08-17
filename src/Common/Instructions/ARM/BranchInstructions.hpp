@@ -10,7 +10,8 @@ namespace ARM
     public:
         BranchLinkExchangeImmediateInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        int32_t GetSignedOffset() { return (_instruction & 0xFFFFFF) << 2; }
+        int32_t GetSignedOffset() const { return (_instruction & 0xFFFFFF) << 2; }
+        uint8_t GetSecondBit() const { return (_instruction >> 24) & 1; }
 
         uint32_t GetOpcode() override;
         bool IsImmediate() override { return true; }
@@ -23,9 +24,7 @@ namespace ARM
     public:
         BranchLinkExchangeRegisterInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        uint8_t GetRegister() { return _instruction & 0xF; }
-
-        bool Link() { return (_instruction >> 5) & 0x1; }
+        uint8_t GetRegister() const { return _instruction & 0xF; }
 
         uint32_t GetOpcode() override;
 
@@ -37,13 +36,13 @@ namespace ARM
     public:
         BranchInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        int32_t GetSignedOffset() { return (_instruction & 0xFFFFFF) << 2; }
+        int32_t GetSignedOffset() const { return (_instruction & 0xFFFFFF) << 2; }
 
         uint32_t GetOpcode() override;
 
         std::string ToString() override;
 
-        bool Link() { return (_instruction >> 24) & 0x1; }
+        bool Link() const { return (_instruction >> 24) & 0x1; }
     };
 }
 #endif

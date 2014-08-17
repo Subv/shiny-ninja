@@ -30,6 +30,9 @@ namespace ARM
 
         ShiftType GetShiftType();
 
+        bool HasFirstOperand();
+        bool HasDestinationRegister();
+
         // If Immediate()
         uint8_t GetSecondOperand();
         uint8_t GetShiftImmediate();

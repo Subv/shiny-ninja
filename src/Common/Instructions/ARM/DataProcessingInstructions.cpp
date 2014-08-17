@@ -86,14 +86,46 @@ std::string ARM::DataProcessingInstruction::ToString()
     std::stringstream command;
     command << ARM::ToString(GetOpcode()) << " ";
 
-    if (GetFirstOperand())
-        command << "R" << GetFirstOperand() << ", ";
+    if (HasDestinationRegister())
+        command << "R" << +GetDestinationRegister() << ", ";
 
-    if (GetDestinationRegister())
-        command << "R" << GetDestinationRegister() << ", ";
+    if (HasFirstOperand())
+        command << "R" << +GetFirstOperand() << ", ";
 
     if (IsImmediate())
-        command << "#" << GetSecondOperand();
+        command << "#" << +GetSecondOperand();
+
+    // TODO: Add immediate shifts and register as second operand
+
     return command.str();
 }
 
+bool ARM::DataProcessingInstruction::HasFirstOperand()
+{
+    switch (GetOpcode())
+    {
+        case ARMOpcodes::MOV:
+        case ARMOpcodes::MVN:
+            return false;
+        default:
+            break;
+    }
+
+    return true;
+}
+
+bool ARM::DataProcessingInstruction::HasDestinationRegister()
+{
+    switch (GetOpcode())
+    {
+        case ARMOpcodes::CMP:
+        case ARMOpcodes::CMN:
+        case ARMOpcodes::TST:
+        case ARMOpcodes::TEQ:
+            return false;
+        default:
+            break;
+    }
+
+    return true;
+}
