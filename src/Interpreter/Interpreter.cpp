@@ -372,6 +372,20 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
             else
                 _cpu->GetRegister(instruction->GetRegister()) = _cpu->GetMemory()->ReadUInt32(address);
             break;
+        case ARM::ARMOpcodes::STR:
+        case ARM::ARMOpcodes::STRB:
+        case ARM::ARMOpcodes::STRBT:
+        {
+            uint32_t writeVal = _cpu->GetRegister(instruction->GetRegister());
+            if (instruction->GetRegister() == PC)
+                writeVal += 4;
+
+            if (instruction->IsUnsignedByte())
+                _cpu->GetMemory()->WriteUInt8(address, writeVal & 0xFF);
+            else
+                _cpu->GetMemory()->WriteUInt32(address, writeVal);
+            break;
+        }
     }
 }
 
