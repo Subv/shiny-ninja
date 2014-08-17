@@ -5,81 +5,41 @@
 #include <cstdint>
 #include <sstream>
 
-std::string Thumb::MoveShiftedRegisterInstruction::ToString() const
+std::string Thumb::ImmediateShiftInstruction::ToString() const
 {
-    std::ostringstream stream;
+    std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
-    stream << ", R" << GetSourceRegister() << " #" << GetOffset();
+    stream << ", R" << GetSourceRegister() << ", #" << GetImmediateValue();
     return stream.str();
 }
 
-uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode() const
+uint32_t Thumb::ImmediateShiftInstruction::GetOpcode() const
 {
-    switch (MathHelper::GetBits(_instruction, 11, 2))
+    switch (MathHelper::GetBits(_instruction, 11, 3))
     {
-        case 0x0: // LSL
-            return ThumbOpcodes::LSL;
-        case 0x1: // LSR
-            return ThumbOpcodes::LSR;
-        case 0x2: // ASR
-            return ThumbOpcodes::ASR;
+        case 000_b: return ThumbOpcodes::LSL;
+        case 001_b: return ThumbOpcodes::LSR;
+        case 010_b: return ThumbOpcodes::ASR;
         default:
-            Utilities::Assert(false, "Thumb::MoveShiftedRegisterInstruction has invalid opcode");
+            Utilities::Assert(false, "Thumb::ImmediateShiftInstruction: Invalid opcode");
             return 0;
     }
 }
 
-std::string Thumb::AddSubstractRegisterInstruction::ToString() const
+std::string Thumb::AddSubRegisterInstruction::ToString() const
 {
-    std::ostringstream stream;
-    switch (GetOpcode())
-    {
-        case ThumbOpcodes::ADD:
-            stream << "ADD ";
-            break;
-        case ThumbOpcodes::SUB:
-            stream << ((IsImmediate() && GetOperand() == 0) ? "MOV " : "SUB ");
-            break;
-    }
-
-    stream << "R" << GetDestinationRegister() << ", R" << GetSourceRegister();
-    if (IsImmediate() && GetOperand() == 0)
-        return stream.str();
-    stream << (!IsImmediate() ? ", R" : ", #") << GetOperand();
+    std::stringstream stream;
+    stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
+    stream << ", R" << GetSourceRegister() << ", " << (IsImmediate() ? "#" : "R");
+    stream << GetThirdOperand();
     return stream.str();
 }
 
-uint32_t Thumb::AddSubstractRegisterInstruction::GetOpcode() const
+uint32_t Thumb::AddSubRegisterInstruction::GetOpcode() const
 {
-    switch (GetOpcode())
-    {
-        case 0x0:
-        case 0x2:
-            return ThumbOpcodes::ADD;
-        case 0x1:
-        case 0x3:
-            return ThumbOpcodes::SUB;
-        default:
-            Utilities::Assert(false, "Thumb::AddSubstractRegisterInstruction has invalid opcode");
-            break;
-    }
-
-    return 0;
-}
-
-uint32_t Thumb::MovCmpAddSubImmediateInstruction::GetOpcode() const
-{
-    switch (MathHelper::GetBits(_instruction, 11, 2))
-    {
-        case 0: return ThumbOpcodes::MOV;
-        case 1: return ThumbOpcodes::CMP;
-        case 2: return ThumbOpcodes::ADD;
-        case 3: return ThumbOpcodes::SUB;
-        default:
-            Utilities::Assert(false, "Thumb::MovCmpAddSubImmediateInstruction has invalid opcode");
-            break;
-    }
-    return 0;
+    if (MathHelper::GetBits(_instruction, 9, 1) == 0)
+        return ThumbOpcodes::ADD;
+    return ThumbOpcodes::SUB;
 }
 
 std::string Thumb::MovCmpAddSubImmediateInstruction::ToString() const
@@ -89,68 +49,16 @@ std::string Thumb::MovCmpAddSubImmediateInstruction::ToString() const
     return stream.str();
 }
 
-uint32_t Thumb::AluInstruction::GetOpcode() const
+uint32_t Thumb::MovCmpAddSubImmediateInstruction::GetOpcode() const
 {
-    switch (MathHelper::GetBits(_instruction, 6, 3))
+    switch (MathHelper::GetBits(_instruction, 11, 3))
     {
-        case 0: return ThumbOpcodes::AND;
-        case 1: return ThumbOpcodes::EOR;
-        case 2: return ThumbOpcodes::LSL;
-        case 3: return ThumbOpcodes::LSR;
-        case 4: return ThumbOpcodes::ASR;
-        case 5: return ThumbOpcodes::ADC;
-        case 6: return ThumbOpcodes::SBC;
-        case 7: return ThumbOpcodes::ROR;
-        case 8: return ThumbOpcodes::TST;
-        case 9: return ThumbOpcodes::NEG;
-        case 10: return ThumbOpcodes::CMP;
-        case 11: return ThumbOpcodes::CMN;
-        case 12: return ThumbOpcodes::ORR;
-        case 13: return ThumbOpcodes::MUL;
-        case 14: return ThumbOpcodes::BIC;
-        case 15: return ThumbOpcodes::MVN;
+        case 100_b: return ThumbOpcodes::MOV; // 100xx
+        case 101_b: return ThumbOpcodes::CMP; // 101xx
+        case 110_b: return ThumbOpcodes::ADD; // 110xx
+        case 111_b: return ThumbOpcodes::SUB; // 111xx
         default:
-            Utilities::Assert(false, "Thumb::AluInstruction has invalid opcode");
-            break;
+            Utilities::Assert(false, "Thumb::MovCmpAddSubImmediateInstruction: Invalid opcode");
+            return 0;
     }
-    return 0;
-}
-
-std::string Thumb::AluInstruction::ToString() const
-{
-    std::stringstream stream;
-    stream << Thumb::ToString(GetOpcode()) << " ";
-    stream << GetDestinationRegister() << ", " << GetSourceRegister();
-    return stream.str();
-}
-
-uint32_t Thumb::HiRegisterOperandBxInstruction::GetOpcode() const
-{
-    switch (MathHelper::GetBits(_instruction, 8, 2))
-    {
-        case 0: return ThumbOpcodes::ADD;
-        case 1: return ThumbOpcodes::CMP;
-        case 2: return ThumbOpcodes::MOV;
-        case 3:
-            if (Link()) // Link flag
-                return ThumbOpcodes::BLX;
-            return ThumbOpcodes::BX;
-        default:
-            Utilities::Assert(false, "Thumb::HiRegisterOperandBxInstruction has invalid opcode");
-            break;
-    }
-    return 0;
-}
-
-std::string Thumb::HiRegisterOperandBxInstruction::ToString() const
-{
-    if (GetOpcode() == ThumbOpcodes::MOV && GetDestinationRegister() == 8 && GetSourceRegister() == 8)
-        return "NOP";
-
-    std::stringstream stream;
-
-    stream << Thumb::ToString(GetOpcode()) << " " << GetDestinationRegister();
-    if (GetOpcode() != ThumbOpcodes::BX && GetOpcode() != ThumbOpcodes::BLX)
-        stream << ", " << GetSourceRegister();
-    return stream.str();
 }

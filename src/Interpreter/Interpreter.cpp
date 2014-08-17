@@ -41,6 +41,12 @@ void Interpreter::HandleThumb(std::shared_ptr<ThumbInstruction> instruction)
 
 void Interpreter::InitializeHandlers()
 {
+    InitializeArm();
+    InitializeThumb();
+}
+
+void Interpreter::InitializeArm()
+{
     // Branch Instructions
     _armHandlers[ARM::ARMOpcodes::B] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BL] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
@@ -64,6 +70,11 @@ void Interpreter::InitializeHandlers()
     _armHandlers[ARM::ARMOpcodes::MOV] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BIC] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::MVN] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+}
+
+void Interpreter::InitializeThumb()
+{
+    
 }
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)

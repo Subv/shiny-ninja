@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <limits>
+#include <strings.h>
 
 #ifndef CHAR_BIT // Defined in <limits.h>, buuuut we already have <limits>
 # define CHAR_BIT sizeof(char)
@@ -38,4 +39,26 @@ namespace MathHelper
         return value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max();
     }
 }
+
+template<char... D>
+struct ToBinary;
+
+template<char... D> constexpr int operator "" _b()
+{
+    return ToBinary<D...>::value;
+}
+
+template<char H, char... D> struct ToBinary<H, D...>
+{
+    static_assert(H == '0' || H == '1', "Non-bit value passed!");
+    static int const value = (H - '0') * (1 << sizeof...(D)) + 
+                             ToBinary<D...>::value;
+};
+
+template<char H> struct ToBinary<H>
+{
+    static_assert(H == '0' || H == '1', "Non-bit value passed!");
+    static int const value = (H - '0');
+};
+
 #endif

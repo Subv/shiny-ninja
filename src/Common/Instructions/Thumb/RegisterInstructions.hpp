@@ -6,76 +6,45 @@
 
 namespace Thumb
 {
-    class MoveShiftedRegisterInstruction : public ThumbInstruction
+    class ImmediateShiftInstruction : public ThumbInstruction
     {
     public:
-        MoveShiftedRegisterInstruction(uint16_t instruction) : ThumbInstruction(instruction) { }
-
-        std::string ToString() const override;
-
+        ImmediateShiftInstruction(uint16_t op) : ThumbInstruction(op) { }
+        
         uint32_t GetOpcode() const override;
-
-        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 2); }
-        uint32_t GetSourceRegister() const { return MathHelper::GetBits(_instruction, 3, 2); }
-        uint32_t GetOffset() const { return MathHelper::GetBits(_instruction, 6, 4); }
+        std::string ToString() const override;
+        bool IsImmediate() const override { return true; }
+        
+        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 3); }
+        uint32_t GetSourceRegister() const { return MathHelper::GetBits(_instruction, 3, 3); }
+        uint32_t GetImmediateValue() const { return MathHelper::GetBits(_instruction, 6, 5); }
     };
-
-    class AddSubstractRegisterInstruction : public ThumbInstruction
+    
+    class AddSubRegisterInstruction : public ThumbInstruction
     {
     public:
-        AddSubstractRegisterInstruction(uint16_t instruction) : ThumbInstruction(instruction) { }
-
-        std::string ToString() const override;
+        AddSubRegisterInstruction(uint16_t op) : ThumbInstruction(op) { }
+        
         uint32_t GetOpcode() const override;
-        bool IsImmediate() const override { return MathHelper::GetBits(_instruction, 9, 2) >= 2; }
-
-        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 2); }
-        uint32_t GetSourceRegister() const { return MathHelper::GetBits(_instruction, 3, 2); }
-        uint32_t GetOperand() const { return MathHelper::GetBits(_instruction, 6, 2); }
+        std::string ToString() const override;
+        
+        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 3); }
+        uint32_t GetSourceRegister() const { return MathHelper::GetBits(_instruction, 3, 3); }
+        bool IsImmediate() const override { return MathHelper::CheckBit(_instruction, 10) == 1; }
+        uint32_t GetThirdOperand() const { return MathHelper::GetBits(_instruction, 6, 3); }
     };
     
     class MovCmpAddSubImmediateInstruction : public ThumbInstruction
     {
     public:
-        MovCmpAddSubImmediateInstruction(uint16_t instruction) : ThumbInstruction(instruction) { }
-
-        std::string ToString() const override;
-        uint32_t GetOpcode() const override;
-        bool IsImmediate() const override { return true; }
-
-        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 8, 2); }
-        uint32_t GetImmediateValue() const { return MathHelper::GetBits(_instruction, 0, 7); }
-    };
-
-    class AluInstruction : public ThumbInstruction
-    {
-    public:
-        AluInstruction(uint16_t opcode) : ThumbInstruction(opcode) { }
-
-        std::string ToString() const override;
-        uint32_t GetOpcode() const override;
-
-        uint32_t GetSourceRegister() const { return MathHelper::GetBits(_instruction, 3, 2); }
-        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 2); }
-    };
-
-    class HiRegisterOperandBxInstruction : public ThumbInstruction
-    {
-    public:
-        HiRegisterOperandBxInstruction(uint16_t instruction) : ThumbInstruction(instruction) { }
-
-        std::string ToString() const override;
-        uint32_t GetOpcode() const override;
-
-        uint32_t GetSourceRegister() const { return MathHelper::GetBits(_instruction, 3, 2); }
-        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 2); }
-
-        // These are not used in ToString(), but they control the range of registers
-        // allowed to be used as source/dest: H2 controls source, H1 controls dest.
-        uint32_t GetH1() const { return (_instruction >> 7) & 0xF; }
-        uint32_t GetH2() const { return (_instruction >> 6) & 0xF; }
+        MovCmpAddSubImmediateInstruction(uint16_t op) : ThumbInstruction(op) { }
         
-        bool Link() const { return GetH1() == 1; }
+        uint32_t GetOpcode() const override;
+        std::string ToString() const override;
+        bool IsImmediate() const override { return true; }
+        
+        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 8, 3); }
+        uint32_t GetImmediateValue() const { return MathHelper::GetBits(_instruction, 0, 8); }
     };
 }
 
