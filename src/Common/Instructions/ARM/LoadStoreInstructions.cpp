@@ -42,4 +42,12 @@ std::string ARM::LoadStoreInstruction::ToString() const
     return ARM::ToString(GetOpcode());
 }
 
+uint32_t ARM::LoadStoreInstruction::GetOpcode() const
+{
+    if (MathHelper::CheckBit(_instruction, 20))
+        return IsUnsignedByte() ? ARMOpcodes::LDRB : ARMOpcodes::LDR;
+    else
+        return IsUnsignedByte() ? ARMOpcodes::STRB : ARMOpcodes::STR;
+}
+
 

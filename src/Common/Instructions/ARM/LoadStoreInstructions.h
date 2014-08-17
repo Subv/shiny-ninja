@@ -11,7 +11,7 @@ namespace ARM
     public:
         LoadStoreInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        uint32_t GetOpcode() const override { return MathHelper::CheckBit(_instruction, 20) ? ARMOpcodes::LDR : ARMOpcodes::STR; }
+        uint32_t GetOpcode() const override;
         std::string ToString() const override;
 
         bool IsImmediate() const override { return !MathHelper::CheckBit(_instruction, 25); }
