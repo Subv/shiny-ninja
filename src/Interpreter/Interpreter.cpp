@@ -104,6 +104,12 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
 {
     auto dataproc = std::static_pointer_cast<ARM::DataProcessingInstruction>(instruction);
 
+    uint32_t firstOperand = _cpu->GetRegister(dataproc->GetFirstOperand());
+    
+    // Account for CPU prefetch, the code expects the PC to be at <CurrentInstruction> + 8, but we're currently at <CurrentInstruction> + 4
+    if (dataproc->GetFirstOperand() == PC)
+        firstOperand += 4;
+
     uint32_t secondOperand = 0;
     uint32_t result = 0;
 
@@ -137,22 +143,22 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
     switch (dataproc->GetOpcode())
     {
         case ARM::ARMOpcodes::AND:
-            result = _cpu->GetRegister(dataproc->GetFirstOperand()) & secondOperand;
+            result = firstOperand & secondOperand;
             break;
         case ARM::ARMOpcodes::EOR:
-            result = _cpu->GetRegister(dataproc->GetFirstOperand()) ^ secondOperand;
+            result = firstOperand ^ secondOperand;
             break;
         case ARM::ARMOpcodes::SUB:
-            result = _cpu->GetRegister(dataproc->GetFirstOperand()) - secondOperand;
+            result = firstOperand - secondOperand;
             break;
-        case ARM::ARMOpcodes::RSB: // Reversed Substract
-            result = secondOperand - _cpu->GetRegister(dataproc->GetFirstOperand());
+        case ARM::ARMOpcodes::RSB: // Reversed Subtract
+            result = secondOperand - firstOperand;
             break;
         case ARM::ARMOpcodes::ADD:
-            result = _cpu->GetRegister(dataproc->GetFirstOperand()) + secondOperand;
+            result = firstOperand + secondOperand;
             break;
         case ARM::ARMOpcodes::ADC: // Add with carry
-            result = _cpu->GetRegister(dataproc->GetFirstOperand()) + secondOperand;
+            result = firstOperand + secondOperand;
             break;
     }
 
