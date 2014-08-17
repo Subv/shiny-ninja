@@ -75,8 +75,10 @@ void Interpreter::InitializeArm()
     // Load / Store instructions
     _armHandlers[ARM::ARMOpcodes::LDR] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::LDRB] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::LDRBT] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::STR] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::STRB] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::STRBT] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::LDM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::STM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
 }
@@ -386,6 +388,9 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
                 _cpu->GetMemory()->WriteUInt32(address, writeVal);
             break;
         }
+        default:
+            Utilities::Assert(false, "Load/Store instruction is not yet supported");
+            break;
     }
 }
 
