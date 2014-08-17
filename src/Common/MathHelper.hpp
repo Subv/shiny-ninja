@@ -15,15 +15,22 @@ namespace MathHelper
     template <typename T>
     inline T RotateLeft(T val, uint8_t moves)
     {
-        static_assert(std::is_arithmetic<T>::value, "T must be a number type");
+        static_assert(std::is_arithmetic<T>::value, "T must be a numeric type");
         return (val << moves) | (val >> (sizeof(T) * CHAR_BIT - moves));
     }
 
     template<typename T>
     inline T RotateRight(T x, uint8_t moves)
     {
-        static_assert(std::is_arithmetic<T>::value, "T must be a number type");
-        return (x >> moves) | (x << sizeof(T) * CHAR_BIT - moves);
+        static_assert(std::is_arithmetic<T>::value, "T must be a numeric type");
+        return (x >> moves) | (x << (sizeof(T) * CHAR_BIT - moves));
+    }
+
+    template<typename T>
+    inline bool Overflow(int64_t value)
+    {
+        static_assert(std::is_arithmetic<T>::value, "T must be a numeric type");
+        return value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max();
     }
 }
 #endif

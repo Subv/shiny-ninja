@@ -13,7 +13,7 @@ uint8_t ARM::DataProcessingInstruction::GetSecondOperand() const
 uint8_t ARM::DataProcessingInstruction::GetShiftImmediate() const
 {
     Utilities::Assert(IsImmediate(), "Instruction must be immediate");
-    return ((_instruction >> 8) & 0xF) << 2;
+    return (_instruction >> 8) & 0xF;
 }
 
 ARM::ShiftType ARM::DataProcessingInstruction::GetShiftType() const
@@ -96,7 +96,7 @@ std::string ARM::DataProcessingInstruction::ToString() const
         command << "R" << +GetFirstOperand() << ", ";
 
     if (IsImmediate())
-        command << "#" << +GetSecondOperand();
+        command << "#" << std::hex << +GetShiftedSecondOperandImmediate();
 
     // TODO: Add immediate shifts and register as second operand
 
@@ -133,10 +133,28 @@ bool ARM::DataProcessingInstruction::HasDestinationRegister() const
     return true;
 }
 
-uint8_t ARM::DataProcessingInstruction::GetShiftedSecondOperandImmediate() const
+uint32_t ARM::DataProcessingInstruction::GetShiftedSecondOperandImmediate() const
 {
     Utilities::Assert(IsImmediate(), "Opcode must be immediate");
 
     // Performs the ROR shift as defined in the opcode encoding.
-    return MathHelper::RotateRight(GetSecondOperand(), GetShiftImmediate());
+    return MathHelper::RotateRight(uint32_t(GetSecondOperand()), GetShiftImmediate() << 1);
+}
+
+bool ARM::DataProcessingInstruction::AffectsOverflow() const
+{
+    switch (GetOpcode())
+    {
+        case ARMOpcodes::AND:
+        case ARMOpcodes::EOR:
+        case ARMOpcodes::TST:
+        case ARMOpcodes::TEQ:
+        case ARMOpcodes::ORR:
+        case ARMOpcodes::MOV:
+        case ARMOpcodes::BIC:
+        case ARMOpcodes::MVN:
+            return false;
+    }
+
+    return true;
 }

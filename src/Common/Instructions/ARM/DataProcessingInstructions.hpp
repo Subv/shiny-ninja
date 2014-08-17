@@ -28,6 +28,9 @@ namespace ARM
 
         uint8_t GetDestinationRegister() const { return (_instruction >> 12) & 0xF; }
 
+        // Returns wether or not this opcode should affect the overflow (V) flag of the CPU's CPSR
+        bool AffectsOverflow() const;
+
         ShiftType GetShiftType() const;
 
         bool HasFirstOperand() const;
@@ -37,7 +40,7 @@ namespace ARM
 
         // If Immediate()
         uint8_t GetShiftImmediate() const;
-        uint8_t GetShiftedSecondOperandImmediate() const; // Returns GetSecondOperand() with the specified shift by GetShiftImmediate() applied
+        uint32_t GetShiftedSecondOperandImmediate() const; // Returns GetSecondOperand() with the specified shift by GetShiftImmediate() applied
 
         // If not Immediate()
         bool ShiftByRegister() const;

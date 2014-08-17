@@ -25,7 +25,7 @@ enum class CPURunState
 #pragma pack(push, 1)
 union ProgramStatusRegisters
 {
-    struct
+    struct FlagsStruct
     {
         uint8_t M : 5;
         uint8_t T : 1;
@@ -56,7 +56,7 @@ union ProgramStatusRegisters
 
 struct CPUState
 {
-    uint32_t Registers[16];
+    int32_t Registers[16];
     ProgramStatusRegisters CPSR; // Current Program Status Register
     ProgramStatusRegisters SPSR; // Saved Program Status Register
 };
@@ -70,8 +70,9 @@ public:
     void Run();
 
     InstructionSet GetCurrentInstructionSet() { return InstructionSet(_state.CPSR.Flags.I); }
-    uint32_t& GetRegister(uint8_t reg) { return _state.Registers[reg]; }
+    int32_t& GetRegister(uint8_t reg) { return _state.Registers[reg]; }
     void SetInstructionSet(InstructionSet set) { _state.CPSR.Flags.T = uint8_t(set); }
+    ProgramStatusRegisters::FlagsStruct& GetCurrentStatusFlags() { return _state.CPSR.Flags; }
 
 private:
     CPUMode _mode;

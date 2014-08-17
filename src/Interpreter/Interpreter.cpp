@@ -114,20 +114,21 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
 {
     auto dataproc = std::static_pointer_cast<ARM::DataProcessingInstruction>(instruction);
 
-    uint32_t firstOperand = _cpu->GetRegister(dataproc->GetFirstOperand());
+    int64_t firstOperand = _cpu->GetRegister(dataproc->GetFirstOperand());
     
     // Account for CPU prefetch, the code expects the PC to be at <CurrentInstruction> + 8, but we're currently at <CurrentInstruction> + 4
     if (dataproc->GetFirstOperand() == PC)
         firstOperand += 4;
 
-    uint32_t secondOperand = 0;
-    uint32_t result = 0;
+    // Use int64_t so that we can check for overflow later
+    int64_t secondOperand = 0;
+    int64_t result = 0;
 
     if (dataproc->IsImmediate())
         secondOperand = dataproc->GetShiftedSecondOperandImmediate();
     else
     {
-        uint32_t registerValue = _cpu->GetRegister(dataproc->GetSecondOperand());
+        int32_t registerValue = _cpu->GetRegister(dataproc->GetSecondOperand());
         // If the instruction must shift the second operand by a register value, then only the lower 8 bits of that register are used.
         uint8_t shiftValue = dataproc->ShiftByRegister() ? (_cpu->GetRegister(dataproc->GetShiftRegisterOrImmediate()) & 0xFF) : dataproc->GetShiftRegisterOrImmediate();
 
@@ -137,17 +138,13 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
                 secondOperand = registerValue << shiftValue;
                 break;
             case ARM::ShiftType::LSR:
-                secondOperand = registerValue >> shiftValue;
-                break;
             case ARM::ShiftType::ASR:
-                // We need to convert it to int32_t in order to perform an Arithmetic Shift Right (ASR)
-                secondOperand = uint32_t((int32_t)registerValue >> (int32_t)shiftValue);
+                secondOperand = registerValue >> shiftValue;
                 break;
             case ARM::ShiftType::ROR:
                 secondOperand = MathHelper::RotateRight(registerValue, shiftValue);
                 break;
         }
-
     }
 
     switch (dataproc->GetOpcode())
@@ -172,13 +169,13 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
             result = firstOperand + secondOperand;
             break;
         case ARM::ARMOpcodes::ADC: // Add with carry
-            // result = firstOperand + secondOperand + carry;
+            result = firstOperand + secondOperand + _cpu->GetCurrentStatusFlags().C;
             break;
         case ARM::ARMOpcodes::SBC: // Sub with carry
-            // result = firstOperand - secondOperand + carry - 1;
+            result = firstOperand - secondOperand + _cpu->GetCurrentStatusFlags().C - 1;
             break;
         case ARM::ARMOpcodes::RSC: // Reversed Sub with Carry
-            // result = secondOperand - firstOperand + carry - 1;
+            result = secondOperand - firstOperand + _cpu->GetCurrentStatusFlags().C - 1;
             break;
         case ARM::ARMOpcodes::ORR:
             result = firstOperand | secondOperand;
@@ -194,7 +191,31 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
             break;
     }
 
+    if (dataproc->SetConditionCodes())
+    {
+        if (dataproc->GetDestinationRegister() == PC)
+        {
+            Utilities::Assert(false, "Loading SPSR into CPSR is not yet implemented");
+            return;
+        }
+
+        _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(31, uint32_t(result));
+        _cpu->GetCurrentStatusFlags().Z = result == 0;
+        
+        if (dataproc->AffectsOverflow())
+        {
+            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<int32_t>(result);
+            // For these opcodes, the carry is set based on the result of the shift operation
+            _cpu->GetCurrentStatusFlags().C = 0;
+        }
+        else
+        {
+            // The carry depends on the value of the result for these opcodes
+            _cpu->GetCurrentStatusFlags().C = 0;
+        }
+    }
+
     if (dataproc->HasDestinationRegister())
-        _cpu->GetRegister(dataproc->GetDestinationRegister()) = result;
+        _cpu->GetRegister(dataproc->GetDestinationRegister()) = int32_t(result);
 }
 
