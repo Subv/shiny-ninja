@@ -87,12 +87,12 @@ class ARMInstruction : public Instruction
 public:
     ARMInstruction(uint32_t instruction) : Instruction(instruction) { }
 
-    InstructionSet GetInstructionSet() override { return InstructionSet::ARM; }
+    InstructionSet GetInstructionSet() const override { return InstructionSet::ARM; }
     
-    InstructionCondition GetCondition();
+    InstructionCondition GetCondition() const;
 
-    virtual uint32_t GetOpcode() override = 0;
-    virtual std::string ToString() override = 0;
-    virtual bool IsImmediate() { return false; }
+    virtual uint32_t GetOpcode() const override = 0;
+    virtual std::string ToString() const override = 0;
+    virtual bool IsImmediate() const { return false; }
 };
 #endif

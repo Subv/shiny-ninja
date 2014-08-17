@@ -18,28 +18,28 @@ namespace ARM
     public:
         DataProcessingInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        uint32_t GetOpcode() override;
-        std::string ToString() override;
+        uint32_t GetOpcode() const override;
+        std::string ToString() const override;
 
-        bool IsImmediate() override { return (_instruction >> 25) & 1; }
-        bool SetConditionCodes() { return (_instruction >> 20) & 1; }
+        bool IsImmediate() const override { return (_instruction >> 25) & 1; }
+        bool SetConditionCodes() const { return (_instruction >> 20) & 1; }
 
-        uint8_t GetFirstOperand() { return (_instruction >> 16) & 0xF; } // The first operand is always a register
+        uint8_t GetFirstOperand() const { return (_instruction >> 16) & 0xF; } // The first operand is always a register
 
-        uint8_t GetDestinationRegister() { return (_instruction >> 12) & 0xF; }
+        uint8_t GetDestinationRegister() const { return (_instruction >> 12) & 0xF; }
 
-        ShiftType GetShiftType();
+        ShiftType GetShiftType() const;
 
-        bool HasFirstOperand();
-        bool HasDestinationRegister();
+        bool HasFirstOperand() const;
+        bool HasDestinationRegister() const;
 
         // If Immediate()
-        uint8_t GetSecondOperand();
-        uint8_t GetShiftImmediate();
+        uint8_t GetSecondOperand() const;
+        uint8_t GetShiftImmediate() const;
 
         // If not Immediate()
-        bool ShiftByRegister();
-        uint8_t GetShiftRegisterOrImmediate();
+        bool ShiftByRegister() const;
+        uint8_t GetShiftRegisterOrImmediate() const;
     };
 }
 #endif

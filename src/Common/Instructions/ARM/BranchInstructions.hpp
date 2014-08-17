@@ -3,6 +3,8 @@
 
 #include "Common/Instructions/ARMInstruction.hpp"
 
+#include "Common/MathHelper.hpp"
+
 namespace ARM
 {
     class BranchLinkExchangeImmediateInstruction : public ARMInstruction
@@ -11,12 +13,12 @@ namespace ARM
         BranchLinkExchangeImmediateInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
         int32_t GetSignedOffset() const { return (_instruction & 0xFFFFFF) << 2; }
-        uint8_t GetSecondBit() const { return (_instruction >> 24) & 1; }
+        uint8_t GetSecondBit() const { return MathHelper::GetBits(_instruction, 24, 1); }
 
-        uint32_t GetOpcode() override;
-        bool IsImmediate() override { return true; }
+        uint32_t GetOpcode() const override;
+        bool IsImmediate() const override { return true; }
 
-        std::string ToString() override;
+        std::string ToString() const override;
     };
 
     class BranchLinkExchangeRegisterInstruction : public ARMInstruction
@@ -26,9 +28,11 @@ namespace ARM
 
         uint8_t GetRegister() const { return _instruction & 0xF; }
 
-        uint32_t GetOpcode() override;
+        uint32_t GetOpcode() const override;
 
-        std::string ToString() override;
+        std::string ToString() const override;
+
+        bool Link() const { return MathHelper::CheckBit(5, _instruction); }
     };
 
     class BranchInstruction : public ARMInstruction
@@ -38,11 +42,11 @@ namespace ARM
 
         int32_t GetSignedOffset() const { return (_instruction & 0xFFFFFF) << 2; }
 
-        uint32_t GetOpcode() override;
+        uint32_t GetOpcode() const override;
 
-        std::string ToString() override;
+        std::string ToString() const override;
 
-        bool Link() const { return (_instruction >> 24) & 0x1; }
+        bool Link() const { return MathHelper::CheckBit(24, _instruction); }
     };
 }
 #endif

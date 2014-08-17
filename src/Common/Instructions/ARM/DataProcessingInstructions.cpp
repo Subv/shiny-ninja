@@ -2,18 +2,18 @@
 #include "DataProcessingInstructions.hpp"
 #include <sstream>
 
-uint8_t ARM::DataProcessingInstruction::GetSecondOperand()
+uint8_t ARM::DataProcessingInstruction::GetSecondOperand() const
 {
     return IsImmediate() ? _instruction & 0xFF : _instruction & 0xF;
 }
 
-uint8_t ARM::DataProcessingInstruction::GetShiftImmediate()
+uint8_t ARM::DataProcessingInstruction::GetShiftImmediate() const
 {
     Utilities::Assert(IsImmediate(), "Instruction must be immediate");
     return ((_instruction >> 8) & 0xF) << 2;
 }
 
-ARM::ShiftType ARM::DataProcessingInstruction::GetShiftType()
+ARM::ShiftType ARM::DataProcessingInstruction::GetShiftType() const
 {
     if (IsImmediate())
         return ShiftType::ROR;
@@ -21,13 +21,13 @@ ARM::ShiftType ARM::DataProcessingInstruction::GetShiftType()
     return ShiftType((_instruction >> 5) & 3);
 }
 
-bool ARM::DataProcessingInstruction::ShiftByRegister()
+bool ARM::DataProcessingInstruction::ShiftByRegister() const
 {
     Utilities::Assert(!IsImmediate(), "Instruction must not be immediate");
     return (_instruction >> 4) & 1;
 }
 
-uint8_t ARM::DataProcessingInstruction::GetShiftRegisterOrImmediate()
+uint8_t ARM::DataProcessingInstruction::GetShiftRegisterOrImmediate() const
 {
     Utilities::Assert(!IsImmediate(), "Instruction must not be immediate");
 
@@ -37,7 +37,7 @@ uint8_t ARM::DataProcessingInstruction::GetShiftRegisterOrImmediate()
     return (_instruction >> 7) & 0x1F; // 5 bits
 }
 
-uint32_t ARM::DataProcessingInstruction::GetOpcode()
+uint32_t ARM::DataProcessingInstruction::GetOpcode() const
 {
     uint8_t op = (_instruction >> 21) & 0xF;
 
@@ -81,7 +81,7 @@ uint32_t ARM::DataProcessingInstruction::GetOpcode()
     }
 }
 
-std::string ARM::DataProcessingInstruction::ToString()
+std::string ARM::DataProcessingInstruction::ToString() const
 {
     std::stringstream command;
     command << ARM::ToString(GetOpcode()) << " ";
@@ -100,7 +100,7 @@ std::string ARM::DataProcessingInstruction::ToString()
     return command.str();
 }
 
-bool ARM::DataProcessingInstruction::HasFirstOperand()
+bool ARM::DataProcessingInstruction::HasFirstOperand() const
 {
     switch (GetOpcode())
     {
@@ -114,7 +114,7 @@ bool ARM::DataProcessingInstruction::HasFirstOperand()
     return true;
 }
 
-bool ARM::DataProcessingInstruction::HasDestinationRegister()
+bool ARM::DataProcessingInstruction::HasDestinationRegister() const
 {
     switch (GetOpcode())
     {

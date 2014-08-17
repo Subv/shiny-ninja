@@ -56,11 +56,11 @@ class ThumbInstruction : public Instruction
 {
 public:
     ThumbInstruction(uint16_t instruction) : Instruction(instruction) { }
-    InstructionSet GetInstructionSet() override { return InstructionSet::Thumb; }
+    InstructionSet GetInstructionSet() const override { return InstructionSet::Thumb; }
     
-    virtual uint32_t GetOpcode() override = 0;
-    virtual std::string ToString() override = 0;
+    virtual uint32_t GetOpcode() const override = 0;
+    virtual std::string ToString() const override = 0;
     
-    virtual bool IsImmediate() override { return false; }
+    virtual bool IsImmediate() const override { return false; }
 };
 #endif

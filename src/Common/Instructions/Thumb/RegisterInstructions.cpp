@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <sstream>
 
-std::string Thumb::MoveShiftedRegisterInstruction::ToString()
+std::string Thumb::MoveShiftedRegisterInstruction::ToString() const
 {
     std::ostringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
@@ -13,7 +13,7 @@ std::string Thumb::MoveShiftedRegisterInstruction::ToString()
     return stream.str();
 }
 
-uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode()
+uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode() const
 {
     switch (MathHelper::GetBits(_instruction, 11, 2))
     {
@@ -29,7 +29,7 @@ uint32_t Thumb::MoveShiftedRegisterInstruction::GetOpcode()
     }
 }
 
-std::string Thumb::AddSubstractRegisterInstruction::ToString()
+std::string Thumb::AddSubstractRegisterInstruction::ToString() const
 {
     std::ostringstream stream;
     switch (GetOpcode())
@@ -49,7 +49,7 @@ std::string Thumb::AddSubstractRegisterInstruction::ToString()
     return stream.str();
 }
 
-uint32_t Thumb::AddSubstractRegisterInstruction::GetOpcode()
+uint32_t Thumb::AddSubstractRegisterInstruction::GetOpcode() const
 {
     switch (GetOpcode())
     {
@@ -67,7 +67,7 @@ uint32_t Thumb::AddSubstractRegisterInstruction::GetOpcode()
     return 0;
 }
 
-uint32_t Thumb::MovCmpAddSubImmediateInstruction::GetOpcode()
+uint32_t Thumb::MovCmpAddSubImmediateInstruction::GetOpcode() const
 {
     switch (MathHelper::GetBits(_instruction, 11, 2))
     {
@@ -82,14 +82,14 @@ uint32_t Thumb::MovCmpAddSubImmediateInstruction::GetOpcode()
     return 0;
 }
 
-std::string Thumb::MovCmpAddSubImmediateInstruction::ToString()
+std::string Thumb::MovCmpAddSubImmediateInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister() << ", #" << GetImmediateValue();
     return stream.str();
 }
 
-uint32_t Thumb::AluInstruction::GetOpcode()
+uint32_t Thumb::AluInstruction::GetOpcode() const
 {
     switch (MathHelper::GetBits(_instruction, 6, 3))
     {
@@ -116,7 +116,7 @@ uint32_t Thumb::AluInstruction::GetOpcode()
     return 0;
 }
 
-std::string Thumb::AluInstruction::ToString()
+std::string Thumb::AluInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " ";
@@ -124,7 +124,7 @@ std::string Thumb::AluInstruction::ToString()
     return stream.str();
 }
 
-uint32_t Thumb::HiRegisterOperandBxInstruction::GetOpcode()
+uint32_t Thumb::HiRegisterOperandBxInstruction::GetOpcode() const
 {
     switch (MathHelper::GetBits(_instruction, 8, 2))
     {
@@ -142,7 +142,7 @@ uint32_t Thumb::HiRegisterOperandBxInstruction::GetOpcode()
     return 0;
 }
 
-std::string Thumb::HiRegisterOperandBxInstruction::ToString()
+std::string Thumb::HiRegisterOperandBxInstruction::ToString() const
 {
     if (GetOpcode() == ThumbOpcodes::MOV && GetDestinationRegister() == 8 && GetSourceRegister() == 8)
         return "NOP";

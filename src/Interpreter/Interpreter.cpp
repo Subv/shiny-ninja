@@ -41,22 +41,24 @@ void Interpreter::InitializeHandlers()
 {
     _armHandlers[ARM::ARMOpcodes::B] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BL] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::BX] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BLX] = std::bind(&Interpreter::HandleARMBranchInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)
 {
-    if (instruction->GetOpcode() == ARMOpcodes::BLX || instruction->GetOpcode() == ARMOpcodes::BX)
+    if (instruction->GetOpcode() == ARM::ARMOpcodes::BLX || instruction->GetOpcode() == ARM::ARMOpcodes::BX)
     {
         // Save the return address, only the BLX instruction does this
-        if (instruction->GetOpcode() == ARMOpcodes::BLX)
+        if (instruction->GetOpcode() == ARM::ARMOpcodes::BLX)
             _cpu->GetRegister(LR) = _cpu->GetRegister(PC);
 
         if (instruction->IsImmediate())
         {
             auto branch = std::static_pointer_cast<ARM::BranchLinkExchangeImmediateInstruction>(instruction);
             // The second bit of the signed offset is set to the value specified in the opcode (GetSecondBit())
-            _cpu->GetRegister(PC) += branch->GetSignedOffset() + (branch->GetSecondBit() << 1);
+            // The 4 is due to the CPU pipeline, the prefetch has already happened so PC should be at <CurrentInstruction> + 8, however we are only at <CurrentInstruction> + 4
+            _cpu->GetRegister(PC) += 4 + branch->GetSignedOffset() + (branch->GetSecondBit() << 1);
 
             // This version of BLX always switches to Thumb mode
             _cpu->SetInstructionSet(InstructionSet::Thumb);
@@ -69,8 +71,8 @@ void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> ins
             uint32_t reg = _cpu->GetRegister(branch->GetRegister());
             bool thumb = MathHelper::CheckBit(0, reg);
 
-            // The branch offset is stored in a register, with the first bit set to 0
-            _cpu->GetRegister(PC) += reg & 0xFFFFFFFE;
+            // The branch location is stored in a register, with the first bit set to 0
+            _cpu->GetRegister(PC) = reg & 0xFFFFFFFE;
 
             _cpu->SetInstructionSet(thumb ? InstructionSet::Thumb : InstructionSet::ARM);
         }

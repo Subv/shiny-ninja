@@ -1,6 +1,6 @@
 #include "ARMInstruction.hpp"
 
-InstructionCondition ARMInstruction::GetCondition()
+InstructionCondition ARMInstruction::GetCondition() const
 {
     // The condition is the last 4 bits of the instruction
     uint8_t cond = _instruction >> 28;

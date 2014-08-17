@@ -16,13 +16,13 @@ namespace ARM
     public:
         MovePSRToRegisterInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        PSRType GetPSRType() { return PSRType((_instruction >> 22) & 1); }
+        PSRType GetPSRType() const { return PSRType((_instruction >> 22) & 1); }
 
-        uint32_t GetOpcode() override { return ARMOpcodes::MRS; }
+        uint32_t GetOpcode() const override { return ARMOpcodes::MRS; }
         
-        std::string ToString() override;
+        std::string ToString() const override;
 
-        uint8_t GetDestinationRegister() { return (_instruction >> 12) & 0xF; }
+        uint8_t GetDestinationRegister() const { return (_instruction >> 12) & 0xF; }
     };
 
     class MoveRegisterToPSRImmediateInstruction : public ARMInstruction
@@ -30,17 +30,17 @@ namespace ARM
     public:
         MoveRegisterToPSRImmediateInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        PSRType GetPSRType() { return PSRType((_instruction >> 22) & 1); }
+        PSRType GetPSRType() const { return PSRType((_instruction >> 22) & 1); }
 
-        uint32_t GetOpcode() override { return ARMOpcodes::MSR; }
+        uint32_t GetOpcode() const override { return ARMOpcodes::MSR; }
 
-        std::string ToString() override;
-        bool IsImmediate() override { return true; }
+        std::string ToString() const override;
+        bool IsImmediate() const override { return true; }
 
-        uint8_t GetFieldsMask() { return (_instruction >> 16) & 0xF; }
+        uint8_t GetFieldsMask() const { return (_instruction >> 16) & 0xF; }
 
-        uint8_t GetImmediateValue() { return _instruction & 0xFF; }
-        uint8_t GetImmediateShift() { return ((_instruction >> 8) & 0xF) << 2; }
+        uint8_t GetImmediateValue() const { return _instruction & 0xFF; }
+        uint8_t GetImmediateShift() const { return ((_instruction >> 8) & 0xF) << 2; }
     };
 
     class MoveRegisterToPSRRegisterInstruction : public ARMInstruction
@@ -48,15 +48,15 @@ namespace ARM
     public:
         MoveRegisterToPSRRegisterInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        PSRType GetPSRType() { return PSRType((_instruction >> 22) & 1); }
+        PSRType GetPSRType() const { return PSRType((_instruction >> 22) & 1); }
 
-        uint32_t GetOpcode() override { return ARMOpcodes::MSR; }
+        uint32_t GetOpcode() const override { return ARMOpcodes::MSR; }
 
-        std::string ToString() override;
+        std::string ToString() const override;
 
-        uint8_t GetFieldsMask() { return (_instruction >> 16) & 0xF; }
+        uint8_t GetFieldsMask() const { return (_instruction >> 16) & 0xF; }
 
-        uint8_t GetSourceRegister() { return _instruction & 0xF; }
+        uint8_t GetSourceRegister() const { return _instruction & 0xF; }
     };
 }
 #endif
