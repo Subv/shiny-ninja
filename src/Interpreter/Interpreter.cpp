@@ -7,6 +7,7 @@
 
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
+#include "Common/Instructions/ARM/LoadStoreInstructions.h"
 
 #include "Common/MathHelper.hpp"
 #include "Common/Utilities.hpp"
@@ -70,6 +71,14 @@ void Interpreter::InitializeArm()
     _armHandlers[ARM::ARMOpcodes::MOV] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::BIC] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::MVN] = std::bind(&Interpreter::HandleARMDataProcessingInstruction, this, std::placeholders::_1);
+
+    // Load / Store instructions
+    _armHandlers[ARM::ARMOpcodes::LDR] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::LDRB] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::STR] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::STRB] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::LDM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::STM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::InitializeThumb()
@@ -178,9 +187,9 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
                 secondOperand = registerValue >> shiftValue;
                 break;
             case ARM::ShiftType::ROR:
-                secondOperand = MathHelper::RotateRight(registerValue, shiftValue);
-                if (shiftValue)
+                if (shiftValue || dataproc->ShiftByRegister())
                 {
+                    secondOperand = MathHelper::RotateRight(registerValue, shiftValue);
                     if (dataproc->ShiftByRegister())
                     {
                         if (MathHelper::CheckBits(shiftValue, 0, 4, 0))
@@ -190,6 +199,12 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
                     }
                     else
                         carryOut = MathHelper::CheckBit(registerValue, shiftValue - 1);
+                }
+                else if (!shiftValue)
+                {
+                    // A 0 shiftValue specifies a RRX shift
+                    secondOperand = (_cpu->GetCurrentStatusFlags().C << 31) | (registerValue >> 1);
+                    carryOut = MathHelper::CheckBit(registerValue, 0);
                 }
                 break;
         }
@@ -271,5 +286,77 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
 
     if (dataproc->HasDestinationRegister())
         _cpu->GetRegister(dataproc->GetDestinationRegister()) = int32_t(result);
+}
+
+void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> instr)
+{
+    auto instruction = std::static_pointer_cast<ARM::LoadStoreInstruction>(instr);
+
+    uint32_t address = _cpu->GetRegister(instruction->GetBaseRegister());
+    uint32_t secondAddressValue = 0;
+
+    if (instruction->IsImmediate())
+        secondAddressValue = instruction->GetImmediateOffset();
+    else
+    {
+        int32_t registerValue = _cpu->GetRegister(instruction->GetIndexRegister());
+        uint32_t shiftValue = instruction->GetShiftImmediate();
+
+        switch (instruction->GetShiftType())
+        {
+            case ARM::ShiftType::LSL:
+                secondAddressValue = registerValue << shiftValue;
+                break;
+            case ARM::ShiftType::LSR:
+                if (shiftValue == 0)
+                    shiftValue = 32;
+                secondAddressValue = registerValue >> shiftValue;
+                break;
+            case ARM::ShiftType::ASR:
+                if (shiftValue == 0)
+                    secondAddressValue = MathHelper::CheckBit(registerValue, 31) ? 0xFFFFFFFF : 0;
+                else
+                    secondAddressValue = registerValue >> shiftValue;
+                break;
+            case ARM::ShiftType::ROR:
+                // A shift amount of 0 in ROR specifies the RRX shift type
+                if (shiftValue == 0)
+                    secondAddressValue = (_cpu->GetCurrentStatusFlags().C << 31) | (registerValue >> 1);
+                else
+                    secondAddressValue = MathHelper::RotateRight(registerValue, shiftValue);
+                break;
+            default:
+                Utilities::Assert(false, "Unknown ShiftType");
+                break;
+        }
+    }
+
+    if (instruction->IsPreIndexed())
+    {
+        if (instruction->IsBaseAdded())
+            address += secondAddressValue;
+        else
+            address -= secondAddressValue;
+
+        if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition))
+            _cpu->GetRegister(instruction->GetBaseRegister()) = address;
+    }
+    else
+    {
+        if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition))
+        {
+            if (instruction->IsBaseAdded())
+                _cpu->GetRegister(instruction->GetBaseRegister()) += secondAddressValue;
+            else
+                _cpu->GetRegister(instruction->GetBaseRegister()) -= secondAddressValue;
+        }
+    }
+    
+    switch (instruction->GetOpcode())
+    {
+        case ARM::ARMOpcodes::LDR:
+
+            break;
+    }
 }
 

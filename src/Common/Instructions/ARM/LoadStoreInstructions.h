@@ -15,6 +15,9 @@ namespace ARM
         std::string ToString() const override;
 
         bool IsImmediate() const override { return !MathHelper::CheckBit(_instruction, 25); }
+        
+        // Used for the LDM and STM instructions
+        bool IsMultiple() const { return MathHelper::CheckBit(_instruction, 27); }
 
         // The Source / Destination register depending on the instruction
         uint8_t GetRegister() const { return MathHelper::GetBits(_instruction, 12, 4); }

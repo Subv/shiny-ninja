@@ -4,10 +4,9 @@
 #include <cstdint>
 #include <type_traits>
 #include <limits>
-#include <strings.h>
 
 #ifndef CHAR_BIT // Defined in <limits.h>, buuuut we already have <limits>
-# define CHAR_BIT sizeof(char)
+# define CHAR_BIT 8
 #endif
 
 namespace MathHelper

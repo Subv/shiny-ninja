@@ -64,6 +64,18 @@ void CPU::Run()
     }
 }
 
+bool CPU::ConditionPasses(InstructionCondition condition)
+{
+    // TODO: STUB
+    switch (condition)
+    {
+        default:
+            return true;
+    }
+
+    return false;
+}
+
 void CPU::LoadROM(GBAHeader& header, FILE* rom)
 {
     _memory->LoadROM(header, rom);

@@ -44,6 +44,18 @@ std::string ARM::LoadStoreInstruction::ToString() const
 
 uint32_t ARM::LoadStoreInstruction::GetOpcode() const
 {
+    if (IsMultiple())
+        return MathHelper::CheckBit(_instruction, 20) ? ARMOpcodes::LDM : ARMOpcodes::STM;
+
+    if (!IsPreIndexed() && MathHelper::CheckBit(_instruction, 21))
+    {
+        // T variants
+        if (MathHelper::CheckBit(_instruction, 20))
+            return IsUnsignedByte() ? ARMOpcodes::LDRBT : ARMOpcodes::LDRT;
+        else
+            return IsUnsignedByte() ? ARMOpcodes::STRBT : ARMOpcodes::STRT;
+    }
+
     if (MathHelper::CheckBit(_instruction, 20))
         return IsUnsignedByte() ? ARMOpcodes::LDRB : ARMOpcodes::LDR;
     else

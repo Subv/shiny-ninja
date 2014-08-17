@@ -69,6 +69,8 @@ public:
     void Reset();
     void Run();
 
+    bool ConditionPasses(InstructionCondition condition);
+
     InstructionSet GetCurrentInstructionSet() { return InstructionSet(_state.CPSR.Flags.T); }
     int32_t& GetRegister(uint8_t reg) { return _state.Registers[reg]; }
     void SetInstructionSet(InstructionSet set) { _state.CPSR.Flags.T = uint8_t(set); }
