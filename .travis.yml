@@ -1,16 +1,16 @@
 language: cpp
 
 compiler:
-	- clang
-	- gcc
+    - clang
+    - gcc
 	
 before_install:
-	- sudo apt-get -qq install cmake
+    - sudo apt-get -qq install cmake
 	
 install:
-	- mkdir build
-	- cd build
-	- cmake ../
+    - mkdir build
+    - cd build
+    - cmake ../
 	
 script:
-	- make -j4
+    - make -j4
