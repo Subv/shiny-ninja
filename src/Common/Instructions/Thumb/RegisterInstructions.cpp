@@ -17,9 +17,9 @@ uint32_t Thumb::ImmediateShiftInstruction::GetOpcode() const
 {
     switch (MathHelper::GetBits(_instruction, 11, 3))
     {
-        case 000_b: return ThumbOpcodes::LSL;
-        case 001_b: return ThumbOpcodes::LSR;
-        case 010_b: return ThumbOpcodes::ASR;
+        case 0: return ThumbOpcodes::LSL;
+        case 1: return ThumbOpcodes::LSR;
+        case 2: return ThumbOpcodes::ASR;
         default:
             Utilities::Assert(false, "Thumb::ImmediateShiftInstruction: Invalid opcode");
             return 0;
@@ -53,10 +53,10 @@ uint32_t Thumb::MovCmpAddSubImmediateInstruction::GetOpcode() const
 {
     switch (MathHelper::GetBits(_instruction, 11, 3))
     {
-        case 100_b: return ThumbOpcodes::MOV; // 100xx
-        case 101_b: return ThumbOpcodes::CMP; // 101xx
-        case 110_b: return ThumbOpcodes::ADD; // 110xx
-        case 111_b: return ThumbOpcodes::SUB; // 111xx
+        case 0x4: return ThumbOpcodes::MOV; // 100xx
+        case 0x5: return ThumbOpcodes::CMP; // 101xx
+        case 0x6: return ThumbOpcodes::ADD; // 110xx
+        case 0x7: return ThumbOpcodes::SUB; // 111xx
         default:
             Utilities::Assert(false, "Thumb::MovCmpAddSubImmediateInstruction: Invalid opcode");
             return 0;

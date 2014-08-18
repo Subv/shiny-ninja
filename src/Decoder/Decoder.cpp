@@ -65,13 +65,13 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 
 shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 {
-    if (MathHelper::CheckBits(opcode, 14, 2, 00_b))
+    if (MathHelper::CheckBits(opcode, 14, 2, 0))
     {
         // LSL 000xxb, LSR 001xxb, ASR 010xxb
-        if (MathHelper::GetBits(opcode, 9, 5) & 01111_b)
+        if (MathHelper::GetBits(opcode, 9, 5) & 0xF)
             return shared_ptr<Instruction>(new Thumb::ImmediateShiftInstruction(opcode));
         
-        if (MathHelper::GetBits(opcode, 9, 5) & 01111_b)
+        if (MathHelper::GetBits(opcode, 9, 5) & 0xF)
             return shared_ptr<Instruction>(new Thumb::AddSubRegisterInstruction(opcode));
             
         return shared_ptr<Instruction>(new Thumb::MovCmpAddSubImmediateInstruction(opcode));
