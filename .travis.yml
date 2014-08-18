@@ -12,7 +12,7 @@ before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install build-essential libtool gcc-4.8 g++-4.8 make cmake
     - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
-    - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-3.4; fi
+    - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-3.3; fi
 
 install:
     - mkdir build
