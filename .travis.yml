@@ -5,15 +5,20 @@ compiler:
     - gcc
 
 before_install:
-    - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
-    - echo "yes" | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    - sudo add-apt-repository -y ppa:kalakris/cmake
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - if [ "$CXX" == "clang++" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
     - sudo apt-get -qq update
     - sudo apt-get -qq install build-essential libtool gcc-4.8 g++-4.8 make cmake
+    - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-3.4; fi
 
 install:
     - mkdir build
     - cd build
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8"; fi
+    - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.4"; fi
     - cmake ../
 
 script:
+    - $CXX --version
     - make -j4
