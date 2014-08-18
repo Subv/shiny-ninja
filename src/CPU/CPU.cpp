@@ -11,6 +11,8 @@ _decoder(new Decoder())
 
 void CPU::Reset()
 {
+    Stop();
+
     _interpreter = std::unique_ptr<Interpreter>(new Interpreter(this));
     _memory = std::unique_ptr<MMU>(new MMU(this));
 
@@ -73,10 +75,12 @@ void CPU::Run()
             instruction = _decoder->DecodeThumb(opcode);
         }
 
+        ExecuteInstructionCallback(InstructionCallbackTypes::InstructionDecoded, instruction);
+
         if (instruction)
         {
-            std::cout << "Set: " << (instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") << ". Instruction: " << instruction->ToString() << std::endl;
             _interpreter->RunInstruction(instruction);
+            ExecuteInstructionCallback(InstructionCallbackTypes::InstructionExecuted, instruction);
         }
         else
             std::cout << "Unknown Instruction" << std::endl;
@@ -151,4 +155,12 @@ ProgramStatusRegisters& CPU::GetSavedStatusRegister()
 
     Utilities::Assert(false, "Current CPU mode doesn't have a SPSR");
     return _state.SPSR[0];
+}
+
+void CPU::ExecuteInstructionCallback(InstructionCallbackTypes type, std::shared_ptr<Instruction> instruction)
+{
+    auto handler = _instructionCallbacks.find(type);
+    
+    if (handler != _instructionCallbacks.end())
+        handler->second(instruction);
 }

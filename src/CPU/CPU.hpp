@@ -5,6 +5,7 @@
 #include "Interpreter/Interpreter.hpp"
 #include "Memory/Memory.hpp"
 
+#include <atomic>
 #include <cstdio>
 
 struct GBAHeader;
@@ -60,6 +61,12 @@ union ProgramStatusRegisters
 };
 #pragma pack(pop)
 
+enum class InstructionCallbackTypes
+{
+    InstructionDecoded,
+    InstructionExecuted
+};
+
 // Define shorthands for the most commonly used registers
 #define SP 13
 #define LR 14
@@ -86,6 +93,7 @@ public:
     CPU(CPUExecutionMode mode);
     void LoadROM(GBAHeader& header, FILE* rom);
     void Reset();
+    void Stop() { _runState = CPURunState::Stopped; }
     void Run();
 
     bool ConditionPasses(InstructionCondition condition);
@@ -104,13 +112,19 @@ public:
 
     std::unique_ptr<MMU>& GetMemory() { return _memory; }
 
+    void RegisterInstructionCallback(InstructionCallbackTypes type, std::function<void(std::shared_ptr<Instruction>)> callback) { _instructionCallbacks[type] = callback; }
+    void ExecuteInstructionCallback(InstructionCallbackTypes type, std::shared_ptr<Instruction> instruction);
+
 private:
     CPUExecutionMode _mode;
-    CPURunState _runState;
+    std::atomic<CPURunState> _runState;
     CPUState _state;
     std::unique_ptr<Interpreter> _interpreter;
     std::unique_ptr<Decoder> _decoder;
     std::unique_ptr<MMU> _memory;
+
+    // Callbacks are used to inform the UI about stuff that happens in the emulator
+    std::unordered_map<InstructionCallbackTypes, std::function<void(std::shared_ptr<Instruction>)>> _instructionCallbacks;
 };
 
 #endif
