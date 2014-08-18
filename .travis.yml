@@ -5,7 +5,10 @@ compiler:
     - gcc
 
 before_install:
-    - sudo apt-get -qq install cmake
+    - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
+    - echo "yes" | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    - sudo apt-get -qq update
+    - sudo apt-get -qq install build-essential libtool gcc-4.8 g++-4.8 make cmake
 
 install:
     - mkdir build
