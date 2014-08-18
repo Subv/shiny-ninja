@@ -1,6 +1,7 @@
 ShinyNinja
 ===========
 [![Build Status](https://travis-ci.org/Subv/shiny-ninja.svg?branch=master)](https://travis-ci.org/Subv/shiny-ninja)
+
 GBA Emulator written in C++.
 
 
