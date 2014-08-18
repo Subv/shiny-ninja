@@ -9,10 +9,21 @@
 
 struct GBAHeader;
 
-enum class CPUMode
+enum class CPUExecutionMode
 {
     Interpreter,
     JIT
+};
+
+enum class CPUMode
+{
+    User = 0x10,
+    FIQ = 0x11,
+    IRQ = 0x12,
+    Supervisor = 0x13,
+    Abort = 0x17,
+    Undefined = 0x1B,
+    System = 0x1F
 };
 
 enum class CPURunState
@@ -57,29 +68,44 @@ union ProgramStatusRegisters
 struct CPUState
 {
     int32_t Registers[16];
+
+    // Banked registers
+    int32_t Registers_FIQ[7]; // Contains R8-R14 for the FIQ mode
+    int32_t Registers_svc[2]; // Contains R13-R14 for the Supervisor mode
+    int32_t Registers_abt[2]; // Contains R13-R14 for the Abort mode
+    int32_t Registers_IRQ[2]; // Contains R13-R14 for the IRQ mode
+    int32_t Registers_und[2]; // Contains R13-R14 for the Undefined mode
+
     ProgramStatusRegisters CPSR; // Current Program Status Register
-    ProgramStatusRegisters SPSR; // Saved Program Status Register
+    ProgramStatusRegisters SPSR[5]; // Saved Program Status Register, there is one per mode except in System/User mode
 };
 
 class CPU final
 {
 public:
-    CPU(CPUMode mode);
+    CPU(CPUExecutionMode mode);
     void LoadROM(GBAHeader& header, FILE* rom);
     void Reset();
     void Run();
 
     bool ConditionPasses(InstructionCondition condition);
 
-    InstructionSet GetCurrentInstructionSet() { return InstructionSet(_state.CPSR.Flags.T); }
-    int32_t& GetRegister(uint8_t reg) { return _state.Registers[reg]; }
+    int32_t& GetRegister(uint8_t reg);
+
+    InstructionSet GetCurrentInstructionSet() const { return InstructionSet(_state.CPSR.Flags.T); }
     void SetInstructionSet(InstructionSet set) { _state.CPSR.Flags.T = uint8_t(set); }
     void ToggleInstructionSet() { _state.CPSR.Flags.T ^= 1; }
+
     ProgramStatusRegisters::FlagsStruct& GetCurrentStatusFlags() { return _state.CPSR.Flags; }
+    ProgramStatusRegisters& GetSavedStatusRegister();
+
+    CPUMode GetCurrentCPUMode() const { return CPUMode(_state.CPSR.Flags.M); }
+    void SetCurrentCPUMode(CPUMode mode) { _state.CPSR.Flags.M = uint8_t(mode); }
+
     std::unique_ptr<MMU>& GetMemory() { return _memory; }
 
 private:
-    CPUMode _mode;
+    CPUExecutionMode _mode;
     CPURunState _runState;
     CPUState _state;
     std::unique_ptr<Interpreter> _interpreter;

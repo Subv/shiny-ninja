@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
         return -2;
     }
 
-    std::shared_ptr<CPU> arm7(new CPU(CPUMode::Interpreter));
+    std::shared_ptr<CPU> arm7(new CPU(CPUExecutionMode::Interpreter));
     arm7->LoadROM(header, rom);
 
     fclose(rom);
