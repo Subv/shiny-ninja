@@ -1,6 +1,8 @@
 #include "Common/GBA.hpp"
 #include "CPU/CPU.hpp"
 #include "Common/Utilities.hpp"
+#include <QApplication>
+#include "MainWindow.h"
 
 #include <iostream>
 #include <cstdio>
@@ -38,6 +40,11 @@ int main(int argc, char* argv[])
         fclose(rom);
         return -2;
     }
+
+    QApplication app(argc, argv);
+    MainWindow mw;
+    mw.show();
+    app.exec();
 
     std::shared_ptr<CPU> arm7(new CPU(CPUExecutionMode::Interpreter));
     arm7->LoadROM(header, rom);
