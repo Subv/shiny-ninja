@@ -67,6 +67,23 @@ enum class InstructionCallbackTypes
     InstructionExecuted
 };
 
+// We have to provide a std::hash specialization for this enum if we want to use it in an unordered_map
+namespace std
+{
+    template<>
+    struct hash<InstructionCallbackTypes>
+    {
+        typedef InstructionCallbackTypes argument_type;
+        typedef std::underlying_type<argument_type>::type underlying_type;
+        typedef std::hash<underlying_type>::result_type result_type;
+        result_type operator()(const argument_type& arg) const
+        {
+            std::hash<underlying_type> hasher;
+            return hasher(static_cast<underlying_type>(arg));
+        }
+    };
+}
+
 // Define shorthands for the most commonly used registers
 #define SP 13
 #define LR 14
