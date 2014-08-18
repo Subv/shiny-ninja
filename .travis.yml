@@ -4,7 +4,7 @@ compiler:
     - clang
     - gcc
 
-    before_install:
+before_install:
     - sudo apt-get -qq install cmake
 
 install:
