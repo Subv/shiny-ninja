@@ -16,8 +16,8 @@ TODO List
 - [ ] GPU
   * [ ] Implement the LCD display routines
 - [ ] Video
-  * Implement some kind of graphics adapter class so users can extend it and create their own interfaces
-  * Provide some basic interfaces based on Qt, ncurses, and possibly libcaca
+  * [ ] Implement some kind of graphics adapter class so users can extend it and create their own interfaces
+  * [ ] Provide some basic interfaces based on Qt, ncurses, and possibly libcaca
 - [ ] MMU
   * [ ] Implement memory writes
   * [ ] Implement read/writes to/from unused memory
