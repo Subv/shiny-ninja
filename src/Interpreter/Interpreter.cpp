@@ -79,6 +79,14 @@ void Interpreter::InitializeArm()
     _armHandlers[ARM::ARMOpcodes::STR] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::STRB] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::STRBT] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+
+    // Miscellaneous Load / Store instructions
+    _armHandlers[ARM::ARMOpcodes::STRH] = std::bind(&Interpreter::HandleARMMiscellaneousLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::LDRH] = std::bind(&Interpreter::HandleARMMiscellaneousLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::LDRSH] = std::bind(&Interpreter::HandleARMMiscellaneousLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::LDRSB] = std::bind(&Interpreter::HandleARMMiscellaneousLoadStoreInstruction, this, std::placeholders::_1);
+
+
     _armHandlers[ARM::ARMOpcodes::LDM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::STM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
 }
@@ -310,7 +318,7 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
         
         // Account for CPU prefetch, the code expects the PC to be at <CurrentInstruction> + 8, but we're currently at <CurrentInstruction> + 4
         if (instruction->GetIndexRegister() == PC)
-            address += 4;
+            registerValue += 4;
 
         uint32_t shiftValue = instruction->GetShiftImmediate();
 
@@ -388,6 +396,73 @@ void Interpreter::HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> 
                 _cpu->GetMemory()->WriteUInt32(address, writeVal);
             break;
         }
+        default:
+            Utilities::Assert(false, "Load/Store instruction is not yet supported");
+            break;
+    }
+}
+
+void Interpreter::HandleARMMiscellaneousLoadStoreInstruction(std::shared_ptr<ARMInstruction> instr)
+{
+    auto instruction = std::static_pointer_cast<ARM::MiscellaneousLoadStoreInstruction>(instr);
+
+    uint32_t address = _cpu->GetRegister(instruction->GetBaseRegister());
+
+    // Account for CPU prefetch, the code expects the PC to be at <CurrentInstruction> + 8, but we're currently at <CurrentInstruction> + 4
+    if (instruction->GetBaseRegister() == PC)
+        address += 4;
+
+    uint32_t secondAddressValue = 0;
+
+    if (instruction->IsImmediate())
+        secondAddressValue = instruction->GetImmediateOffset();
+    else
+    {
+        secondAddressValue = _cpu->GetRegister(instruction->GetRegisterOffset());
+        if (instruction->GetRegisterOffset() == PC)
+            secondAddressValue += 4;
+    }
+
+    if (instruction->IsPreIndexed())
+    {
+        if (instruction->IsBaseAdded())
+            address += secondAddressValue;
+        else
+            address -= secondAddressValue;
+
+        if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition()))
+            _cpu->GetRegister(instruction->GetBaseRegister()) = address;
+    }
+    else
+    {
+        if (_cpu->ConditionPasses(instruction->GetCondition()))
+        {
+            if (instruction->IsBaseAdded())
+                _cpu->GetRegister(instruction->GetBaseRegister()) += secondAddressValue;
+            else
+                _cpu->GetRegister(instruction->GetBaseRegister()) -= secondAddressValue;
+        }
+    }
+
+    switch (instruction->GetOpcode())
+    {
+        case ARM::ARMOpcodes::STRH:
+        {
+            uint32_t writeVal = _cpu->GetRegister(instruction->GetRegister());
+            if (instruction->GetRegister() == PC)
+                writeVal += 4;
+            _cpu->GetMemory()->WriteUInt16(address, writeVal & 0xFFFF);
+            break;
+        }
+        case ARM::ARMOpcodes::LDRH:
+            _cpu->GetRegister(instruction->GetRegister()) = _cpu->GetMemory()->ReadUInt16(address);
+            break;
+        case ARM::ARMOpcodes::LDRSH:
+            _cpu->GetRegister(instruction->GetRegister()) = (int16_t)_cpu->GetMemory()->ReadUInt16(address);
+            break;
+        case ARM::ARMOpcodes::LDRSB:
+            _cpu->GetRegister(instruction->GetRegister()) = (int8_t)_cpu->GetMemory()->ReadUInt8(address);
+            break;
         default:
             Utilities::Assert(false, "Load/Store instruction is not yet supported");
             break;

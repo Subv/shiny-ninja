@@ -45,6 +45,9 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
             return shared_ptr<Instruction>(new ARM::MoveRegisterToPSRRegisterInstruction(opcode));
     }
 
+    if (MathHelper::CheckBits(opcode, 25, 3, 0) && MathHelper::CheckBit(opcode, 7) && MathHelper::CheckBit(opcode, 4))
+        return shared_ptr<Instruction>(new ARM::MiscellaneousLoadStoreInstruction(opcode));
+
     // Check for data processing instructions
     if (MathHelper::CheckBits(opcode, 26, 2, 0))
         return shared_ptr<Instruction>(new ARM::DataProcessingInstruction(opcode));

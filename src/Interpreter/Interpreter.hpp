@@ -24,6 +24,7 @@ public:
     void HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction);
     void HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruction> instruction);
     void HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> instruction);
+    void HandleARMMiscellaneousLoadStoreInstruction(std::shared_ptr<ARMInstruction> instruction);
 
 private:
     CPU* _cpu;

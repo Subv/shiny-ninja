@@ -35,5 +35,26 @@ namespace ARM
         bool IsUnprivileged() const;
         bool WriteBack() const;
     };
+
+    class MiscellaneousLoadStoreInstruction : public ARMInstruction
+    {
+    public:
+        MiscellaneousLoadStoreInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
+
+        uint32_t GetOpcode() const override;
+        std::string ToString() const override;
+        bool IsImmediate() const override { return MathHelper::CheckBit(_instruction, 22); }
+
+        // The Source / Destination register depending on the instruction
+        uint8_t GetRegister() const { return MathHelper::GetBits(_instruction, 12, 4); }
+        uint8_t GetBaseRegister() const { return MathHelper::GetBits(_instruction, 16, 4); }
+
+        uint8_t GetImmediateOffset() const;
+        uint8_t GetRegisterOffset() const;
+
+        bool IsPreIndexed() const { return MathHelper::CheckBit(_instruction, 24); }
+        bool IsBaseAdded() const { return MathHelper::CheckBit(_instruction, 23); }
+        bool WriteBack() const;
+    };
 }
 #endif
