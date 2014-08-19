@@ -1,4 +1,4 @@
-file(GLOB_RECURSE DesktopSources *.cpp *.hpp)
+file(GLOB_RECURSE DesktopSources *.cpp *.hpp *.h)
 
 file(GLOB_RECURSE UI_FILES *.ui)
 qt5_wrap_ui(UI_HEADERS ${UI_FILES})

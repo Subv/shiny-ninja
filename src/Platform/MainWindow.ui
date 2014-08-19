@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>391</width>
+    <height>342</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>150</y>
+      <x>30</x>
+      <y>120</y>
       <width>241</width>
       <height>91</height>
      </rect>
@@ -27,13 +27,52 @@
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pauseCPU">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Pause CPU</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stepCPU">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>80</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Step CPU</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="runOnLoad">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>40</y>
+      <width>111</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Run ROM on load</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>391</width>
      <height>21</height>
     </rect>
    </property>
@@ -46,7 +85,14 @@
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionDisassembler"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuDebug"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
@@ -62,6 +108,11 @@
   <action name="actionReset_ROM">
    <property name="text">
     <string>Reset ROM</string>
+   </property>
+  </action>
+  <action name="actionDisassembler">
+   <property name="text">
+    <string>Disassembler</string>
    </property>
   </action>
  </widget>
@@ -115,9 +166,60 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionDisassembler</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openDisassembler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pauseCPU</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>pause()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>195</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stepCPU</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>step()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>195</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>open()</slot>
   <slot>restart()</slot>
+  <slot>openDisassembler()</slot>
+  <slot>pause()</slot>
+  <slot>step()</slot>
  </slots>
 </ui>

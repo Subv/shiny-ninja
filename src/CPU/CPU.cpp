@@ -53,38 +53,7 @@ void CPU::Run()
 
     // Loop until something stops the CPU
     while (_runState == CPURunState::Running)
-    {
-        std::shared_ptr<Instruction> instruction;
-
-        if (GetCurrentInstructionSet() == InstructionSet::ARM)
-        {
-            uint32_t opcode = _memory->ReadUInt32(GetRegister(PC)); // Read the opcode from memory, 4 bytes in ARM mode
-
-            GetRegister(PC) += 4; // Increment the PC 4 bytes
-
-            // Extract the instruction from it
-            instruction = _decoder->DecodeARM(opcode);
-        }
-        else
-        {
-            uint16_t opcode = _memory->ReadUInt16(GetRegister(PC)); // Read the opcode from memory, 2 bytes in Thumb mode
-
-            GetRegister(PC) += 2; // Increment the PC 2 bytes
-
-            // Extract the instruction from it
-            instruction = _decoder->DecodeThumb(opcode);
-        }
-
-        ExecuteInstructionCallback(InstructionCallbackTypes::InstructionDecoded, instruction);
-
-        if (instruction)
-        {
-            _interpreter->RunInstruction(instruction);
-            ExecuteInstructionCallback(InstructionCallbackTypes::InstructionExecuted, instruction);
-        }
-        else
-            std::cout << "Unknown Instruction" << std::endl;
-    }
+        StepInstruction();
 }
 
 bool CPU::ConditionPasses(InstructionCondition condition)
@@ -106,33 +75,7 @@ void CPU::LoadROM(GBAHeader& header, FILE* rom)
 
 int32_t& CPU::GetRegister(uint8_t reg)
 {
-    Utilities::Assert(reg <= PC, "Trying to access invalid register");
-
-    // R0 through R7, and R15 are shared across all modes
-    // User mode and System mode use the same registers
-    if (reg <= 7 || reg == PC || GetCurrentCPUMode() == CPUMode::User || GetCurrentCPUMode() == CPUMode::System)
-        return _state.Registers[reg];
-
-    // FIQ mode uses R8_fiq through R14_fiq
-    if (GetCurrentCPUMode() == CPUMode::FIQ)
-        return _state.Registers_FIQ[reg - 8];
-
-    // R8 through R12 are shared in the other modes
-    if (reg <= 12)
-        return _state.Registers[reg];
-
-    // Registers R13 and R14 are specific to each mode
-    if (GetCurrentCPUMode() == CPUMode::Supervisor)
-        return _state.Registers_svc[reg - 13];
-    else if (GetCurrentCPUMode() == CPUMode::Abort)
-        return _state.Registers_abt[reg - 13];
-    else if (GetCurrentCPUMode() == CPUMode::IRQ)
-        return _state.Registers_IRQ[reg - 13];
-    else if (GetCurrentCPUMode() == CPUMode::Undefined)
-        return _state.Registers_und[reg - 13];
-
-    Utilities::Assert(false, "Unknown CPU mode registers");
-    return _state.Registers[reg];
+    return GetRegisterForMode(GetCurrentCPUMode(), reg);
 }
 
 ProgramStatusRegisters& CPU::GetSavedStatusRegister()
@@ -163,4 +106,69 @@ void CPU::ExecuteInstructionCallback(InstructionCallbackTypes type, std::shared_
     
     if (handler != _instructionCallbacks.end())
         handler->second(instruction);
+}
+
+int32_t& CPU::GetRegisterForMode(CPUMode mode, uint8_t reg)
+{
+    Utilities::Assert(reg <= PC, "Trying to access invalid register");
+
+    // R0 through R7, and R15 are shared across all modes
+    // User mode and System mode use the same registers
+    if (reg <= 7 || reg == PC || mode == CPUMode::User || mode == CPUMode::System)
+        return _state.Registers[reg];
+
+    // FIQ mode uses R8_fiq through R14_fiq
+    if (mode == CPUMode::FIQ)
+        return _state.Registers_FIQ[reg - 8];
+
+    // R8 through R12 are shared in the other modes
+    if (reg <= 12)
+        return _state.Registers[reg];
+
+    // Registers R13 and R14 are specific to each mode
+    if (mode == CPUMode::Supervisor)
+        return _state.Registers_svc[reg - 13];
+    else if (mode == CPUMode::Abort)
+        return _state.Registers_abt[reg - 13];
+    else if (mode == CPUMode::IRQ)
+        return _state.Registers_IRQ[reg - 13];
+    else if (mode == CPUMode::Undefined)
+        return _state.Registers_und[reg - 13];
+
+    Utilities::Assert(false, "Unknown CPU mode registers");
+    return _state.Registers[reg];
+}
+
+void CPU::StepInstruction()
+{
+    std::shared_ptr<Instruction> instruction;
+
+    if (GetCurrentInstructionSet() == InstructionSet::ARM)
+    {
+        uint32_t opcode = _memory->ReadUInt32(GetRegister(PC)); // Read the opcode from memory, 4 bytes in ARM mode
+
+        GetRegister(PC) += 4; // Increment the PC 4 bytes
+
+        // Extract the instruction from it
+        instruction = _decoder->DecodeARM(opcode);
+    }
+    else
+    {
+        uint16_t opcode = _memory->ReadUInt16(GetRegister(PC)); // Read the opcode from memory, 2 bytes in Thumb mode
+
+        GetRegister(PC) += 2; // Increment the PC 2 bytes
+
+        // Extract the instruction from it
+        instruction = _decoder->DecodeThumb(opcode);
+    }
+
+    ExecuteInstructionCallback(InstructionCallbackTypes::InstructionDecoded, instruction);
+
+    if (instruction)
+    {
+        _interpreter->RunInstruction(instruction);
+        ExecuteInstructionCallback(InstructionCallbackTypes::InstructionExecuted, instruction);
+    }
+    else
+        std::cout << "Unknown Instruction" << std::endl;
 }

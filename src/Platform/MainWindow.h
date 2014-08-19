@@ -13,6 +13,8 @@ namespace Ui {
 class MainWindow;
 }
 
+class DisassemblerWindow;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -23,12 +25,17 @@ public:
 
     void Run();
     void RegisterCPUCallbacks();
+    std::shared_ptr<CPU> GetCPU() { return _cpu; }
 
 private slots:
     void open();
     void restart();
+    void pause();
+    void step();
+    void openDisassembler();
     
 private:
+    DisassemblerWindow* _disasmWindow;
     std::shared_ptr<CPU> _cpu;
     GBAHeader _header;
     std::thread _cpuThread;

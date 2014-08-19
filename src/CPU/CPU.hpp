@@ -116,6 +116,7 @@ public:
     bool ConditionPasses(InstructionCondition condition);
 
     int32_t& GetRegister(uint8_t reg);
+    int32_t& GetRegisterForMode(CPUMode mode, uint8_t reg);
 
     InstructionSet GetCurrentInstructionSet() const { return InstructionSet(_state.CPSR.Flags.T); }
     void SetInstructionSet(InstructionSet set) { _state.CPSR.Flags.T = uint8_t(set); }
@@ -131,6 +132,8 @@ public:
 
     void RegisterInstructionCallback(InstructionCallbackTypes type, std::function<void(std::shared_ptr<Instruction>)> callback) { _instructionCallbacks[type] = callback; }
     void ExecuteInstructionCallback(InstructionCallbackTypes type, std::shared_ptr<Instruction> instruction);
+
+    void StepInstruction();
 
 private:
     CPUExecutionMode _mode;
