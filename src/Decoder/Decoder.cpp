@@ -5,7 +5,7 @@
 #include "Common/Instructions/ARM/MultiplyAccumulateInstructions.hpp"
 #include "Common/Instructions/ARM/LoadStoreInstructions.hpp"
 
-#include "Common/Instructions/Thumb/RegisterInstructions.hpp"
+#include "Common/Instructions/Thumb/DataProcessingInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 
@@ -65,71 +65,32 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
 
 shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 {
-    if (MathHelper::CheckBits(opcode, 14, 2, 0))
+    if (MathHelper::GetBits(opcode, 13, 3) == 0) // 000 (LSR, LSL, ASR, ADD SUB REG)
     {
-        // LSL 000xxb, LSR 001xxb, ASR 010xxb
-        if (MathHelper::GetBits(opcode, 9, 5) & 0xF)
+        if (MathHelper::GetBits(opcode, 11, 2) <= 2)
             return shared_ptr<Instruction>(new Thumb::ImmediateShiftInstruction(opcode));
-        
-        if (MathHelper::GetBits(opcode, 9, 5) & 0xF)
-            return shared_ptr<Instruction>(new Thumb::AddSubRegisterInstruction(opcode));
-            
-        return shared_ptr<Instruction>(new Thumb::MovCmpAddSubImmediateInstruction(opcode));
+        return shared_ptr<Instruction>(new Thumb::AddSubInstruction(opcode));
     }
-    
-    /*uint32_t identifier = MathHelper::GetBits(opcode, 10, 4);
-    
-    if (MathHelper::CheckBits(opcode, 14, 2, 01_b))
+
+    if (MathHelper::GetBits(opcode, 13, 3) == 1) // ADD SUB CMP MOV IMM
+        return shared_ptr<Instruction>(new Thumb::AddSubCmpMovImmInstruction(opcode));
+
+    if (MathHelper::GetBits(opcode, 10, 6) == 16) // DataProc
+        return shared_ptr<Instruction>(new Thumb::DataProcessingInstruction(opcode));
+
+    if (MathHelper::GetBits(opcode, 10, 6) == 17) // SpecialDataProc and Branch
     {
-        if (identifier & 0000_b) // (01)0000
-            return shared_ptr<Instruction>(new Thumb::DataProcessingInstructions(opcode));
+        // if (MathHelper::GetBits(opcode, 8, 2) == 3)
+        //     return shared_ptr<Instruction>(new Thumb::BranchExchangeInstruction(opcode));
 
-        if (identifier & 0001_b) // (01)0001
-            return shared_ptr<Instruction>(new Thumb::SpecialDataAndBranchExchangeInstruction(opcode));
-        
-        // (01)001x Load from Literal Pool, see LDR (literal) on page A6-90
-        if (identifier & 0010_b)
-            return shared_ptr<Instruction>(new Thumb::LoadStoreInstruction(opcode)); 
-        
-        // (01)01xx Load/store single data item on page A5-9
-        // (01)1xxx Load/store single data item on page A5-9
-        // (10)0xxx Load/store single data item on page A5-9
-        return shared_ptr<Instruction>(new Thumb::LoadStoreInstruction(opcode));
+        return shared_ptr<Instruction>(new Thumb::SpecialDataProcessingInstruction(opcode));
     }
-    
-    if (MathHelper::CheckBits(opcode, 14, 2, 10_b))
-    {
-        // (10)100x Generate PC-relative address, see ADR on page A6-30
-        if (identifier & 1001_b))
-            return shared_ptr<Instruction>(new Thumb::ADR(opcode));
-        
-        // (10)101x Generate SP-relative address, see ADD (SP plus immediate) on page A6-26
-        if (identifier & 1011_b)
-            return shared_ptr<Instruction>(new Thumb::ADD(opcode));
 
-        // (10)11xx Miscellaneous 16-bit instructions on page A5-10
-        if (identifier & 1111_b)
-            return shared_ptr<Instruction>(new Thumb::MiscInstructions(opcode));
+    // if (MathHelper::GetBits(opcode, 11, 5) == 9) // LDR literal store
+    //     return shared_ptr<Instruction>(new Thumb::LoadFromLiteralStoreInstruction(opcode));
 
-        return shared_ptr<Instruction>(nullptr);
-    }
-    
-    // At this point 14-15 is forced to be 0b11.
-    
-    // (11)000x Store multiple registers, see STM / STMIA / STMEA on page A6-218
-    if (identifier & 0001_b)
-        return shared_ptr<Instruction>(new Thumb::StoreRegistersInstruction(opcode));
-        
-    // (11)001x Load multiple registers, see LDM / LDMIA / LDMFD on page A6-84
-    if (identifier & 0011_b)
-        return shared_ptr<Instruction>(new Thumb::LoadRegistersInstruction(opcode));
+    // if (MathHelper::GetBits(opcode, 12, 4) == 5) // Load/Store register offset
+    //     return shared_ptr<Instruction>(new Thumb::LoadStoreRegisterInstruction(opcode));
 
-    // (11)01xx Conditional branch, and supervisor call on page A5-12
-    if (identifier & 0111_b)
-        return shared_ptr<Instruction>(new Thumb::CondBranchSupervisorInstruction(opcode));
-    
-    if (identifier & 1001_b)
-        return shared_ptr<Instruction>(new Thumb::UnconditionalBranchInstruction(opcode));
-*/
     return shared_ptr<Instruction>(nullptr);
 }
