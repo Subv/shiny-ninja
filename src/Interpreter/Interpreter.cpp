@@ -8,6 +8,7 @@
 #include "Common/Instructions/ARM/BranchInstructions.hpp"
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 #include "Common/Instructions/ARM/LoadStoreInstructions.hpp"
+#include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 #include "Common/Utilities.hpp"
@@ -86,9 +87,13 @@ void Interpreter::InitializeArm()
     _armHandlers[ARM::ARMOpcodes::LDRSH] = std::bind(&Interpreter::HandleARMMiscellaneousLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::LDRSB] = std::bind(&Interpreter::HandleARMMiscellaneousLoadStoreInstruction, this, std::placeholders::_1);
 
-
+    // Not Yet Implemented
     _armHandlers[ARM::ARMOpcodes::LDM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::STM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+
+    // PSR Operations
+    _armHandlers[ARM::ARMOpcodes::MRS] = std::bind(&Interpreter::HandleARMPSROperationInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::MSR] = std::bind(&Interpreter::HandleARMPSROperationInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::InitializeThumb()
@@ -466,6 +471,81 @@ void Interpreter::HandleARMMiscellaneousLoadStoreInstruction(std::shared_ptr<ARM
         default:
             Utilities::Assert(false, "Load/Store instruction is not yet supported");
             break;
+    }
+}
+
+void Interpreter::HandleARMPSROperationInstruction(std::shared_ptr<ARMInstruction> instruction)
+{
+    if (instruction->GetOpcode() == ARM::ARMOpcodes::MRS)
+    {
+        auto mrs = std::static_pointer_cast<ARM::MovePSRToRegisterInstruction>(instruction);
+
+        if (mrs->GetPSRType() == ARM::PSRType::CPSR)
+            _cpu->GetRegister(mrs->GetDestinationRegister()) = _cpu->GetCurrentStatusRegister().Full;
+        else
+            _cpu->GetRegister(mrs->GetDestinationRegister()) = _cpu->GetSavedStatusRegister().Full;
+    }
+    else
+    {
+        uint32_t operand = 0;
+        uint8_t fieldMask = 0;
+        ARM::PSRType psr;
+
+        if (instruction->IsImmediate())
+        {
+            auto msr = std::static_pointer_cast<ARM::MoveRegisterToPSRImmediateInstruction>(instruction);
+            operand = MathHelper::RotateRight(uint32_t(msr->GetImmediateValue()), msr->GetImmediateShift() << 1);
+            fieldMask = msr->GetFieldsMask();
+            psr = msr->GetPSRType();
+        }
+        else
+        {
+            auto msr = std::static_pointer_cast<ARM::MoveRegisterToPSRRegisterInstruction>(instruction);
+            operand = _cpu->GetRegister(msr->GetSourceRegister());
+            fieldMask = msr->GetFieldsMask();
+            psr = msr->GetPSRType();
+
+            if (msr->GetSourceRegister() == PC)
+                operand += 4;
+        }
+
+        if (operand & BitMaskConstants::UnallocMask)
+        {
+            Utilities::Assert(false, "Undefined behavior, MSR attempted to set reserved bits");
+            return;
+        }
+
+        uint32_t byteMask =
+            (MathHelper::CheckBit(fieldMask, 0) ? 0x000000FF : 0) |
+            (MathHelper::CheckBit(fieldMask, 1) ? 0x0000FF00 : 0) |
+            (MathHelper::CheckBit(fieldMask, 2) ? 0x00FF0000 : 0) |
+            (MathHelper::CheckBit(fieldMask, 3) ? 0xFF000000 : 0);
+
+        uint32_t mask = 0;
+
+        if (psr == ARM::PSRType::CPSR)
+        {
+            if (_cpu->IsInPrivilegedMode())
+            {
+                if (operand & BitMaskConstants::StateMask)
+                {
+                    Utilities::Assert(false, "Undefined behavior, MSR attempted to set non-ARM execution state");
+                    return;
+                }
+
+                mask = byteMask & (BitMaskConstants::UserMask | BitMaskConstants::PrivMask);
+            }
+            else
+                mask = byteMask & BitMaskConstants::UserMask;
+
+            _cpu->GetCurrentStatusRegister().Full = (_cpu->GetCurrentStatusRegister().Full & ~mask) | (operand & mask);
+        }
+        else
+        {
+            // Modes without an SPSR will assert in CPU::GetSavedStatusRegister
+            mask = byteMask & (BitMaskConstants::UserMask | BitMaskConstants::PrivMask | BitMaskConstants::StateMask);
+            _cpu->GetSavedStatusRegister().Full = (_cpu->GetSavedStatusRegister().Full & ~mask) | (operand & mask);
+        }
     }
 }
 

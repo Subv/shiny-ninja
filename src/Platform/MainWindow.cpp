@@ -91,10 +91,6 @@ void MainWindow::restart()
 
     _cpu->Reset();
     _cpuThread.join();
-
-    _cpuThread = std::thread([&] {
-        _cpu->Run();
-    });
 }
 
 void MainWindow::RegisterCPUCallbacks()

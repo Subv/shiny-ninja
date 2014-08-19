@@ -84,6 +84,16 @@ namespace std
     };
 }
 
+// Used by the MSR and MRS instructions
+// These are different in each ARM version, we are using the values from the ARMv4T architecture
+enum BitMaskConstants
+{
+    UnallocMask = 0x0FFFFF00,
+    UserMask = 0xF0000000,
+    PrivMask = 0x0000000F,
+    StateMask = 0x00000020
+};
+
 // Define shorthands for the most commonly used registers
 #define SP 13
 #define LR 14
@@ -123,9 +133,11 @@ public:
     void ToggleInstructionSet() { _state.CPSR.Flags.T ^= 1; }
 
     ProgramStatusRegisters::FlagsStruct& GetCurrentStatusFlags() { return _state.CPSR.Flags; }
+    ProgramStatusRegisters& GetCurrentStatusRegister() { return _state.CPSR; }
     ProgramStatusRegisters& GetSavedStatusRegister();
 
     CPUMode GetCurrentCPUMode() const { return CPUMode(_state.CPSR.Flags.M); }
+    bool IsInPrivilegedMode() const { return GetCurrentCPUMode() != CPUMode::User; }
     void SetCurrentCPUMode(CPUMode mode) { _state.CPSR.Flags.M = uint8_t(mode); }
 
     std::unique_ptr<MMU>& GetMemory() { return _memory; }

@@ -17,6 +17,10 @@ void DisassemblerWindow::UpdateLabelData()
 {
     if (!_mainWindow->GetCPU())
         return;
+    auto mode = findChild<QLabel*>("label_19");
+
+    mode->setText(QString::number(uint32_t(_mainWindow->GetCPU()->GetCurrentCPUMode())));
+
     for (int i = 0; i <= 15; ++i)
     {
         auto label = findChild<QLabel*>(QString::fromStdString("label_r" + std::to_string(i)));
