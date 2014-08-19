@@ -97,8 +97,32 @@ std::string ARM::DataProcessingInstruction::ToString() const
 
     if (IsImmediate())
         command << "#" << std::hex << +GetShiftedSecondOperandImmediate();
+    else
+    {
+        command << "R" << GetSecondOperand() << ", ";
+        switch (GetShiftType())
+        {
+            case ShiftType::LSL:
+                command << "LSL";
+                break;
+            case ShiftType::LSR:
+                command << "LSR";
+                break;
+            case ShiftType::ASR:
+                command << "ASR";
+                break;
+            case ShiftType::ROR:
+                command << "ROR";
+                break;
+        }
 
-    // TODO: Add immediate shifts and register as second operand
+        if (ShiftByRegister())
+            command << " R";
+        else
+            command << " #";
+
+        command << GetShiftRegisterOrImmediate();
+    }
 
     return command.str();
 }
