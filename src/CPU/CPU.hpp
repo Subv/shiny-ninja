@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <cstdio>
+#include <array>
 
 struct GBAHeader;
 
@@ -101,14 +102,14 @@ enum BitMaskConstants
 
 struct CPUState
 {
-    int32_t Registers[16];
+    std::array<int32_t, 16> Registers;
 
     // Banked registers
-    int32_t Registers_FIQ[7]; // Contains R8-R14 for the FIQ mode
-    int32_t Registers_svc[2]; // Contains R13-R14 for the Supervisor mode
-    int32_t Registers_abt[2]; // Contains R13-R14 for the Abort mode
-    int32_t Registers_IRQ[2]; // Contains R13-R14 for the IRQ mode
-    int32_t Registers_und[2]; // Contains R13-R14 for the Undefined mode
+    std::array<int32_t, 7> Registers_FIQ; // Contains R8-R14 for the FIQ mode
+    std::array<int32_t, 2> Registers_svc; // Contains R13-R14 for the Supervisor mode
+    std::array<int32_t, 2> Registers_abt; // Contains R13-R14 for the Abort mode
+    std::array<int32_t, 2> Registers_IRQ; // Contains R13-R14 for the IRQ mode
+    std::array<int32_t, 2> Registers_und; // Contains R13-R14 for the Undefined mode
 
     ProgramStatusRegisters CPSR; // Current Program Status Register
     ProgramStatusRegisters SPSR[5]; // Saved Program Status Register, there is one per mode except in System/User mode

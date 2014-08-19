@@ -17,23 +17,12 @@ void CPU::Reset()
     _memory = std::unique_ptr<MMU>(new MMU(this));
 
     // Zero-out all the registers
-    for (int i = 0; i < 16; ++i)
-        _state.Registers[i] = 0;
-
-    for (int i = 0; i < 7; ++i)
-        _state.Registers_FIQ[i] = 0;
-
-    for (int i = 0; i < 2; ++i)
-        _state.Registers_svc[i] = 0;
-
-    for (int i = 0; i < 2; ++i)
-        _state.Registers_abt[i] = 0;
-
-    for (int i = 0; i < 2; ++i)
-        _state.Registers_IRQ[i] = 0;
-
-    for (int i = 0; i < 2; ++i)
-        _state.Registers_und[i] = 0;
+    _state.Registers = { };
+    _state.Registers_FIQ = { };
+    _state.Registers_svc = { };
+    _state.Registers_abt = { };
+    _state.Registers_IRQ = { };
+    _state.Registers_und = { };
 
     _state.CPSR.Full = 0;
 
