@@ -8,7 +8,8 @@ int main(int argc, char* argv[])
     if (argc > 1 && !strcmp(argv[1], "--no-gui"))
     {
         NoGUI noGUI(argc, argv);
-        return noGUI.Run();
+        noGUI.Run();
+        return 0;
     }
 
     // Start the Qt GUI
