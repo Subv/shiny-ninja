@@ -5,7 +5,7 @@
 std::string ARM::MovePSRToRegisterInstruction::ToString() const
 {
     std::stringstream stream;
-    stream << "MRS R" << GetDestinationRegister() << (GetPSRType() == PSRType::CPSR ? ", CPSR" : ", SPSR");
+    stream << "MRS R" << +GetDestinationRegister() << (GetPSRType() == PSRType::CPSR ? ", CPSR" : ", SPSR");
     return stream.str();
 }
 

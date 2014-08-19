@@ -96,10 +96,10 @@ std::string ARM::DataProcessingInstruction::ToString() const
         command << "R" << +GetFirstOperand() << ", ";
 
     if (IsImmediate())
-        command << "#" << std::hex << +GetShiftedSecondOperandImmediate();
+        command << "#0x" << std::hex << +GetShiftedSecondOperandImmediate();
     else
     {
-        command << "R" << GetSecondOperand() << ", ";
+        command << "R" << +GetSecondOperand() << ", ";
         switch (GetShiftType())
         {
             case ShiftType::LSL:
@@ -119,9 +119,9 @@ std::string ARM::DataProcessingInstruction::ToString() const
         if (ShiftByRegister())
             command << " R";
         else
-            command << " #";
+            command << " #0x";
 
-        command << GetShiftRegisterOrImmediate();
+        command << +GetShiftRegisterOrImmediate();
     }
 
     return command.str();

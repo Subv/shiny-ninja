@@ -1,6 +1,8 @@
 #include "LoadStoreInstructions.hpp"
 #include "Common/Utilities.hpp"
 
+#include <sstream>
+
 bool ARM::LoadStoreInstruction::IsUnprivileged() const
 {
     Utilities::Assert(!IsPreIndexed(), "Operation must be post indexed");
@@ -39,7 +41,50 @@ uint8_t ARM::LoadStoreInstruction::GetShiftImmediate() const
 
 std::string ARM::LoadStoreInstruction::ToString() const
 {
-    return ARM::ToString(GetOpcode());
+    std::stringstream command;
+    command << ARM::ToString(GetOpcode()) << " R" << +GetRegister() << ", [R" << +GetBaseRegister();
+    
+    if (IsPreIndexed())
+        command << ", ";
+    else
+        command << "], ";
+    
+    if (!IsBaseAdded())
+        command << "-";
+
+    if (IsImmediate())
+        command << "#0x" << std::hex << +GetImmediateOffset();
+    else
+    {
+        command << "R" << std::hex << +GetIndexRegister() << ", ";
+
+        switch (GetShiftType())
+        {
+            case ShiftType::LSL:
+                command << "LSL";
+                break;
+            case ShiftType::LSR:
+                command << "LSR";
+                break;
+            case ShiftType::ASR:
+                command << "ASR";
+                break;
+            case ShiftType::ROR:
+                command << "ROR";
+                break;
+        }
+
+        command << "#0x" << +GetShiftImmediate();
+    }
+
+    if (IsPreIndexed())
+    {
+        command << "]";
+        if (WriteBack())
+            command << "!";
+    }
+
+    return command.str();
 }
 
 uint32_t ARM::LoadStoreInstruction::GetOpcode() const
@@ -47,16 +92,16 @@ uint32_t ARM::LoadStoreInstruction::GetOpcode() const
     if (IsMultiple())
         return MathHelper::CheckBit(_instruction, 20) ? ARMOpcodes::LDM : ARMOpcodes::STM;
 
-    if (!IsPreIndexed() && MathHelper::CheckBit(_instruction, 21))
+    if (!IsPreIndexed() && IsUnprivileged())
     {
         // T variants
-        if (MathHelper::CheckBit(_instruction, 20))
+        if (IsLoad())
             return IsUnsignedByte() ? ARMOpcodes::LDRBT : ARMOpcodes::LDRT;
         else
             return IsUnsignedByte() ? ARMOpcodes::STRBT : ARMOpcodes::STRT;
     }
 
-    if (MathHelper::CheckBit(_instruction, 20))
+    if (IsLoad())
         return IsUnsignedByte() ? ARMOpcodes::LDRB : ARMOpcodes::LDR;
     else
         return IsUnsignedByte() ? ARMOpcodes::STRB : ARMOpcodes::STR;

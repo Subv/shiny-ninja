@@ -29,6 +29,8 @@ namespace ARM
 
         uint32_t GetImmediateOffset() const;
 
+        bool IsLoad() const { return MathHelper::CheckBit(_instruction, 20); }
+
         bool IsPreIndexed() const { return MathHelper::CheckBit(_instruction, 24); }
         bool IsBaseAdded() const { return MathHelper::CheckBit(_instruction, 23); }
         bool IsUnsignedByte() const { return MathHelper::CheckBit(_instruction, 22); }
