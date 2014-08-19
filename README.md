@@ -12,6 +12,20 @@ TODO List
 ---------
 - [ ] CPU
   * [ ] Implement the rest of the ARM opcodes
+    * [x] ARM.3: Branch and Exchange (BX, BLX)
+    * [x] ARM.4: Branch and Branch with Link (B, BL, BLX)
+    * [x] ARM.5: Data Processing
+    * [x] ARM.6: PSR Transfer (MRS, MSR)
+    * [ ] ARM.7: Multiply and Multiply-Accumulate (MUL,MLA)
+    * [x] ARM.9: Single Data Transfer (LDR, STR, PLD)
+    * [x] ARM.10: Halfword, Doubleword, and Signed Data Transfer
+    * [ ] ARM.11: Block Data Transfer (LDM,STM)
+    * [ ] ARM.12: Single Data Swap (SWP)
+    * [ ] ARM.13: Software Interrupt (SWI)
+    * [ ] ARM.14: Coprocessor Data Operations (CDP)
+    * [ ] ARM.15: Coprocessor Data Transfers (LDC,STC)
+    * [ ] ARM.16: Coprocessor Register Transfers (MRC, MCR)
+    * [ ] ARM.17: Undefined Instruction
   * [ ] Implement the rest of the Thumb opcodes
 - [ ] GPU
   * [ ] Implement the LCD display routines
