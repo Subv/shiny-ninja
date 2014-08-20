@@ -44,7 +44,7 @@ std::string Thumb::AddSubCmpMovImmInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
-    stream << ", #" << GetImmediate();
+    stream << ", #0x" << std::hex << std::uppercase << GetImmediate();
     return stream.str();
 }
 

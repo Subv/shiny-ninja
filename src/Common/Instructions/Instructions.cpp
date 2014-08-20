@@ -10,8 +10,8 @@ std::string Thumb::ToString(uint32_t opcode)
         case ThumbOpcodes::ADD_2:
         case ThumbOpcodes::ADD_3:
         case ThumbOpcodes::ADD_4:
-        case ThumbOpcodes::ADD_5:
-        case ThumbOpcodes::ADD_6:
+        case ThumbOpcodes::ADD_SP:
+        case ThumbOpcodes::ADD_PC:
         case ThumbOpcodes::ADD_7:
             return "ADD";
         case ThumbOpcodes::AND:

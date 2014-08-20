@@ -6,6 +6,8 @@
 #include "Common/Instructions/ARM/LoadStoreInstructions.hpp"
 
 #include "Common/Instructions/Thumb/DataProcessingInstructions.hpp"
+#include "Common/Instructions/Thumb/BranchExchangeInstruction.hpp"
+#include "Common/Instructions/Thumb/LoadStoreInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 
@@ -80,17 +82,30 @@ shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
 
     if (MathHelper::GetBits(opcode, 10, 6) == 17) // SpecialDataProc and Branch
     {
-        // if (MathHelper::GetBits(opcode, 8, 2) == 3)
-        //     return shared_ptr<Instruction>(new Thumb::BranchExchangeInstruction(opcode));
+        if (MathHelper::GetBits(opcode, 8, 2) == 3)
+            return shared_ptr<Instruction>(new Thumb::BranchExchangeInstruction(opcode));
 
         return shared_ptr<Instruction>(new Thumb::SpecialDataProcessingInstruction(opcode));
     }
 
-    // if (MathHelper::GetBits(opcode, 11, 5) == 9) // LDR literal store
-    //     return shared_ptr<Instruction>(new Thumb::LoadFromLiteralStoreInstruction(opcode));
+    if (MathHelper::GetBits(opcode, 11, 5) == 9) // LDR literal store
+        return shared_ptr<Instruction>(new Thumb::LoadFromLiteralStoreInstruction(opcode));
 
-    // if (MathHelper::GetBits(opcode, 12, 4) == 5) // Load/Store register offset
-    //     return shared_ptr<Instruction>(new Thumb::LoadStoreRegisterInstruction(opcode));
+    if (MathHelper::GetBits(opcode, 12, 4) == 5) // Load/Store Register
+        return shared_ptr<Instruction>(new Thumb::LoadStoreRegisterOffsetInstruction(opcode));
+
+    if (MathHelper::GetBits(opcode, 13, 3) == 3 // Load/Store Word/Byte Immediate
+        || MathHelper::GetBits(opcode, 12, 4) == 8) // Load Store Halfword Immediate
+        return shared_ptr<Instruction>(new Thumb::LoadStoreImmediateInstruction(opcode));
+
+    if (MathHelper::GetBits(opcode, 12, 4) == 9) // Load/Store to/from stack
+        return shared_ptr<Instruction>(new Thumb::LoadStoreStackInstruction(opcode));
+
+    if (MathHelper::GetBits(opcode, 12, 4) == 11) // Misc.
+        return shared_ptr<Instruction>(nullptr); // NYI
+
+    if (MathHelper::GetBits(opcode, 12, 4) == 12) // Load/Store Multiple
+        return shared_ptr<Instruction>(new Thumb::LoadStoreMultipleInstruction(opcode));
 
     return shared_ptr<Instruction>(nullptr);
 }

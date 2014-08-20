@@ -4,6 +4,7 @@
 #include "Instruction.hpp"
 #include "Common/Utilities.hpp"
 #include <cstdint>
+#include <memory>
 
 namespace Thumb
 {
@@ -16,8 +17,8 @@ namespace Thumb
         ADD_2,
         ADD_3,
         ADD_4,
-        ADD_5,
-        ADD_6,
+        ADD_SP,
+        ADD_PC,
         ADD_7,
         AND,
         ASR_1,
@@ -101,4 +102,58 @@ public:
     
     virtual bool IsImmediate() const override { return false; }
 };
+
+/*namespace std
+{
+    template<> class shared_ptr<::ThumbInstruction> : public __shared_ptr<::ThumbInstruction>
+    {
+    public:
+        template<typename _Derived>
+        explicit shared_ptr(_Derived* instance) :
+            __shared_ptr(static_cast<::ThumbInstruction*>(instance))
+        {
+            static_assert(!std::is_same<_Derived, ::ThumbInstruction>::value, "Can't construct the pointer with the same class");
+        }
+
+        template<typename _Derived, typename _Deleter>
+        shared_ptr(_Derived* __p, _Deleter __d) :
+            __shared_ptr<::ThumbInstruction>(__p, __d)
+        {
+            static_assert(!std::is_same<_Derived, ::ThumbInstruction>::value, "Can't construct the pointer with the same class");
+        }
+
+        template<typename _Deleter>
+        shared_ptr(nullptr_t __p, _Deleter __d) : __shared_ptr<::ThumbInstruction>(__p, __d) { }
+
+        template<typename _Tp1, typename _Deleter, typename _Alloc>
+        shared_ptr(_Tp1* __p, _Deleter __d, _Alloc __a)
+            : __shared_ptr<::ThumbInstruction>(__p, __d, std::move(__a))
+        {
+            static_assert(!std::is_same<_Tp1, ::ThumbInstruction>::value, "Can't construct the pointer with the same class");
+        }
+
+        template<typename _Deleter, typename _Alloc>
+        shared_ptr(nullptr_t __p, _Deleter __d, _Alloc __a)
+            : __shared_ptr<::ThumbInstruction>(__p, __d, std::move(__a)) { }
+
+        template <class _Derived>
+        operator std::shared_ptr<_Derived> () const
+        {
+            return To<_Derived>();
+        }
+
+        ::ThumbInstruction* get() const { return this->__shared_ptr<::ThumbInstruction>::get(); }
+
+        ::ThumbInstruction operator*() { return this->__shared_ptr<::ThumbInstruction>::operator*(); }
+        ::ThumbInstruction* operator->() { return this->__shared_ptr<::ThumbInstruction>::operator->(); }
+
+    private:
+        template<class _Derived> std::shared_ptr<_Derived> To() const
+        {
+            static_assert(std::is_base_of<::ThumbInstruction, _Derived>::value, "Cast type is not inheriting from the base class.");
+            return std::static_pointer_cast<_Derived>(*this);
+        }
+    };
+}*/
+
 #endif

@@ -25,4 +25,5 @@ public:
 protected:
     uint32_t _instruction;
 };
+
 #endif

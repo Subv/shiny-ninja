@@ -70,8 +70,19 @@ namespace Thumb
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 
-        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 3); }
-        uint32_t GetFirstDataRegister() const { return MathHelper::GetBits(_instruction, 3, 3); }
+        uint32_t GetDestinationRegister() const
+        {
+            if (HiOperandFlagDestination())
+                return 8 + MathHelper::GetBits(_instruction, 0, 3);
+            return MathHelper::GetBits(_instruction, 0, 3);
+        }
+
+        uint32_t GetFirstDataRegister() const
+        {
+            if (HiOperandFlagSource())
+                return 8 + MathHelper::GetBits(_instruction, 3, 3);
+            return MathHelper::GetBits(_instruction, 3, 3);
+        }
 
         bool HiOperandFlagSource() const { return MathHelper::CheckBit(_instruction, 6); }
         bool HiOperandFlagDestination() const { return MathHelper::CheckBit(_instruction, 7); }
