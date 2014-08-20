@@ -64,7 +64,7 @@ std::string Thumb::LoadStoreStackInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
-    stream << ", SP, #" << std::hex << std::uppercase << GetImmediate();
+    stream << ", SP, #" << std::hex << std::uppercase << GetRelativeOffset();
     return stream.str();
 }
 

@@ -74,6 +74,8 @@ namespace Thumb
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 
+        bool IsLoad() const { return MathHelper::CheckBit(_instruction, 11); }
+
         uint32_t GetRegister() const { return MathHelper::GetBits(_instruction, 8, 3); }
         uint32_t GetRegisterList() const { return MathHelper::GetBits(_instruction, 0, 8); }
     };
