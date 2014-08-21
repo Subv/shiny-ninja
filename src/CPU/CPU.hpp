@@ -7,7 +7,10 @@
 
 #include <atomic>
 #include <cstdio>
+#include <cstdint>
 #include <array>
+#include <memory>
+#include <functional>
 
 struct GBAHeader;
 
@@ -68,6 +71,60 @@ enum class InstructionCallbackTypes
     InstructionExecuted
 };
 
+#pragma pack(push, 1)
+typedef struct Bit
+{
+    uint8_t bit : 1;
+
+    operator bool() const { return bit == 1; }
+    operator int() const { return int(bit); }
+    operator uint32_t() const { return uint32_t(bit); }
+    operator int32_t() const { return int32_t(bit); }
+    operator uint8_t() const { return uint8_t(bit); }
+
+    bool operator == (const uint32_t& r) { return operator uint32_t() == r; }
+
+private:
+    friend class GeneralPurposeRegister;
+    uint8_t operator = (uint32_t value)
+    {
+        bit = value == 1;
+        return bit;
+    }
+} GeneralPurposeRegisterBit;
+#pragma pack(pop)
+
+struct GeneralPurposeRegister
+{
+    GeneralPurposeRegisterBit Bits[32];
+    int32_t Full;
+
+    operator int32_t() const { return uint32_t(Full); }
+    operator int32_t&() { return Full; }
+
+    GeneralPurposeRegisterBit operator[](uint32_t i)
+    {
+        return Bits[31 - i];
+    }
+
+    void SetBit(uint8_t bitIndex, bool enabled)
+    {
+        Bits[31 - bitIndex] = enabled ? 1 : 0;
+        if (enabled)
+            Full |= 1 << bitIndex;
+        else
+            Full &= ~(1 << bitIndex);
+    }
+
+    int32_t operator = (uint32_t val)
+    {
+        Full = val;
+        for (uint8_t i = 0; i < 32; ++i)
+            Bits[31 - i] = (val & (1 << i)) != 0;
+        return Full;
+    }
+};
+
 // We have to provide a std::hash specialization for this enum if we want to use it in an unordered_map
 namespace std
 {
@@ -102,14 +159,14 @@ enum BitMaskConstants
 
 struct CPUState
 {
-    std::array<int32_t, 16> Registers;
+    std::array<GeneralPurposeRegister, 16> Registers;
 
     // Banked registers
-    std::array<int32_t, 7> Registers_FIQ; // Contains R8-R14 for the FIQ mode
-    std::array<int32_t, 2> Registers_svc; // Contains R13-R14 for the Supervisor mode
-    std::array<int32_t, 2> Registers_abt; // Contains R13-R14 for the Abort mode
-    std::array<int32_t, 2> Registers_IRQ; // Contains R13-R14 for the IRQ mode
-    std::array<int32_t, 2> Registers_und; // Contains R13-R14 for the Undefined mode
+    std::array<GeneralPurposeRegister, 7> Registers_FIQ; // Contains R8-R14 for the FIQ mode
+    std::array<GeneralPurposeRegister, 2> Registers_svc; // Contains R13-R14 for the Supervisor mode
+    std::array<GeneralPurposeRegister, 2> Registers_abt; // Contains R13-R14 for the Abort mode
+    std::array<GeneralPurposeRegister, 2> Registers_IRQ; // Contains R13-R14 for the IRQ mode
+    std::array<GeneralPurposeRegister, 2> Registers_und; // Contains R13-R14 for the Undefined mode
 
     ProgramStatusRegisters CPSR; // Current Program Status Register
     ProgramStatusRegisters SPSR[5]; // Saved Program Status Register, there is one per mode except in System/User mode
@@ -126,8 +183,8 @@ public:
 
     bool ConditionPasses(InstructionCondition condition);
 
-    int32_t& GetRegister(uint8_t reg);
-    int32_t& GetRegisterForMode(CPUMode mode, uint8_t reg);
+    GeneralPurposeRegister& GetRegister(uint8_t reg);
+    GeneralPurposeRegister& GetRegisterForMode(CPUMode mode, uint8_t reg);
 
     InstructionSet GetCurrentInstructionSet() const { return InstructionSet(_state.CPSR.Flags.T); }
     void SetInstructionSet(InstructionSet set) { _state.CPSR.Flags.T = uint8_t(set); }

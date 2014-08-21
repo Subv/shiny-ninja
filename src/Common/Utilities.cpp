@@ -6,9 +6,9 @@ void Utilities::Assert(bool condition, const char* message)
 {
     if (!condition)
     {
-        std::cerr << message << std::endl;
-        std::cin.get();
-        std::terminate();
+        std::cerr << std::endl << "ASSERTION FAILURE:" << std::endl;
+        std::cerr << " --> what(): " << message << std::endl << std::endl;
+        std::exit(EXIT_FAILURE);
     }
 }
 

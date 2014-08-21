@@ -20,6 +20,83 @@ namespace Thumb
 
         uint32_t GetTargetAddressRegister() const { return MathHelper::GetBits(_instruction, 3, 4); }
     };
+
+    class BranchInstruction : public ThumbInstruction
+    {
+    public:
+        BranchInstruction(uint16_t op, bool isConditional) : ThumbInstruction(op),
+            _conditional(isConditional) { }
+
+        uint32_t GetOpcode() const override;
+        std::string ToString() const override;
+
+        bool IsConditionalBranch() const { return _conditional; }
+
+        uint32_t GetCondition() const
+        {
+            Utilities::Assert(!IsConditionalBranch(), "Thumb::BranchInstruction: Condition cannot be gotten if unconditional!");
+            return MathHelper::GetBits(_instruction, 8, 4);
+        }
+
+        uint32_t GetImmediate() const
+        {
+            if (IsConditionalBranch())
+                return MathHelper::GetBits(_instruction, 0, 8);
+            return MathHelper::GetBits(_instruction, 0, 10);
+        }
+
+        int32_t GetBranchOffset() const
+        {
+            return int32_t(GetImmediate() << 1);
+        }
+
+    private:
+        bool _conditional;
+    };
+
+    class LongBranchLinkInstruction : public ThumbInstruction
+    {
+    public:
+        LongBranchLinkInstruction(uint16_t opcode) : ThumbInstruction(opcode) { }
+
+        bool IsTriggeringSubroutineCall() const
+        {
+            // To allow for a reasonably large offset to the target subroutine,
+            // the BL (or BLX) instruction is automatically translated by the
+            // assembler into a sequence of two 16-bit Thumb instructions:
+            // - The first Thumb instruction has H == 0b10 and supplies the high part
+            //   of the branch offset. This instruction sets up for the subroutine
+            //   call (and is shared between the BL and BLX forms).
+            // - The second Thumb instruction has H == 0b11 (for BL) (or H == 0b01 (for BLX)).
+            //   It supplies the low part of the branch offset and causes the subroutine
+            //   call to take place.
+            // H can only be 0b01 (BLX) on ARMv5T and above. So this is always a BL.
+            return MathHelper::CheckBit(_instruction, 11);
+        }
+
+        uint32_t GetOpcode() const override
+        {
+            if (MathHelper::CheckBits(_instruction, 11, 2, 2))
+                return ThumbOpcodes::BL;
+            return MathHelper::CheckBit(_instruction, 12) ? ThumbOpcodes::BL : ThumbOpcodes::BLX_1;
+        }
+        std::string ToString() const override;
+
+        uint32_t GetOffset() const
+        {
+            /*
+             * TODO: This needs to access LR register...
+             * if H == 10 then
+             *    LR = PC + (SignExtend(offset_11) << 12)
+             * else if H == 11 then
+             *    PC = LR + (offset_11 << 1)
+             *    LR = (address of next instruction) | 1
+             * else if (ARMv5T case, H == 01, ignored)
+             */
+
+            return MathHelper::GetBits(_instruction, 0, 11);
+        }
+    };
 }
 
 #endif // THUMB_BX_INSTR_H

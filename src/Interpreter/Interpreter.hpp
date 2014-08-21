@@ -27,6 +27,11 @@ public:
     void HandleARMMiscellaneousLoadStoreInstruction(std::shared_ptr<ARMInstruction> instruction);
     void HandleARMPSROperationInstruction(std::shared_ptr<ARMInstruction> instruction);
 
+    // Thumb Instruction handlers
+    void HandleThumbStackOperationInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbImmediateShiftInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbAddSubImmRegInstruction(std::shared_ptr<ThumbInstruction> instruction);
+
 private:
     CPU* _cpu;
     std::unordered_map<ARM::ARMOpcodes, std::function<void(std::shared_ptr<ARMInstruction>)>, std::hash<int>> _armHandlers;

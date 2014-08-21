@@ -8,6 +8,7 @@
 #include "Common/Instructions/Thumb/DataProcessingInstructions.hpp"
 #include "Common/Instructions/Thumb/BranchExchangeInstruction.hpp"
 #include "Common/Instructions/Thumb/LoadStoreInstructions.hpp"
+#include "Common/Instructions/Thumb/MiscInstructions.hpp"
 
 #include "Common/MathHelper.hpp"
 
@@ -102,10 +103,35 @@ shared_ptr<Instruction> Decoder::DecodeThumb(uint16_t opcode)
         return shared_ptr<Instruction>(new Thumb::LoadStoreStackInstruction(opcode));
 
     if (MathHelper::GetBits(opcode, 12, 4) == 11) // Misc.
-        return shared_ptr<Instruction>(nullptr); // NYI
+    {
+        if (MathHelper::GetBits(opcode, 8, 4) == 0) // Adjust stack pointer
+            return shared_ptr<Instruction>(nullptr); // NYI
+
+        if (MathHelper::GetBits(opcode, 9, 2) == 2) // Push/pop registers list
+            return shared_ptr<Instruction>(new Thumb::StackOperation(opcode));
+    }
 
     if (MathHelper::GetBits(opcode, 12, 4) == 12) // Load/Store Multiple
         return shared_ptr<Instruction>(new Thumb::LoadStoreMultipleInstruction(opcode));
+
+    if (MathHelper::GetBits(opcode, 12, 4) == 13) // Conditional Branch, Undefined and Soft. int.
+    {
+        if (MathHelper::GetBits(opcode, 8, 4) == 14) // Undefined Instruction
+            return shared_ptr<Instruction>(nullptr); // NYI
+
+        if (MathHelper::GetBits(opcode, 8, 4) == 15) // Software Interrupt
+            return shared_ptr<Instruction>(nullptr); // NYI
+
+        // Conditional Branch
+        return shared_ptr<Instruction>(new Thumb::BranchInstruction(opcode, true));
+    }
+
+    if (MathHelper::GetBits(opcode, 11, 5) == 28) // Unconditional Branch
+        return shared_ptr<Instruction>(new Thumb::BranchInstruction(opcode, false));
+
+    if (MathHelper::GetBits(opcode, 11, 5) == 30 || // BL prefix
+        MathHelper::GetBits(opcode, 11, 5) == 31)   // BL suffix
+        return shared_ptr<Instruction>(new Thumb::LongBranchLinkInstruction(opcode));
 
     return shared_ptr<Instruction>(nullptr);
 }

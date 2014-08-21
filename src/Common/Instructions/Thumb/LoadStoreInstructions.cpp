@@ -84,7 +84,7 @@ std::string Thumb::LoadStoreMultipleInstruction::ToString() const
     {
         if (registersMask & (1 << i) == 0)
             continue;
-        stream << "R" << i;
+        stream << "R" << +i;
         if (i < 7)
             stream << ", ";
     }

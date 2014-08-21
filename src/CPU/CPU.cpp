@@ -62,7 +62,7 @@ void CPU::LoadROM(GBAHeader& header, FILE* rom)
     _memory->LoadROM(header, rom);
 }
 
-int32_t& CPU::GetRegister(uint8_t reg)
+GeneralPurposeRegister& CPU::GetRegister(uint8_t reg)
 {
     return GetRegisterForMode(GetCurrentCPUMode(), reg);
 }
@@ -97,7 +97,7 @@ void CPU::ExecuteInstructionCallback(InstructionCallbackTypes type, std::shared_
         handler->second(instruction);
 }
 
-int32_t& CPU::GetRegisterForMode(CPUMode mode, uint8_t reg)
+GeneralPurposeRegister& CPU::GetRegisterForMode(CPUMode mode, uint8_t reg)
 {
     Utilities::Assert(reg <= PC, "Trying to access invalid register");
 

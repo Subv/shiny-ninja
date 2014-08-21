@@ -19,8 +19,8 @@ std::string Thumb::ToString(uint32_t opcode)
         case ThumbOpcodes::ASR_1:
         case ThumbOpcodes::ASR_2:
             return "ASR";
-        case ThumbOpcodes::B_1:
-        case ThumbOpcodes::B_2:
+        case ThumbOpcodes::B_CONDITIONAL:
+        case ThumbOpcodes::B_UNCONDITIONAL:
             return "B";
         case ThumbOpcodes::BIC:
             return "BIC";

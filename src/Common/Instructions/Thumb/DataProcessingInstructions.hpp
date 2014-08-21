@@ -72,16 +72,12 @@ namespace Thumb
 
         uint32_t GetDestinationRegister() const
         {
-            if (HiOperandFlagDestination())
-                return 8 + MathHelper::GetBits(_instruction, 0, 3);
-            return MathHelper::GetBits(_instruction, 0, 3);
+            return (HiOperandFlagDestination() << 3) | MathHelper::GetBits(_instruction, 0, 3);
         }
 
         uint32_t GetFirstDataRegister() const
         {
-            if (HiOperandFlagSource())
-                return 8 + MathHelper::GetBits(_instruction, 3, 3);
-            return MathHelper::GetBits(_instruction, 3, 3);
+            return (HiOperandFlagSource() << 3) | MathHelper::GetBits(_instruction, 3, 3);
         }
 
         bool HiOperandFlagSource() const { return MathHelper::CheckBit(_instruction, 6); }

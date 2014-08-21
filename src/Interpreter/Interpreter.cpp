@@ -10,8 +10,13 @@
 #include "Common/Instructions/ARM/LoadStoreInstructions.hpp"
 #include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
 
+#include "Common/Instructions/Thumb/MiscInstructions.hpp"
+#include "Common/Instructions/Thumb/DataProcessingInstructions.hpp"
+
 #include "Common/MathHelper.hpp"
 #include "Common/Utilities.hpp"
+
+#include <bitset>
 
 Interpreter::Interpreter(CPU* arm)  : _cpu(arm)
 {
@@ -98,7 +103,20 @@ void Interpreter::InitializeArm()
 
 void Interpreter::InitializeThumb()
 {
-    
+    // Stack operations
+    _thumbHandlers[Thumb::ThumbOpcodes::PUSH] = std::bind(&Interpreter::HandleThumbStackOperationInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::POP] = std::bind(&Interpreter::HandleThumbStackOperationInstruction, this, std::placeholders::_1);
+
+    // Immediate Shift operations
+    _thumbHandlers[Thumb::ThumbOpcodes::LSL_1] = std::bind(&Interpreter::HandleThumbImmediateShiftInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::LSR_1] = std::bind(&Interpreter::HandleThumbImmediateShiftInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::ASR_1] = std::bind(&Interpreter::HandleThumbImmediateShiftInstruction, this, std::placeholders::_1);
+
+    // Add/Substract Register/Immediate operations
+    _thumbHandlers[Thumb::ThumbOpcodes::ADD_1] = std::bind(&Interpreter::HandleThumbAddSubImmRegInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::ADD_3] = std::bind(&Interpreter::HandleThumbAddSubImmRegInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::SUB_1] = std::bind(&Interpreter::HandleThumbAddSubImmRegInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::SUB_3] = std::bind(&Interpreter::HandleThumbAddSubImmRegInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)
@@ -549,3 +567,127 @@ void Interpreter::HandleARMPSROperationInstruction(std::shared_ptr<ARMInstructio
     }
 }
 
+void Interpreter::HandleThumbStackOperationInstruction(std::shared_ptr<ThumbInstruction> instruction)
+{
+    auto stackOperation = std::static_pointer_cast<Thumb::StackOperation>(instruction);
+
+    std::bitset<9> registersSet = stackOperation->GetRegisterMask();
+    if (stackOperation->IsPopOperand())
+    {
+        // MemoryAccess(B-bit, E-bit)
+        uint32_t startAddress = _cpu->GetRegister(SP);
+        uint32_t endAddress = startAddress + 4 * registersSet.count();
+        uint32_t address = startAddress;
+
+        for (uint8_t i = 0; i < 8; ++i)
+        {
+            if (!registersSet.test(i))
+                continue;
+            _cpu->GetRegister(i) = _cpu->GetMemory()->ReadUInt32(address);
+            address += 4;
+        }
+
+        if (registersSet.test(8))
+        {
+            uint32_t value = _cpu->GetMemory()->ReadUInt32(address);
+            _cpu->GetRegister(PC) = value & 0xFFFFFFFE;
+            // if (arch v5 or above) // Halp, subv, i'm confused as to what version we use
+            //     CPSR.T = value[0];
+            address += 4;
+        }
+
+        Utilities::Assert(endAddress == address, "");
+        _cpu->GetRegister(SP) = endAddress;
+    }
+    else
+    {
+        uint32_t startAddress = _cpu->GetRegister(SP) - 4 * registersSet.count();
+        uint32_t endAddress = _cpu->GetRegister(SP) - 4;
+        uint32_t address = startAddress;
+        for (uint8_t i = 0; i < 8; ++i)
+        {
+            if (!registersSet.test(i))
+                continue;
+             _cpu->GetMemory()->WriteUInt32(address, _cpu->GetRegister(i));
+            address += 4;
+        }
+
+        if (registersSet.test(8))
+        {
+            _cpu->GetMemory()->WriteUInt32(address, _cpu->GetRegister(LR));
+            address += 4;
+        }
+
+        Utilities::Assert(endAddress == address - 4, "");
+        _cpu->GetRegister(SP) = startAddress;
+        // Same as POP
+        // if (CP15_reg1_Ubit == 1) /* ARMv6 */
+        //   if Shared(address then /* from ARMv6 */
+        //     physical_address = TLB(address
+        //     ClearExclusiveByAddress(physical_address, size)
+    }
+}
+
+void Interpreter::HandleThumbImmediateShiftInstruction(std::shared_ptr<ThumbInstruction> instruction)
+{
+    auto shiftInstr = std::static_pointer_cast<Thumb::ImmediateShiftInstruction>(instruction);
+
+    GeneralPurposeRegister& Rm = _cpu->GetRegister(shiftInstr->GetSourceRegister());
+    GeneralPurposeRegister& Rd = _cpu->GetRegister(shiftInstr->GetDestinationRegister());
+    uint32_t Imm = shiftInstr->GetOffset();
+
+    switch (shiftInstr->GetOpcode())
+    {
+        case Thumb::ThumbOpcodes::LSL_1:
+        {
+            Rd = Rm << Imm;
+            if (shiftInstr->GetOffset() != 0)
+                _cpu->GetCurrentStatusRegister().Flags.C = Rm[32 - Imm];
+            break;
+        }
+        case Thumb::ThumbOpcodes::LSR_1:
+        {
+            _cpu->GetCurrentStatusRegister().Flags.C = Rm[Imm == 0 ? 31 : (Imm - 1)];
+            if (Imm == 0)
+                Rd = 0;
+            else
+                Rd = Rm << Imm;
+            break;
+        }
+        case Thumb::ThumbOpcodes::ASR_1:
+        {
+            _cpu->GetCurrentStatusRegister().Flags.C = Rm[Imm == 0 ? 31 : (Imm - 1)];
+            if (Imm == 0)
+                Rd = (Rm[31] ? 0 : 0xFFFFFFFF);
+            else
+                Rd = int32_t(Rm) >> 5;
+            break;
+        }
+    }
+    _cpu->GetCurrentStatusRegister().Flags.N = Rd[31];
+    _cpu->GetCurrentStatusRegister().Flags.Z = Rd != 0;
+}
+
+void Interpreter::HandleThumbAddSubImmRegInstruction(std::shared_ptr<ThumbInstruction> instruction)
+{
+    auto instr = std::static_pointer_cast<Thumb::AddSubInstruction>(instruction);
+    GeneralPurposeRegister& Rd = _cpu->GetRegister(instr->GetDestinationRegister());
+    GeneralPurposeRegister& Rn = _cpu->GetRegister(instr->GetSourceRegister());
+    switch (instr->GetOpcode())
+    {
+        case Thumb::ThumbOpcodes::ADD_1:
+        case Thumb::ThumbOpcodes::ADD_3:
+            Rd = Rn + (instr->IsImmediate() ? instr->GetThirdOperand() : _cpu->GetRegister(instr->GetThirdOperand()));
+            // V Flag = OverflowFrom(Rn + immed_3) | CarryFrom(Rn + Rm)
+            // C Flag = CarryFrom(Rn + immed_3) | OverflowFrom(Rn + Rm)
+            break;
+        case Thumb::ThumbOpcodes::SUB_1:
+        case Thumb::ThumbOpcodes::SUB_3:
+            Rd = Rn - (instr->IsImmediate() ? instr->GetThirdOperand() : _cpu->GetRegister(instr->GetThirdOperand()));
+            // C Flag = NOT BorrowFrom(Rn - immed_3) | NOT BorrowFrom(Rn - Rm)
+            // V Flag = OverflowFrom(Rn - immed_3) | OverflowFrom(Rn - Rm)
+
+    }
+    _cpu->GetCurrentStatusRegister().Flags.N = Rd[31];
+    _cpu->GetCurrentStatusRegister().Flags.N = Rd != 0;
+}

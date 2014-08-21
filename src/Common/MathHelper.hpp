@@ -37,5 +37,12 @@ namespace MathHelper
         static_assert(std::is_arithmetic<T>::value, "T must be a numeric type");
         return value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max();
     }
+
+    template<typename T>
+    inline bool BorrowFrom(int64_t left, int64_t right)
+    {
+        static_assert(std::is_arithmetic<T>::value, "T must be a numeric type");
+        return int64_t(left) - int64_t(right) < 0;
+    }
 }
 #endif

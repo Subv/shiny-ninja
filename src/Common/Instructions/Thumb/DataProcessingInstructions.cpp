@@ -36,8 +36,8 @@ std::string Thumb::AddSubInstruction::ToString() const
 uint32_t Thumb::AddSubInstruction::GetOpcode() const
 {
     if (!MathHelper::CheckBit(_instruction, 9))
-        return ThumbOpcodes::ADD_1;
-    return ThumbOpcodes::SUB_1;
+        return IsImmediate() ? ThumbOpcodes::ADD_1 : ThumbOpcodes::ADD_3;
+    return IsImmediate() ? ThumbOpcodes::SUB_1 : ThumbOpcodes::SUB_3;
 }
 
 std::string Thumb::AddSubCmpMovImmInstruction::ToString() const
