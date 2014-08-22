@@ -26,6 +26,7 @@ public:
     void HandleARMLoadStoreInstruction(std::shared_ptr<ARMInstruction> instruction);
     void HandleARMMiscellaneousLoadStoreInstruction(std::shared_ptr<ARMInstruction> instruction);
     void HandleARMPSROperationInstruction(std::shared_ptr<ARMInstruction> instruction);
+    void HandleARMMultiplyInstruction(std::shared_ptr<ARMInstruction> instruction);
 
     // Thumb Instruction handlers
     void HandleThumbStackOperationInstruction(std::shared_ptr<ThumbInstruction> instruction);

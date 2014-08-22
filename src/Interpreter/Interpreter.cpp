@@ -9,6 +9,7 @@
 #include "Common/Instructions/ARM/DataProcessingInstructions.hpp"
 #include "Common/Instructions/ARM/LoadStoreInstructions.hpp"
 #include "Common/Instructions/ARM/PSRTransferInstructions.hpp"
+#include "Common/Instructions/ARM/MultiplyAccumulateInstructions.hpp"
 
 #include "Common/Instructions/Thumb/MiscInstructions.hpp"
 #include "Common/Instructions/Thumb/DataProcessingInstructions.hpp"
@@ -99,6 +100,10 @@ void Interpreter::InitializeArm()
     // PSR Operations
     _armHandlers[ARM::ARMOpcodes::MRS] = std::bind(&Interpreter::HandleARMPSROperationInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::MSR] = std::bind(&Interpreter::HandleARMPSROperationInstruction, this, std::placeholders::_1);
+
+    // Multiply and Multiply Accumulate
+    _armHandlers[ARM::ARMOpcodes::MUL] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::MLA] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::InitializeThumb()
@@ -690,4 +695,27 @@ void Interpreter::HandleThumbAddSubImmRegInstruction(std::shared_ptr<ThumbInstru
     }
     _cpu->GetCurrentStatusRegister().Flags.N = Rd[31];
     _cpu->GetCurrentStatusRegister().Flags.N = Rd != 0;
+}
+
+void Interpreter::HandleARMMultiplyInstruction(std::shared_ptr<ARMInstruction> instruction)
+{
+    auto mul = std::static_pointer_cast<ARM::MultiplyAccumulateInstruction>(instruction);
+    GeneralPurposeRegister& firstOp = _cpu->GetRegister(mul->GetFirstOperand());
+    GeneralPurposeRegister& secondOp = _cpu->GetRegister(mul->GetSecondOperand());
+    
+    int64_t result = firstOp * secondOp;
+    
+    if (mul->GetOpcode() == ARM::ARMOpcodes::MLA)
+        result += _cpu->GetRegister(mul->GetThirdOperand());
+
+    int32_t lower = MathHelper::GetBits(result, 0, 32);
+
+    _cpu->GetRegister(mul->GetDestinationRegister()) = lower;
+
+    if (mul->SetConditionCodes())
+    {
+        _cpu->GetCurrentStatusFlags().Z = lower == 0;
+        _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(lower, 31);
+        // The Carry flag should be now be UNPREDICTABLE, but we do not handle that.
+    }
 }
