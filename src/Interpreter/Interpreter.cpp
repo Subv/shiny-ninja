@@ -44,7 +44,10 @@ void Interpreter::HandleARM(std::shared_ptr<ARMInstruction> instruction)
 
 void Interpreter::HandleThumb(std::shared_ptr<ThumbInstruction> instruction)
 {
+    auto handler = _thumbHandlers.find(Thumb::ThumbOpcodes(instruction->GetOpcode()));
 
+    if (handler != _thumbHandlers.end())
+        handler->second(instruction);
 }
 
 void Interpreter::InitializeHandlers()
@@ -708,7 +711,7 @@ void Interpreter::HandleARMMultiplyInstruction(std::shared_ptr<ARMInstruction> i
     if (mul->GetOpcode() == ARM::ARMOpcodes::MLA)
         result += _cpu->GetRegister(mul->GetThirdOperand());
 
-    int32_t lower = MathHelper::GetBits(result, 0, 32);
+    int32_t lower = int32_t(MathHelper::GetBits(result, 0, 32));
 
     _cpu->GetRegister(mul->GetDestinationRegister()) = lower;
 
