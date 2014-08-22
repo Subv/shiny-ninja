@@ -72,12 +72,11 @@ enum class InstructionCallbackTypes
 };
 
 #pragma pack(push, 1)
-typedef struct Bit
+struct GeneralPurposeRegisterBit
 {
     uint8_t bit : 1;
 
     operator bool() const { return bit == 1; }
-    operator int() const { return int(bit); }
     operator uint32_t() const { return uint32_t(bit); }
     operator int32_t() const { return int32_t(bit); }
     operator uint8_t() const { return uint8_t(bit); }
@@ -85,13 +84,13 @@ typedef struct Bit
     bool operator == (const uint32_t& r) { return operator uint32_t() == r; }
 
 private:
-    friend class GeneralPurposeRegister;
+    friend struct GeneralPurposeRegister;
     uint8_t operator = (uint32_t value)
     {
         bit = value == 1;
         return bit;
     }
-} GeneralPurposeRegisterBit;
+};
 #pragma pack(pop)
 
 struct GeneralPurposeRegister

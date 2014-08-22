@@ -16,7 +16,7 @@ namespace Thumb
         bool IsImmediate() const override { return true; }
 
         uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 8, 3); }
-        uint32_t GetImmediate() const { return MathHelper::GetBits(_instruction, 0, 8); }
+        uint32_t GetImmediate() const { return MathHelper::GetBits(_instruction, 0, 8) << 2; }
     };
 
     class LoadStoreRegisterOffsetInstruction : public ThumbInstruction
