@@ -62,6 +62,8 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
     // We group the LDR/STR and LDM/STM instructions in a single class
     if (MathHelper::CheckBits(opcode, 26, 2, 1) || MathHelper::CheckBits(opcode, 26, 2, 2))
         return shared_ptr<Instruction>(new ARM::LoadStoreInstruction(opcode));
+    if (MathHelper::CheckBits(opcode, 25, 3, 4)) // LDM/STR
+        return shared_ptr<Instruction>(new ARM::LoadStoreInstruction(opcode));
 
     return shared_ptr<Instruction>(nullptr);
 }

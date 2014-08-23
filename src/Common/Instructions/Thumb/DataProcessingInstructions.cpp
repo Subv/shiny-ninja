@@ -104,11 +104,17 @@ uint32_t Thumb::SpecialDataProcessingInstruction::GetOpcode() const
 {
     switch (MathHelper::GetBits(_instruction, 8, 2))
     {
-        case 0: return ThumbOpcodes::ADD_4;
-        case 1: return ThumbOpcodes::CMP_3;
-        case 2: return ThumbOpcodes::MOV_3;
+        case 0:
+            return ThumbOpcodes::ADD_4;
+        case 1:
+            return ThumbOpcodes::CMP_3;
+        case 2:
+            return ThumbOpcodes::MOV_3;
+        default:
+            break;
     }
     Utilities::Assert(false, "SpecialDataProcessInstructions: Opcode 3 should be handled by BX instructions!");
+    return 0;
 }
 
 

@@ -107,6 +107,12 @@ uint32_t ARM::LoadStoreInstruction::GetOpcode() const
         return IsUnsignedByte() ? ARMOpcodes::STRB : ARMOpcodes::STR;
 }
 
+uint16_t ARM::LoadStoreInstruction::GetRegistersList() const
+{
+    Utilities::Assert(IsMultiple(), "Instruction must be LDM or STM");
+    return MathHelper::GetBits(_instruction, 0, 16);
+}
+
 uint32_t ARM::MiscellaneousLoadStoreInstruction::GetOpcode() const
 {
     bool L = MathHelper::CheckBit(_instruction, 20);

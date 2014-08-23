@@ -19,7 +19,7 @@ TODO List
     * [x] ARM.7: Multiply and Multiply-Accumulate (MUL,MLA)
     * [x] ARM.9: Single Data Transfer (LDR, STR, PLD)
     * [x] ARM.10: Halfword, Doubleword, and Signed Data Transfer
-    * [ ] ARM.11: Block Data Transfer (LDM,STM)
+    * [x] ARM.11: Block Data Transfer (LDM,STM)
     * [ ] ARM.12: Single Data Swap (SWP)
     * [ ] ARM.13: Software Interrupt (SWI)
     * [ ] ARM.14: Coprocessor Data Operations (CDP)

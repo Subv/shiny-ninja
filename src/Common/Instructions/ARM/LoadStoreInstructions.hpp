@@ -18,6 +18,7 @@ namespace ARM
         
         // Used for the LDM and STM instructions
         bool IsMultiple() const { return MathHelper::CheckBit(_instruction, 27); }
+        uint16_t GetRegistersList() const;
 
         // The Source / Destination register depending on the instruction
         uint8_t GetRegister() const { return MathHelper::GetBits(_instruction, 12, 4); }

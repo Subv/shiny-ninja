@@ -82,7 +82,7 @@ std::string Thumb::LoadStoreMultipleInstruction::ToString() const
     uint32_t registersMask = GetRegisterList();
     for (uint8_t i = 0; i < 8; ++i)
     {
-        if (registersMask & (1 << i) == 0)
+        if ((registersMask & (1 << i)) == 0)
             continue;
         stream << "R" << +i;
         if (i < 7)

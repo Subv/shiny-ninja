@@ -44,5 +44,12 @@ namespace MathHelper
         static_assert(std::is_arithmetic<T>::value, "T must be a numeric type");
         return int64_t(left) - int64_t(right) < 0;
     }
+
+    inline uint32_t NumberOfSetBits(uint32_t i)
+    {
+        i = i - ((i >> 1) & 0x55555555);
+        i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+        return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+    }
 }
 #endif

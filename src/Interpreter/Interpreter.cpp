@@ -97,8 +97,8 @@ void Interpreter::InitializeArm()
     _armHandlers[ARM::ARMOpcodes::LDRSB] = std::bind(&Interpreter::HandleARMMiscellaneousLoadStoreInstruction, this, std::placeholders::_1);
 
     // Not Yet Implemented
-    _armHandlers[ARM::ARMOpcodes::LDM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
-    _armHandlers[ARM::ARMOpcodes::STM] = std::bind(&Interpreter::HandleARMLoadStoreInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::LDM] = std::bind(&Interpreter::HandleARMLoadStoreMultipleInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::STM] = std::bind(&Interpreter::HandleARMLoadStoreMultipleInstruction, this, std::placeholders::_1);
 
     // PSR Operations
     _armHandlers[ARM::ARMOpcodes::MRS] = std::bind(&Interpreter::HandleARMPSROperationInstruction, this, std::placeholders::_1);
@@ -754,5 +754,71 @@ void Interpreter::HandleARMMultiplyInstruction(std::shared_ptr<ARMInstruction> i
             _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(lower, 31);
         }
         // The Carry flag should be now be UNPREDICTABLE, but we do not handle that.
+    }
+}
+
+void Interpreter::HandleARMLoadStoreMultipleInstruction(std::shared_ptr<ARMInstruction> instr)
+{
+    auto instruction = std::static_pointer_cast<ARM::LoadStoreInstruction>(instr);
+    
+    uint16_t registers = instruction->GetRegistersList();
+    uint32_t startAddress = 0;
+    uint32_t endAddress = 0;
+
+    // Indicates how the memory will be loaded
+    if (instruction->IsBaseAdded())
+    {
+        startAddress = _cpu->GetRegister(instruction->GetBaseRegister());
+
+        if (instruction->GetBaseRegister() == PC)
+            startAddress += 4;
+
+        endAddress = startAddress + MathHelper::NumberOfSetBits(registers) * 4;
+
+        if (!instruction->IsPreIndexed())
+            endAddress -= 4;
+        else
+            startAddress += 4;
+    }
+    else
+    {
+        endAddress = _cpu->GetRegister(instruction->GetBaseRegister());
+
+        if (instruction->GetBaseRegister() == PC)
+            endAddress += 4;
+
+        startAddress = endAddress - MathHelper::NumberOfSetBits(registers) * 4;
+
+        if (!instruction->IsPreIndexed())
+            startAddress += 4;
+        else
+            endAddress -= 4;
+    }
+
+    uint32_t currentAddress = startAddress;
+    for (uint8_t i = 0; i < 16 && currentAddress <= endAddress; ++i)
+    {
+        // If the bit is set, load the data into the register
+        if (MathHelper::CheckBit(registers, i))
+        {
+            if (instruction->IsLoad())
+                _cpu->GetRegister(i) = _cpu->GetMemory()->ReadUInt32(currentAddress);
+            else
+            {
+                uint32_t val = _cpu->GetRegister(i);
+                if (i == PC)
+                    val += 4;
+                _cpu->GetMemory()->WriteUInt32(currentAddress, val);
+            }
+            currentAddress += 4;
+        }
+    }
+
+    if (instruction->WriteBack() && _cpu->ConditionPasses(instruction->GetCondition()))
+    {
+        if (instruction->IsBaseAdded())
+            _cpu->GetRegister(instruction->GetBaseRegister()) += MathHelper::NumberOfSetBits(registers) * 4;
+        else
+            _cpu->GetRegister(instruction->GetBaseRegister()) -= MathHelper::NumberOfSetBits(registers) * 4;
     }
 }
