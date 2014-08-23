@@ -107,6 +107,10 @@ void Interpreter::InitializeArm()
     // Multiply and Multiply Accumulate
     _armHandlers[ARM::ARMOpcodes::MUL] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
     _armHandlers[ARM::ARMOpcodes::MLA] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::SMLAL] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::SMULL] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::UMLAL] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
+    _armHandlers[ARM::ARMOpcodes::UMULL] = std::bind(&Interpreter::HandleARMMultiplyInstruction, this, std::placeholders::_1);
 }
 
 void Interpreter::InitializeThumb()
@@ -317,6 +321,11 @@ void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruct
         else
         {
             // The carry depends on the value of the result for these opcodes
+
+            // For these opcodes, the Carry flag is actually a NOT(Borrow)
+            if (dataproc->GetOpcode() == ARM::ARMOpcodes::CMP || dataproc->GetOpcode() == ARM::ARMOpcodes::SUB || dataproc->GetOpcode() == ARM::ARMOpcodes::SBC || dataproc->GetOpcode() == ARM::ARMOpcodes::RSC || dataproc->GetOpcode() == ARM::ARMOpcodes::RSB)
+                _cpu->GetCurrentStatusFlags().C = result >= 0;
+
             _cpu->GetCurrentStatusFlags().C = MathHelper::CheckBit(result, 32); // Check the 32th bit of the result, it's set only if the operation had a carry
         }
 
@@ -708,17 +717,42 @@ void Interpreter::HandleARMMultiplyInstruction(std::shared_ptr<ARMInstruction> i
     
     int64_t result = firstOp * secondOp;
     
-    if (mul->GetOpcode() == ARM::ARMOpcodes::MLA)
-        result += _cpu->GetRegister(mul->GetThirdOperand());
+    if (!mul->IsSigned())
+        result = std::abs(result);
+    
+    int64_t added = 0;
 
-    int32_t lower = int32_t(MathHelper::GetBits(result, 0, 32));
+    if (mul->IsLong())
+        added = (_cpu->GetRegister(mul->GetDestinationRegisterHigh()) << 31) | _cpu->GetRegister(mul->GetDestinationRegisterLow());
+    else
+        added = _cpu->GetRegister(mul->GetThirdOperand());
+    
+    if (mul->Accumulate())
+        result += added;
 
-    _cpu->GetRegister(mul->GetDestinationRegister()) = lower;
+    uint32_t lower = MathHelper::GetBits(result, 0, 32);
+    uint32_t higher = MathHelper::GetBits(result, 32, 32);
+
+    if (!mul->IsLong())
+        _cpu->GetRegister(mul->GetDestinationRegisterHigh()) = lower;
+    else
+    {
+        _cpu->GetRegister(mul->GetDestinationRegisterLow()) = lower;
+        _cpu->GetRegister(mul->GetDestinationRegisterHigh()) = higher;
+    }
 
     if (mul->SetConditionCodes())
     {
-        _cpu->GetCurrentStatusFlags().Z = lower == 0;
-        _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(lower, 31);
+        if (mul->IsLong())
+        {
+            _cpu->GetCurrentStatusFlags().Z = lower == 0 && higher == 0;
+            _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(higher, 31);
+        }
+        else
+        {
+            _cpu->GetCurrentStatusFlags().Z = lower == 0;
+            _cpu->GetCurrentStatusFlags().N = MathHelper::CheckBit(lower, 31);
+        }
         // The Carry flag should be now be UNPREDICTABLE, but we do not handle that.
     }
 }

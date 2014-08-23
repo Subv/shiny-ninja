@@ -15,7 +15,7 @@ namespace MathHelper
 
     bool CheckBits(uint32_t value, uint8_t start, uint8_t bitCount, uint32_t check);
 
-    uint32_t GetBits(uint32_t value, uint8_t start, uint8_t bitCount);
+    uint32_t GetBits(uint64_t value, uint8_t start, uint8_t bitCount);
 
     template <typename T>
     inline T RotateLeft(T val, uint8_t moves)

@@ -16,7 +16,7 @@ TODO List
     * [x] ARM.4: Branch and Branch with Link (B, BL, BLX)
     * [x] ARM.5: Data Processing
     * [x] ARM.6: PSR Transfer (MRS, MSR)
-    * [ ] ARM.7: Multiply and Multiply-Accumulate (MUL,MLA)
+    * [x] ARM.7: Multiply and Multiply-Accumulate (MUL,MLA)
     * [x] ARM.9: Single Data Transfer (LDR, STR, PLD)
     * [x] ARM.10: Halfword, Doubleword, and Signed Data Transfer
     * [ ] ARM.11: Block Data Transfer (LDM,STM)

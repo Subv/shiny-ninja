@@ -11,21 +11,33 @@ uint8_t ARM::MultiplyAccumulateInstruction::GetThirdOperand() const
 
 uint32_t ARM::MultiplyAccumulateInstruction::GetOpcode() const
 {
-    if (MathHelper::CheckBit(_instruction, 21))
-        return ARMOpcodes::MLA;
-
-    return ARMOpcodes::MUL;
+    switch (MathHelper::GetBits(_instruction, 21, 3))
+    {
+        case 0:
+            return ARMOpcodes::MUL;
+        case 1:
+            return ARMOpcodes::MLA;
+        case 4:
+            return ARMOpcodes::UMULL;
+        case 5:
+            return ARMOpcodes::UMLAL;
+        case 6:
+            return ARMOpcodes::SMULL;
+        case 7:
+            return ARMOpcodes::SMLAL;
+        default:
+            break;
+    }
+    Utilities::Assert(false, "Unrecognized opcode in ARM::MultiplyAccumulateInstruction");
+    return 0;
 }
 
 std::string ARM::MultiplyAccumulateInstruction::ToString() const
 {
     std::stringstream opcode;
-    if (GetOpcode() == ARMOpcodes::MLA)
-        opcode << "MLA";
-    else
-        opcode << "MUL";
+    opcode << ARM::ToString(GetOpcode());
 
-    opcode << " R" << GetDestinationRegister() << ", " << GetFirstOperand() << ", " << GetSecondOperand();
+    opcode << " R" << GetDestinationRegisterHigh() << ", " << GetFirstOperand() << ", " << GetSecondOperand();
 
     if (GetOpcode() == ARMOpcodes::MLA)
         opcode << ", " << GetThirdOperand();

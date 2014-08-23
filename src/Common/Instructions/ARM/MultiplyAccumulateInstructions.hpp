@@ -11,12 +11,18 @@ namespace ARM
     public:
         MultiplyAccumulateInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
-        bool SetConditionCodes() const { return MathHelper::CheckBit(20, _instruction); }
+        bool SetConditionCodes() const { return MathHelper::CheckBit(_instruction, 20); }
 
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 
-        uint8_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 16, 4); }
+        bool IsSigned() const { return GetOpcode() == ARMOpcodes::SMLAL || GetOpcode() == ARMOpcodes::SMULL; }
+        bool Accumulate() const { return MathHelper::CheckBit(_instruction, 21); }
+        
+        bool IsLong() const { return GetOpcode() > ARMOpcodes::MLA; }
+
+        uint8_t GetDestinationRegisterHigh() const { return MathHelper::GetBits(_instruction, 16, 4); }
+        uint8_t GetDestinationRegisterLow() const { return MathHelper::GetBits(_instruction, 12, 4); }
         uint8_t GetFirstOperand() const { return MathHelper::GetBits(_instruction, 0, 4); }
         uint8_t GetSecondOperand() const { return MathHelper::GetBits(_instruction, 8, 4); }
         uint8_t GetThirdOperand() const;

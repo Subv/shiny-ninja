@@ -56,7 +56,7 @@ shared_ptr<Instruction> Decoder::DecodeARM(uint32_t opcode)
         return shared_ptr<Instruction>(new ARM::DataProcessingInstruction(opcode));
 
     // Check for multiply / multiply accumulate instructions
-    if (MathHelper::CheckBits(opcode, 22, 6, 0) && MathHelper::CheckBits(opcode, 4, 4, 9))
+    if (MathHelper::CheckBits(opcode, 24, 4, 0) && MathHelper::CheckBits(opcode, 4, 4, 9))
         return shared_ptr<Instruction>(new ARM::MultiplyAccumulateInstruction(opcode));
 
     // We group the LDR/STR and LDM/STM instructions in a single class
