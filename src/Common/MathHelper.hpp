@@ -1,6 +1,8 @@
 #ifndef MATH_HPP
 #define MATH_HPP
 
+#include "Utilities.hpp"
+
 #include <cstdint>
 #include <type_traits>
 #include <limits>
@@ -26,11 +28,29 @@ namespace MathHelper
         return (val << moves) | (val >> (sizeof(T) * CHAR_BIT - moves));
     }
 
+    //! TODO Optimize it for the compiler. This probably won't inline
+    template<>
+    inline GeneralPurposeRegister RotateLeft<GeneralPurposeRegister>(GeneralPurposeRegister val, uint8_t moves)
+    {
+        GeneralPurposeRegister reg;
+        reg.Value = (val << moves) | (val >> (32 - moves));
+        return reg;
+    }
+
     template<typename T>
     inline T RotateRight(T x, uint8_t moves)
     {
         static_assert(std::is_arithmetic<T>::value, "T must be a numeric type");
         return (x >> moves) | (x << (sizeof(T) * CHAR_BIT - moves));
+    }
+
+    //! TODO Optimize it for the compiler. This probably won't inline
+    template<>
+    inline GeneralPurposeRegister RotateRight<GeneralPurposeRegister>(GeneralPurposeRegister x, uint8_t moves)
+    {
+        GeneralPurposeRegister reg;
+        reg.Value = (x >> moves) | (x << (32 - moves));
+        return reg;
     }
 
     template<typename T>
@@ -45,18 +65,16 @@ namespace MathHelper
         return uint32_t(left) < uint32_t(right);
     }
 
+    // OK
     inline bool CarryFrom(int32_t left, int32_t right)
     {
         return uint32_t(0xFFFFFFFFU - uint32_t(left)) < uint32_t(right);
     }
 
-    template <bool isAddition>
-    inline bool OverflowFrom(int32_t left, int32_t right)
+    // OK
+    inline bool CarryFrom16(int16_t left, int16_t right)
     {
-        int32_t result = isAddition ? (left + right) : (left - right);
-        if (isAddition)
-            return ((left >= 0 && right >= 0) || (left < 0 && right < 0)) && ((left < 0 && result >= 0) || (left >= 0 && result < 0));
-        return ((left < 0 && right >= 0) || (left >= 0 && right < 0)) && ((left < 0 && result >= 0) || (left >= 0 && result < 0));
+        return uint16_t(0xFFFFU - uint16_t(left)) < uint16_t(right);
     }
 
     inline uint32_t NumberOfSetBits(uint32_t i)

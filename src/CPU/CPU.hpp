@@ -161,6 +161,7 @@ private:
     std::unique_ptr<Interpreter> _interpreter;
     std::unique_ptr<Decoder> _decoder;
     std::unique_ptr<MMU> _memory;
+    // std::shared_ptr<Instruction> _nextInstruction; // Used by prefetching
 
     // Callbacks are used to inform the UI about stuff that happens in the emulator
     std::unordered_map<InstructionCallbackTypes, std::function<void(std::shared_ptr<Instruction>)>> _instructionCallbacks;
