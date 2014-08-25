@@ -11,6 +11,7 @@
 #include <array>
 #include <memory>
 #include <functional>
+#include <bitset>
 
 struct GBAHeader;
 
@@ -71,59 +72,6 @@ enum class InstructionCallbackTypes
     InstructionExecuted
 };
 
-#pragma pack(push, 1)
-struct GeneralPurposeRegisterBit
-{
-    uint8_t bit : 1;
-
-    operator bool() const { return bit == 1; }
-    operator uint32_t() const { return uint32_t(bit); }
-    operator int32_t() const { return int32_t(bit); }
-    operator uint8_t() const { return uint8_t(bit); }
-
-    bool operator == (const uint32_t& r) { return operator uint32_t() == r; }
-
-private:
-    friend struct GeneralPurposeRegister;
-    uint8_t operator = (uint32_t value)
-    {
-        bit = value == 1;
-        return bit;
-    }
-};
-#pragma pack(pop)
-
-struct GeneralPurposeRegister
-{
-    GeneralPurposeRegisterBit Bits[32];
-    int32_t Full;
-
-    operator int32_t() const { return uint32_t(Full); }
-    operator int32_t&() { return Full; }
-
-    GeneralPurposeRegisterBit operator[](uint32_t i)
-    {
-        return Bits[31 - i];
-    }
-
-    void SetBit(uint8_t bitIndex, bool enabled)
-    {
-        Bits[31 - bitIndex] = enabled ? 1 : 0;
-        if (enabled)
-            Full |= 1 << bitIndex;
-        else
-            Full &= ~(1 << bitIndex);
-    }
-
-    int32_t operator = (uint32_t val)
-    {
-        Full = val;
-        for (uint8_t i = 0; i < 32; ++i)
-            Bits[31 - i] = (val & (1 << i)) != 0;
-        return Full;
-    }
-};
-
 // We have to provide a std::hash specialization for this enum if we want to use it in an unordered_map
 namespace std
 {
@@ -150,6 +98,8 @@ enum BitMaskConstants
     PrivMask = 0x0000000F,
     StateMask = 0x00000020
 };
+
+class GeneralPurposeRegister;
 
 // Define shorthands for the most commonly used registers
 #define SP 13

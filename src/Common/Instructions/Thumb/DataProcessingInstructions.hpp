@@ -58,8 +58,8 @@ namespace Thumb
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 
-        uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 3); }
-        uint32_t GetSourceRegister() const { return MathHelper::GetBits(_instruction, 3, 3); }
+        uint32_t GetFirstOperand() const { return MathHelper::GetBits(_instruction, 0, 3); }
+        uint32_t GetSecondOperand() const { return MathHelper::GetBits(_instruction, 3, 3); }
     };
 
     class SpecialDataProcessingInstruction : public ThumbInstruction

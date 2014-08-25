@@ -33,6 +33,15 @@ public:
     void HandleThumbStackOperationInstruction(std::shared_ptr<ThumbInstruction> instruction);
     void HandleThumbImmediateShiftInstruction(std::shared_ptr<ThumbInstruction> instruction);
     void HandleThumbAddSubImmRegInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbSpecialDataProcessingInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbBranchExchangeInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbLiteralPoolLoadInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbLoadStoreRegisterOffsetInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbLoadStoreStackInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbLoadStoreMultipleInstruction(std::shared_ptr<ThumbInstruction> instruction);
 
 private:
     CPU* _cpu;

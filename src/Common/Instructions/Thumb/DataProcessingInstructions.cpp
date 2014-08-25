@@ -63,7 +63,7 @@ std::string Thumb::DataProcessingInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R";
-    stream << GetDestinationRegister() << ", R" << GetSourceRegister();
+    stream << GetFirstOperand() << ", R" << GetSecondOperand();
     return stream.str();
 }
 

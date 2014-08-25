@@ -31,8 +31,8 @@ namespace Thumb
         bool IsSignedOperation() const { return MathHelper::CheckBit(_instruction, 0); }
 
         uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 3); }
-        uint32_t GetRn() const { return MathHelper::GetBits(_instruction, 3, 3); }
-        uint32_t GetRm() const { return MathHelper::GetBits(_instruction, 6, 3); }
+        uint32_t GetFirstOperand() const { return MathHelper::GetBits(_instruction, 3, 3); }
+        uint32_t GetSecondOperand() const { return MathHelper::GetBits(_instruction, 6, 3); }
     };
 
     class LoadStoreImmediateInstruction : public ThumbInstruction

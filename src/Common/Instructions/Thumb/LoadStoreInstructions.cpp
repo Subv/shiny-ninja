@@ -17,7 +17,7 @@ std::string Thumb::LoadStoreRegisterOffsetInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
-    stream << ", [R" << GetRn() << ", R" << GetRm() << "]";
+    stream << ", [R" << GetFirstOperand() << ", R" << GetSecondOperand() << "]";
     return stream.str();
 }
 
@@ -71,8 +71,8 @@ std::string Thumb::LoadStoreStackInstruction::ToString() const
 uint32_t Thumb::LoadStoreStackInstruction::GetOpcode() const
 {
     if (MathHelper::CheckBit(_instruction, 11))
-        return ThumbOpcodes::ADD_SP;
-    return ThumbOpcodes::ADD_PC;
+        return ThumbOpcodes::ADD_6;
+    return ThumbOpcodes::ADD_5;
 }
 
 std::string Thumb::LoadStoreMultipleInstruction::ToString() const

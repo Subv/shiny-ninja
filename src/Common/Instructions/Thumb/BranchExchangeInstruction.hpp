@@ -93,8 +93,7 @@ namespace Thumb
              *    LR = (address of next instruction) | 1
              * else if (ARMv5T case, H == 01, ignored)
              */
-
-            return MathHelper::GetBits(_instruction, 0, 11);
+            return MathHelper::GetBits(_instruction, 0, 11) << 1;
         }
     };
 }
