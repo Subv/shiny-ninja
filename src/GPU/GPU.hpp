@@ -5,9 +5,18 @@
 #include <cstring>
 #include <memory>
 
+#include "LCD.hpp"
+#include "Common/Utilities.hpp"
+
+class CPU;
+
 enum VideoMode
 {
+    // In this mode, four text background layers can be shown.
+    // In this mode backgrounds 0 - 3 all count as "text" backgrounds,
+    // and cannot be scaled or rotated.
     MODE_0 = 0,
+    // This mode is similar in most respects to Mode 0, the main difference being that only 3 backgrounds are accessible -- 0, 1, and 2. Bgs 0 and 1 are text backgrounds, while bg 2 is a rotation/scaling background.
     MODE_1 = 1,
     MODE_2 = 2,
     MODE_3 = 3,
@@ -15,37 +24,80 @@ enum VideoMode
     MODE_5 = 5,
 };
 
+enum VideoData
+{
+    CYCLES_PER_PIXEL = 4,
+    HORIZONTAL_PIXELS = 240,
+    HDRAW_LENGTH = 1006,
+    HBLANK_LENGTH = 226,
+    HORIZONTAL_LENGTH = 1232,
+    VERTICAL_PIXELS = 160,
+    VBLANK_PIXELS = 68,
+    VERTICAL_TOTAL_PIXELS = 228,
+    TOTAL_LENGTH = 280896,
+
+    VDRAW_DURATION = 160, // 160 scanlines
+    VBLANK_DURATION = 68, // 68 scanlines
+    HDRAW_DURATION = 1006, // 1006 scanlines
+    HBLANK_DURATION = 228, // 228 scanlines (various sizes tell 226)
+};
+
+#define VCOUNT 0x00000006 // LY
+#define DISPSTAT 0x00000004
+#define DISPCNT 0x00000000
+#define IRF 0x00000202 // Interrupt Request Flags
+#define IER 0x00000200 // Interrupt Enable Register
+
 class GPU final
 {
-    private:
-        GPU()
+    public:
+        GPU(CPU* cpu) : _cpu(cpu)
         {
             memset(_vram, 0, sizeof(_vram) / sizeof(uint8_t));
-            memset(_vram, 0, sizeof(_oam) / sizeof(uint8_t));
-            memset(_vram, 0, sizeof(_obj) / sizeof(uint8_t));
+            memset(_oam, 0, sizeof(_oam) / sizeof(uint8_t));
+            memset(_obj, 0, sizeof(_obj) / sizeof(uint8_t));
+            _adapter = std::shared_ptr<LCDAdapter>(nullptr);
         }
 
-    public:
-        static std::unique_ptr<GPU>& Instance()
-        {
-            static std::unique_ptr<GPU> _instance(new GPU());
-            return _instance;
-        }
+        /*
+         * @description Main loop logic
+         */
+        void Step(uint32_t cycles);
         
-        uint32_t ReadInt32(uint32_t offset);
-        uint16_t ReadInt16(uint32_t offset);
-        uint8_t ReadInt8(uint32_t offset);
+        int32_t ReadInt32(uint32_t offset) { return int32_t(ReadUInt32(offset)); }
+        uint32_t ReadUInt32(uint32_t offset);
+        int16_t ReadInt16(uint32_t offset) { return int16_t(ReadUInt16(offset)); }
+        uint16_t ReadUInt16(uint32_t offset);
+        int8_t ReadInt8(uint32_t offset) { return int8_t(ReadUInt8(offset)); }
+        uint8_t ReadUInt8(uint32_t offset);
+        bool ReadBit(uint32_t offset, uint8_t bitIndex);
+
+        void WriteUInt8(uint32_t offset, uint8_t value);
+        void WriteUInt16(uint32_t offset, uint16_t value);
+        void WriteUInt32(uint32_t offset, uint32_t value);
+        void WriteBit(uint32_t offset, uint8_t bitIndex, bool isSet);
         
         /**
-         * @description A Helper function that reads color data from palette u16
+         * @description A helper function that reads color data from palette u16
          */
         void ExtractColorValues(uint16_t input, uint8_t& red, uint8_t& green, uint8_t& blue);
-    
+
+        // LCD I/O Registers
+        uint16_t DISPCNT() { return ReadUInt16(0x04000000); }
+        uint16_t DISPSTAT() { return ReadUInt16(0x04000004); }
+        uint16_t BG0CNT() { return ReadUInt16(0x04000008); }
+        uint16_t BG1CNT() { return ReadUInt16(0x0400000A); }
+        uint16_t BG2CNT() { return ReadUInt16(0x0400000C); }
+        uint16_t BG3CNT() { return ReadUInt16(0x0400000E); }
+        uint8_t BG0HOFS() { return ReadUInt8(0x04000010); }
+        uint8_t BG0VOFS() { return ReadUInt8(0x04000012); }
+
     private:
+        CPU* _cpu;
         uint8_t _vram[0x18000]; // VRAM (96KB)
         uint8_t _oam[0x400];    // OAM (1KB)
         uint8_t _obj[0x400];    // BG/OBJ Palette (1KB)
+        std::shared_ptr<LCDAdapter> _adapter;
 };
 
-#define sGPU GPU::Instance()
 #endif

@@ -4,6 +4,7 @@
 #include "Decoder/Decoder.hpp"
 #include "Interpreter/Interpreter.hpp"
 #include "Memory/Memory.hpp"
+#include "IO/IO.hpp"
 
 #include <atomic>
 #include <cstdio>
@@ -148,6 +149,7 @@ public:
     void SetCurrentCPUMode(CPUMode mode) { _state.CPSR.Flags.M = uint8_t(mode); }
 
     std::unique_ptr<MMU>& GetMemory() { return _memory; }
+    std::unique_ptr<GPU>& GetIO() { return _io; }
 
     void RegisterInstructionCallback(InstructionCallbackTypes type, std::function<void(std::shared_ptr<Instruction>)> callback) { _instructionCallbacks[type] = callback; }
     void ExecuteInstructionCallback(InstructionCallbackTypes type, std::shared_ptr<Instruction> instruction);
@@ -155,12 +157,16 @@ public:
     void StepInstruction();
 
 private:
+    uint32_t _cycles;
+
     CPUExecutionMode _mode;
-    std::atomic<CPURunState> _runState;
     CPUState _state;
+
+    std::atomic<CPURunState> _runState;
     std::unique_ptr<Interpreter> _interpreter;
     std::unique_ptr<Decoder> _decoder;
     std::unique_ptr<MMU> _memory;
+    std::unique_ptr<GPU> _io;
     // std::shared_ptr<Instruction> _nextInstruction; // Used by prefetching
 
     // Callbacks are used to inform the UI about stuff that happens in the emulator

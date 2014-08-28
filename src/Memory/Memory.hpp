@@ -35,6 +35,7 @@ public:
 
 private:
 
+    uint8_t _ioram[0x400];   // 04000000 - 040003FF   IORAM - Memory mapped registers (1Kb)
     uint8_t _bios[0x4000];   // 00000000 - 00003FFF   BIOS - System ROM         (16 KBytes)
     uint8_t _ewram[0x40000]; // 02000000 - 0203FFFF   WRAM - On-board Work RAM  (256 KBytes) 2 Wait
     uint8_t _iwram[0x8000];  // 03000000 - 03007FFF   WRAM - On-chip Work RAM   (32 KBytes)
