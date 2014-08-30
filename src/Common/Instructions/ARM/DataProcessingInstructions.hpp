@@ -10,6 +10,7 @@ namespace ARM
     public:
         DataProcessingInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
+        uint32_t GetTiming() const override;
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 

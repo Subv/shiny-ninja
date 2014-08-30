@@ -44,3 +44,16 @@ std::string ARM::MultiplyAccumulateInstruction::ToString() const
 
     return opcode.str();
 }
+
+uint32_t ARM::MultiplyAccumulateInstruction::GetTiming() const
+{
+    uint32_t total = 1;
+    
+    if (Accumulate())
+        ++total; // +1I
+
+    if (IsLong())
+        ++total; // +1I
+
+    return total;
+}

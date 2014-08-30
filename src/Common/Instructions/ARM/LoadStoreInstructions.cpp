@@ -113,6 +113,22 @@ uint16_t ARM::LoadStoreInstruction::GetRegistersList() const
     return MathHelper::GetBits(_instruction, 0, 16);
 }
 
+uint32_t ARM::LoadStoreInstruction::GetTiming() const
+{
+    if (IsMultiple())
+    {
+        if (IsLoad())
+            return 2 + MathHelper::NumberOfSetBits(GetRegistersList()) + (MathHelper::CheckBit(GetRegistersList(), 15) ? 2 : 0);
+        else
+            return 1 + MathHelper::NumberOfSetBits(GetRegistersList());
+    }
+
+    if (IsLoad())
+        return 3 + (GetRegister() == 15 ? 2 : 0); // If Rd == PC then add 2
+    else
+        return 2;
+}
+
 uint32_t ARM::MiscellaneousLoadStoreInstruction::GetOpcode() const
 {
     bool L = MathHelper::CheckBit(_instruction, 20);
@@ -170,4 +186,12 @@ bool ARM::MiscellaneousLoadStoreInstruction::WriteBack() const
     if (!IsPreIndexed() && MathHelper::CheckBit(_instruction, 21))
         Utilities::Assert(false, "Unpredictable result, W-bit must be 0 for post-indexed instructions");
     return MathHelper::CheckBit(_instruction, 21);
+}
+
+uint32_t ARM::MiscellaneousLoadStoreInstruction::GetTiming() const
+{
+    if (MathHelper::CheckBit(_instruction, 20))
+        return 3 + (GetRegister() == 15 ? 2 : 0); // If Rd == PC then add 2
+    else
+        return 2;
 }

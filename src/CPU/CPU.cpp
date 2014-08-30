@@ -162,6 +162,7 @@ void CPU::StepInstruction()
     if (instruction)
     {
         _interpreter->RunInstruction(instruction);
+        _cycles += instruction->GetTiming();
         ExecuteInstructionCallback(InstructionCallbackTypes::InstructionExecuted, instruction);
     }
     else

@@ -13,6 +13,7 @@ namespace ARM
 
         bool SetConditionCodes() const { return MathHelper::CheckBit(_instruction, 20); }
 
+        uint32_t GetTiming() const override;
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 

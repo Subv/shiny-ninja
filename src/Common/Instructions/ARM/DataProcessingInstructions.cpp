@@ -182,3 +182,17 @@ bool ARM::DataProcessingInstruction::AffectsOverflow() const
 
     return true;
 }
+
+uint32_t ARM::DataProcessingInstruction::GetTiming() const
+{
+    uint32_t total = 1;
+
+    if (!IsImmediate() && ShiftByRegister())
+        ++total; // +1I
+
+    // if Rd == PC
+    if (GetDestinationRegister() == 15)
+        total += 2; // +1N + 1S
+    
+    return total;
+}

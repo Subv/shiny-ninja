@@ -11,6 +11,7 @@ namespace ARM
     public:
         LoadStoreInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
+        uint32_t GetTiming() const override;
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 
@@ -44,6 +45,7 @@ namespace ARM
     public:
         MiscellaneousLoadStoreInstruction(uint32_t instruction) : ARMInstruction(instruction) { }
 
+        uint32_t GetTiming() const override;
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
         bool IsImmediate() const override { return MathHelper::CheckBit(_instruction, 22); }

@@ -16,6 +16,8 @@ public:
     Instruction(uint32_t instruction) : _instruction(instruction) { }
     virtual ~Instruction() { }
 
+    virtual uint32_t GetTiming() const { return 1; }
+
     virtual std::string ToString() const = 0;
     virtual InstructionSet GetInstructionSet() const = 0;
 
