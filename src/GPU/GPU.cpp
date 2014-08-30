@@ -1,4 +1,5 @@
-#include "IO.hpp"
+#include "GPU.hpp"
+#include "CPU/CPU.hpp"
 
 #include <iostream>
 
@@ -98,9 +99,9 @@ void GPU::WriteBit(uint32_t offset, uint8_t bitIndex, bool isSet)
     uint8_t bitValue = (1 << (bitIndex % 8));
 
     if (isSet)
-        _iomap[offset % 0x400 + rebasedOffset] |= bitValue;
+        _ioram[offset % 0x400 + rebasedOffset] |= bitValue;
     else
-        _iomap[offset % 0x400 + rebasedOffset] &= ~bitValue;
+        _ioram[offset % 0x400 + rebasedOffset] &= ~bitValue;
 }
 
 // GPU logic

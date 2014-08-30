@@ -51,12 +51,11 @@ enum VideoData
 class GPU final
 {
     public:
-        GPU(CPU* cpu) : _cpu(cpu)
+        GPU(CPU* cpu) : _cpu(cpu), _adapter(nullptr)
         {
             memset(_vram, 0, sizeof(_vram) / sizeof(uint8_t));
             memset(_oam, 0, sizeof(_oam) / sizeof(uint8_t));
             memset(_obj, 0, sizeof(_obj) / sizeof(uint8_t));
-            _adapter = std::shared_ptr<LCDAdapter>(nullptr);
         }
 
         /*
@@ -81,16 +80,6 @@ class GPU final
          * @description A helper function that reads color data from palette u16
          */
         void ExtractColorValues(uint16_t input, uint8_t& red, uint8_t& green, uint8_t& blue);
-
-        // LCD I/O Registers
-        uint16_t DISPCNT() { return ReadUInt16(0x04000000); }
-        uint16_t DISPSTAT() { return ReadUInt16(0x04000004); }
-        uint16_t BG0CNT() { return ReadUInt16(0x04000008); }
-        uint16_t BG1CNT() { return ReadUInt16(0x0400000A); }
-        uint16_t BG2CNT() { return ReadUInt16(0x0400000C); }
-        uint16_t BG3CNT() { return ReadUInt16(0x0400000E); }
-        uint8_t BG0HOFS() { return ReadUInt8(0x04000010); }
-        uint8_t BG0VOFS() { return ReadUInt8(0x04000012); }
 
     private:
         CPU* _cpu;

@@ -3,7 +3,7 @@
 #include "Common/Utilities.hpp"
 #include "Memory.hpp"
 #include "CPU/CPU.hpp"
-#include "IO/IO.hpp"
+#include "GPU/GPU.hpp"
 
 #include <cstring>
 #include <memory>
@@ -79,16 +79,16 @@ uint8_t MMU::ReadUInt8(uint32_t address)
             return _iwram[address - 0x03000000];
         case 0x4: // I/O Registers
             Utilities::Assert(address <= 0x040003FF, "Trying to read in unused IOMAP memory");
-            return _ioram[(offset & 0xFFF) % 0x400];
+            return _ioram[(address & 0xFFF) % 0x400];
         case 0x5: // BG/OBJ Palette RAM
             Utilities::Assert(address <= 0x050003FF, "Trying to read in unused palette memory");
-            return _cpu->GetIO()->ReadInt8(address);
+            return _cpu->GetGPU()->ReadInt8(address);
         case 0x6: // VRAM
             Utilities::Assert(address <= 0x06017FFF, "Trying to read in unused VRAM memory");
-            return _cpu->GetIO()->ReadInt8(address);
+            return _cpu->GetGPU()->ReadInt8(address);
         case 0x7: // OAM - OBJ Attributes
             Utilities::Assert(address <= 0x070003FF, "Trying to read in unused OBJ memory");
-            return _cpu->GetIO()->ReadInt8(address);
+            return _cpu->GetGPU()->ReadInt8(address);
         case 0x8: // Game Pak, State 0
         case 0x9: // Game Pak, State 0
         case 0xA: // Game Pak, State 1
@@ -140,19 +140,19 @@ void MMU::WriteUInt8(uint32_t address, uint8_t value)
             break;
         case 0x4: // I/O Registers
             Utilities::Assert(address <= 0x040003FF, "Trying to write in unused IOMAP memory");
-            _cpu->GetIO()->WriteUInt8(address, value);
+            _cpu->GetGPU()->WriteUInt8(address, value);
             break;
         case 0x5: // BG/OBJ Palette RAM
             Utilities::Assert(address <= 0x050003FF, "Trying to write in unused palette memory");
-            _cpu->GetIO()->WriteUInt8(address, value);
+            _cpu->GetGPU()->WriteUInt8(address, value);
             break;
         case 0x6: // VRAM
             Utilities::Assert(address <= 0x06017FFF, "Trying to write in unused VRAM memory");
-            _cpu->GetIO()->WriteUInt8(address, value);
+            _cpu->GetGPU()->WriteUInt8(address, value);
             break;
         case 0x7: // OAM - OBJ Attributes
             Utilities::Assert(address <= 0x070003FF, "Trying to write in unused OBJ memory");
-            _cpu->GetIO()->WriteUInt8(address, value);
+            _cpu->GetGPU()->WriteUInt8(address, value);
             break;
         case 0x8: // Game Pak, State 0
         case 0x9: // Game Pak, State 0

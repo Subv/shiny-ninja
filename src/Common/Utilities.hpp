@@ -49,7 +49,7 @@ public:
             return (*Reference & (1 << Position)) == 0;
         }
 
-        operator bool() const { return *Reference & (1 << Position) != 0; }
+        operator bool() const { return ((*Reference) & (1 << Position)) != 0; }
 
         BitReference& Flip()
         {
