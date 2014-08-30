@@ -95,13 +95,13 @@ void GPU::WriteUInt16(uint32_t offset, uint16_t value)
  */
 void GPU::WriteBit(uint32_t offset, uint8_t bitIndex, bool isSet)
 {
-    uint8_t rebasedOffset = bitIndex / 8;
+    /*uint8_t rebasedOffset = bitIndex / 8;
     uint8_t bitValue = (1 << (bitIndex % 8));
 
     if (isSet)
         _ioram[offset % 0x400 + rebasedOffset] |= bitValue;
     else
-        _ioram[offset % 0x400 + rebasedOffset] &= ~bitValue;
+        _ioram[offset % 0x400 + rebasedOffset] &= ~bitValue;*/
 }
 
 // GPU logic
@@ -133,5 +133,4 @@ void GPU::Step(uint32_t cycles)
 
     WriteBit(DISPSTAT, 0, vCount >= VDRAW_DURATION && vCount <= VDRAW_DURATION + VBLANK_DURATION);
     WriteBit(DISPSTAT, 1, cycles >= HDRAW_DURATION && cycles <= HDRAW_DURATION + HBLANK_DURATION);
-
 }

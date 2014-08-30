@@ -140,7 +140,7 @@ void MMU::WriteUInt8(uint32_t address, uint8_t value)
             break;
         case 0x4: // I/O Registers
             Utilities::Assert(address <= 0x040003FF, "Trying to write in unused IOMAP memory");
-            _cpu->GetGPU()->WriteUInt8(address, value);
+            _ioram[(address & 0xFFF) % 0x400] = value;
             break;
         case 0x5: // BG/OBJ Palette RAM
             Utilities::Assert(address <= 0x050003FF, "Trying to write in unused palette memory");
