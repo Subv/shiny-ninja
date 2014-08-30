@@ -67,11 +67,19 @@ void MainWindow::open()
         return;
     }
 
+    FILE* bios = fopen("E:/NDS_Projects/gba_bios.bin", "rb");
+    if (!bios)
+    {
+        std::cout << "Could not load the GBA Bios." << std::endl;
+        return;
+    }
+
     _cpu = std::shared_ptr<CPU>(new CPU(CPUExecutionMode::Interpreter));
     RegisterCPUCallbacks();
 
-    _cpu->LoadROM(_header, rom);
+    _cpu->LoadROM(_header, rom, bios);
 
+    fclose(bios);
     fclose(rom);
 
     auto checkbox = findChild<QCheckBox*>("runOnLoad");

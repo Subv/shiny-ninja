@@ -31,12 +31,20 @@ NoGUI::NoGUI(int argc, char* argv[])
         return;
     }
 
+    FILE* bios = fopen("E:/NDS_Projects/gba_bios.bin", "rb");
+    if (!bios)
+    {
+        std::cout << "Could not load the GBA Bios." << std::endl;
+        return;
+    }
+
     _cpu = std::unique_ptr<CPU>(new CPU(CPUExecutionMode::Interpreter));
 
     RegisterCPUCallbacks();
 
-    _cpu->LoadROM(header, rom);
+    _cpu->LoadROM(header, rom, bios);
 
+    fclose(bios);
     fclose(rom);
 }
 

@@ -9,11 +9,11 @@
 #include <memory>
 #include <cstdint>
 
-MMU::MMU(CPU* arm) : _cpu(arm), _inBios(false)
+MMU::MMU(CPU* arm) : _cpu(arm)
 {
 }
 
-void MMU::LoadROM(GBAHeader& header, FILE* rom)
+void MMU::LoadROM(GBAHeader& header, FILE* rom, FILE* bios)
 {
     // Zero out all 3 wait states
     for (int i = 0; i < NUM_WAIT_STATES; ++i)
@@ -39,6 +39,9 @@ void MMU::LoadROM(GBAHeader& header, FILE* rom)
     memset(_iwram, 0, sizeof(_iwram) / sizeof(uint8_t));
     memset(_vram, 0, sizeof(_vram) / sizeof(uint8_t));
     memset(_sram, 0, sizeof(_sram) / sizeof(uint8_t));
+
+    // Load BIOS
+    fread(&_bios, sizeof(uint8_t), sizeof(_bios) / sizeof(uint8_t), bios);
 }
 
 uint32_t MMU::ReadUInt32(uint32_t offset)

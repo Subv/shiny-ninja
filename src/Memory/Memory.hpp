@@ -21,7 +21,7 @@ class MMU final
 public:
     MMU(CPU* arm);
 
-    void LoadROM(GBAHeader& header, FILE* rom);
+    void LoadROM(GBAHeader& header, FILE* rom, FILE* bios);
 
     uint32_t ReadUInt32(uint32_t address);
     uint16_t ReadUInt16(uint32_t address);
@@ -30,8 +30,6 @@ public:
     void WriteUInt32(uint32_t address, uint32_t value);
     void WriteUInt16(uint32_t address, uint16_t value);
     void WriteUInt8(uint32_t address, uint8_t value);
-
-    bool IsInBios() const { return _inBios; }
 
 private:
 
@@ -45,7 +43,6 @@ private:
     uint8_t _sram[0x10000];  // 0E000000 - 0E00FFFF   Game Pak SRAM    (max 64 KBytes) - 8bit Bus width
 
     CPU* _cpu;
-    bool _inBios; // Constantly set to false for now, we do not have a BIOS.
 };
 
 #endif

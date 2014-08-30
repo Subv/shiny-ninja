@@ -107,6 +107,10 @@ class GeneralPurposeRegister;
 #define LR 14
 #define PC 15
 
+#define InterruptRequestFlags 0x4000202 
+#define InterruptEnableRegister 0x4000200 
+#define InterruptMasterEnableRegister 0x4000208
+
 struct CPUState
 {
     std::array<GeneralPurposeRegister, 16> Registers;
@@ -122,11 +126,30 @@ struct CPUState
     ProgramStatusRegisters SPSR[5]; // Saved Program Status Register, there is one per mode except in System/User mode
 };
 
+enum class InterruptTypes
+{
+    VBlank,
+    HBlank,
+    VCounterMatch,
+    Timer0Overflow,
+    Timer1Overflow,
+    Timer2Overflow,
+    Timer3Overflow,
+    SerialCommunication,
+    DMA0,
+    DMA1,
+    DMA2,
+    DMA3,
+    KeyPad,
+    GamePak
+};
+
 class CPU final
 {
 public:
     CPU(CPUExecutionMode mode);
-    void LoadROM(GBAHeader& header, FILE* rom);
+
+    void LoadROM(GBAHeader& header, FILE* rom, FILE* bios);
     void Reset();
     void Stop() { _runState = CPURunState::Stopped; }
     void Run();
@@ -141,12 +164,15 @@ public:
     void ToggleInstructionSet() { _state.CPSR.Flags.T ^= 1; }
 
     ProgramStatusRegisters::FlagsStruct& GetCurrentStatusFlags() { return _state.CPSR.Flags; }
+
     ProgramStatusRegisters& GetCurrentStatusRegister() { return _state.CPSR; }
     ProgramStatusRegisters& GetSavedStatusRegister();
 
     CPUMode GetCurrentCPUMode() const { return CPUMode(_state.CPSR.Flags.M); }
     bool IsInPrivilegedMode() const { return GetCurrentCPUMode() != CPUMode::User; }
     void SetCurrentCPUMode(CPUMode mode) { _state.CPSR.Flags.M = uint8_t(mode); }
+
+    bool IsInterruptEnabled(InterruptTypes type);
 
     std::unique_ptr<MMU>& GetMemory() { return _memory; }
     std::unique_ptr<GPU>& GetGPU() { return _gpu; }
@@ -157,6 +183,8 @@ public:
     void StepInstruction();
 
 private:
+    void TriggerInterrupt(InterruptTypes type);
+
     uint32_t _cycles;
 
     CPUExecutionMode _mode;

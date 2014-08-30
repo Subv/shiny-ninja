@@ -15,11 +15,10 @@ void GPU::ExtractColorValues(uint16_t input, uint8_t& red, uint8_t& green, uint8
     red = input & 0x1F;
 }
 
-
 bool GPU::ReadBit(uint32_t offset, uint8_t bitIndex)
 {
     uint8_t rebasedOffset = bitIndex / 8;
-    return ReadUInt8(0x04000000 + offset + rebasedOffset) & (1 << (bitIndex % 8));
+    return ReadUInt8(offset + rebasedOffset) & (1 << (bitIndex % 8));
 }
 
 uint8_t GPU::ReadUInt8(uint32_t offset)
@@ -128,7 +127,7 @@ void GPU::Step(uint32_t cycles)
         // if #5 is set, an IRQ is requested.
         WriteBit(DISPSTAT, 2, true);
         if (ReadBit(DISPSTAT, 5))
-            WriteBit(IRF, 2, true); // Request VCounter IRQ
+            WriteBit(InterruptRequestFlags, 2, true); // Request VCounter IRQ
     }
 
     WriteBit(DISPSTAT, 0, vCount >= VDRAW_DURATION && vCount <= VDRAW_DURATION + VBLANK_DURATION);

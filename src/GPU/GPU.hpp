@@ -42,11 +42,9 @@ enum VideoData
     HBLANK_DURATION = 228, // 228 scanlines (various sizes tell 226)
 };
 
-#define VCOUNT 0x00000006 // LY
-#define DISPSTAT 0x00000004
-#define DISPCNT 0x00000000
-#define IRF 0x00000202 // Interrupt Request Flags
-#define IER 0x00000200 // Interrupt Enable Register
+#define VCOUNT 0x4000006 // LY
+#define DISPSTAT 0x4000004
+#define DISPCNT 0x4000000
 
 class GPU final
 {

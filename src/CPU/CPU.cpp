@@ -1,5 +1,6 @@
 #include "CPU.hpp"
 #include "Memory/Memory.hpp"
+#include "Common/MathHelper.hpp"
 
 #include <iostream>
 
@@ -62,9 +63,9 @@ bool CPU::ConditionPasses(InstructionCondition condition)
     return false;
 }
 
-void CPU::LoadROM(GBAHeader& header, FILE* rom)
+void CPU::LoadROM(GBAHeader& header, FILE* rom, FILE* bios)
 {
-    _memory->LoadROM(header, rom);
+    _memory->LoadROM(header, rom, bios);
 }
 
 GeneralPurposeRegister& CPU::GetRegister(uint8_t reg)
@@ -165,4 +166,46 @@ void CPU::StepInstruction()
     }
     else
         std::cout << "Unknown Instruction" << std::endl;
+}
+
+bool CPU::IsInterruptEnabled(InterruptTypes type)
+{
+    // All interrupts are disabled when an IRQ is being handled
+    if (GetCurrentStatusFlags().I)
+        return false;
+
+    uint32_t masterEnable = GetMemory()->ReadUInt32(InterruptMasterEnableRegister);
+    
+    // If the Interrupt Master Enable Register says interrupts are disabled, then don't try to check any further
+    if (!MathHelper::CheckBit(masterEnable, 0))
+        return false;
+
+    uint16_t interrupts = GetMemory()->ReadUInt16(InterruptEnableRegister);
+    
+    // Check if the specified type of interrupt is disabled in the Interrupt Enable Register
+    return MathHelper::CheckBit(interrupts, uint8_t(type));
+}
+
+void CPU::TriggerInterrupt(InterruptTypes type)
+{
+    std::swap(GetRegisterForMode(CPUMode::IRQ, SP), GetRegister(SP));
+    std::swap(GetRegisterForMode(CPUMode::IRQ, LR), GetRegister(LR));
+
+    // Save the CPSR into SPSR_irq
+    _state.SPSR[2] = GetCurrentStatusRegister();
+    
+    // Disable interrupts
+    GetCurrentStatusFlags().I = 1;
+
+    // Setup the return address
+    GetRegisterForMode(CPUMode::IRQ, LR) = PC + (GetCurrentInstructionSet() == InstructionSet::ARM ? 4 : 2);
+
+    // Set IRQ mode
+    SetCurrentCPUMode(CPUMode::IRQ);
+    
+    // Switch to ARM mode
+    SetInstructionSet(InstructionSet::ARM);
+
+    // Jump to the BIOS IRQ handler
+    GetRegister(PC) = 0x18;
 }
