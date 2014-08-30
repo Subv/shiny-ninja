@@ -173,6 +173,7 @@ public:
     void SetCurrentCPUMode(CPUMode mode) { _state.CPSR.Flags.M = uint8_t(mode); }
 
     bool IsInterruptEnabled(InterruptTypes type);
+    void RequestInterrupt(InterruptTypes type);
 
     std::unique_ptr<MMU>& GetMemory() { return _memory; }
     std::unique_ptr<GPU>& GetGPU() { return _gpu; }

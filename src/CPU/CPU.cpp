@@ -209,3 +209,16 @@ void CPU::TriggerInterrupt(InterruptTypes type)
     // Jump to the BIOS IRQ handler
     GetRegister(PC) = 0x18;
 }
+
+void CPU::RequestInterrupt(InterruptTypes type)
+{
+    if (!IsInterruptEnabled(type))
+        return;
+
+    // Write the interrupt to the Interrupt Request Flags for the sake of completeness, we process the interrupt inmediately
+    uint16_t interruptRequests = GetMemory()->ReadUInt16(InterruptRequestFlags);
+    interruptRequests |= (1 << uint8_t(type));
+    GetMemory()->WriteUInt32(InterruptRequestFlags, interruptRequests);
+
+    TriggerInterrupt(type);
+}

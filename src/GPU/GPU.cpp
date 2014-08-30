@@ -127,7 +127,7 @@ void GPU::Step(uint32_t cycles)
         // if #5 is set, an IRQ is requested.
         WriteBit(DISPSTAT, 2, true);
         if (ReadBit(DISPSTAT, 5))
-            WriteBit(InterruptRequestFlags, 2, true); // Request VCounter IRQ
+            _cpu->RequestInterrupt(InterruptTypes::VCounterMatch);
     }
 
     WriteBit(DISPSTAT, 0, vCount >= VDRAW_DURATION && vCount <= VDRAW_DURATION + VBLANK_DURATION);
