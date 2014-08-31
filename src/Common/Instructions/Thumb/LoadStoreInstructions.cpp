@@ -8,7 +8,7 @@
 std::string Thumb::LoadFromLiteralStoreInstruction::ToString() const
 {
     std::stringstream stream;
-    stream << "LDR R" << GetDestinationRegister() << ", [PC, #";
+    stream << "LDR R" << GetDestinationRegister() << ", [PC, #0x";
     stream << std::hex << std::uppercase << GetImmediate() << "]";
     return stream.str();
 }
@@ -45,7 +45,7 @@ std::string Thumb::LoadStoreImmediateInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
-    stream << ", [R" << GetBaseAddressRegister() << ", #" << GetImmediate() << "]";
+    stream << ", [R" << GetBaseAddressRegister() << ", #0x" << std::hex << std::uppercase << GetImmediate() << "]";
     return stream.str();
 }
 
@@ -60,19 +60,29 @@ uint32_t Thumb::LoadStoreImmediateInstruction::GetOpcode() const
     return IsLoad() ? ThumbOpcodes::LDRH_1 : ThumbOpcodes::STRH_1;
 }
 
+uint32_t Thumb::LoadStoreImmediateInstruction::GetImmediate() const
+{
+    uint32_t rawImm = MathHelper::GetBits(_instruction, 6, 5);
+    if (GetOpcode() == ThumbOpcodes::LDR_1 || GetOpcode() == ThumbOpcodes::STR_1)
+        rawImm <<= 2;
+    else if (GetOpcode() == ThumbOpcodes::LDRH_1 || GetOpcode() == ThumbOpcodes::STRH_1)
+        rawImm <<= 1;
+    return rawImm;
+}
+
 std::string Thumb::LoadStoreStackInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetDestinationRegister();
-    stream << ", SP, #" << std::hex << std::uppercase << GetRelativeOffset();
+    stream << ", [SP, #0x" << std::hex << std::uppercase << GetRelativeOffset() << "]";
     return stream.str();
 }
 
 uint32_t Thumb::LoadStoreStackInstruction::GetOpcode() const
 {
     if (MathHelper::CheckBit(_instruction, 11))
-        return ThumbOpcodes::ADD_6;
-    return ThumbOpcodes::ADD_5;
+        return ThumbOpcodes::LDR_4;
+    return ThumbOpcodes::STR_3;
 }
 
 std::string Thumb::LoadStoreMultipleInstruction::ToString() const

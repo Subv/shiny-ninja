@@ -251,7 +251,6 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
             _cpu->GetCurrentStatusFlags().Z = Rd == 0;
             break;
         }
-        // In ADC and SBC, determine C and V before doing the maths.
         case Thumb::ThumbOpcodes::ADC:
         {
             Rd += Rm + _cpu->GetCurrentStatusFlags().C;
@@ -483,25 +482,19 @@ void Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr
             Rd = _cpu->GetMemory()->ReadUInt8(Rn + instr->GetImmediate());
             break;
         case Thumb::ThumbOpcodes::LDR_1:
-            //! TODO: Remove * 4 when GetImmediate() is fixed (doesn't do the math yet)
-            //! Since not all opcodes under this format need a multiplication...
-            //! Warpten.
-            Rd = _cpu->GetMemory()->ReadUInt32(Rn + (instr->GetImmediate() << 2));
+            Rd = _cpu->GetMemory()->ReadUInt32(Rn + instr->GetImmediate());
             break;
         case Thumb::ThumbOpcodes::STRB_1:
             _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate(), Rd);
             break;
         case Thumb::ThumbOpcodes::STR_1:
-            //! TODO: Remove * 4 when GetImmediate() is fixed (doesn't do the math yet)
-            //! Since not all opcodes under this format need a multiplication...
-            //! Warpten.
-            _cpu->GetMemory()->WriteUInt8(Rn + (instr->GetImmediate() << 2), Rd);
+            _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate(), Rd);
             break;
         case Thumb::ThumbOpcodes::LDRH_1:
-            Rd = _cpu->GetMemory()->ReadUInt32(Rn + (instr->GetImmediate() << 1));
+            Rd = _cpu->GetMemory()->ReadUInt32(Rn + instr->GetImmediate());
             break;
         case Thumb::ThumbOpcodes::STRH_1:
-            _cpu->GetMemory()->WriteUInt32(Rn + (instr->GetImmediate() << 1), Rd);
+            _cpu->GetMemory()->WriteUInt32(Rn + instr->GetImmediate(), Rd);
             break;
         default:
             break;
@@ -515,17 +508,10 @@ void Interpreter::HandleThumbLoadStoreStackInstruction(std::shared_ptr<ThumbInst
 
     GeneralPurposeRegister& Rd = _cpu->GetRegister(instr->GetDestinationRegister());
 
-    switch (instr->GetOpcode())
-    {
-        case Thumb::ThumbOpcodes::ADD_6:
-            Rd = _cpu->GetRegister(SP) + uint32_t(instr->GetRelativeOffset() << 2);
-            break;
-        case Thumb::ThumbOpcodes::ADD_5:
-            Rd = (_cpu->GetRegister(PC) + 2) & 0xFFFFFFFC + uint32_t(instr->GetRelativeOffset() << 2);
-            break;
-        default:
-            break;
-    }
+    if (instr->IsLoadOperation())
+        Rd = _cpu->GetMemory()->ReadUInt32(_cpu->GetRegister(SP) + instr->GetRelativeOffset());
+    else
+        _cpu->GetMemory()->WriteUInt32(_cpu->GetRegister(SP) + instr->GetRelativeOffset(), Rd);
 }
 
 // Section: A7.1.27, A7.1.57

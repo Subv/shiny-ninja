@@ -168,8 +168,8 @@ void Interpreter::InitializeThumb()
     _thumbHandlers[Thumb::ThumbOpcodes::STRH_2] = std::bind(&Interpreter::HandleThumbLoadStoreRegisterOffsetInstruction, this, std::placeholders::_1);
 
     // Load/Store Word/Byte/Halfword Immediate Offset operation
-    _thumbHandlers[Thumb::ThumbOpcodes::ADD_6] = std::bind(&Interpreter::HandleThumbLoadStoreStackInstruction, this, std::placeholders::_1);
-    _thumbHandlers[Thumb::ThumbOpcodes::ADD_5] = std::bind(&Interpreter::HandleThumbLoadStoreStackInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::LDR_4] = std::bind(&Interpreter::HandleThumbLoadStoreStackInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::STR_3] = std::bind(&Interpreter::HandleThumbLoadStoreStackInstruction, this, std::placeholders::_1);
 
     // Load/Store Multiple operation
     _thumbHandlers[Thumb::ThumbOpcodes::STMIA] = std::bind(&Interpreter::HandleThumbLoadStoreMultipleInstruction, this, std::placeholders::_1);

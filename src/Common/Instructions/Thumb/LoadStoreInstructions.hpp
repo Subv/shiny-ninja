@@ -50,7 +50,7 @@ namespace Thumb
 
         uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 0, 3); }
         uint32_t GetBaseAddressRegister() const { return MathHelper::GetBits(_instruction, 3, 3); }
-        uint32_t GetImmediate() const { return MathHelper::GetBits(_instruction, 6, 5); }
+        uint32_t GetImmediate() const;
     };
 
     class LoadStoreStackInstruction : public ThumbInstruction
@@ -61,9 +61,9 @@ namespace Thumb
         uint32_t GetOpcode() const override;
         std::string ToString() const override;
 
-        bool IsStackPointerOperation() const { return MathHelper::CheckBit(_instruction, 11); }
+        bool IsLoadOperation() const { return MathHelper::CheckBit(_instruction, 11); }
         uint32_t GetDestinationRegister() const { return MathHelper::GetBits(_instruction, 8, 3); }
-        uint32_t GetRelativeOffset() const { return MathHelper::GetBits(_instruction, 0, 8); }
+        uint32_t GetRelativeOffset() const { return MathHelper::GetBits(_instruction, 0, 8) << 2; }
     };
 
     class LoadStoreMultipleInstruction : public ThumbInstruction
