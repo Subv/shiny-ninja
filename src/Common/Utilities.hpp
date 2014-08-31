@@ -83,7 +83,7 @@ public:
             bitCount = 32 - firstBitIndex;
         uint32_t returnValue = 0;
         for (; bitCount > 0; --bitCount)
-            returnValue |= uint32_t(operator[](bitCount + firstBitIndex));
+            returnValue |= uint32_t(operator[](bitCount + firstBitIndex)) << bitCount;
         return returnValue;
     }
 

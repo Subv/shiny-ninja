@@ -14,6 +14,9 @@
 
 void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> instruction)
 {
+    if (!_cpu->ConditionPasses(instruction->GetCondition()))
+        return;
+
     if (instruction->GetOpcode() == ARM::ARMOpcodes::BLX || instruction->GetOpcode() == ARM::ARMOpcodes::BX)
     {
         // Save the return address, only the BLX instruction does this
@@ -59,6 +62,9 @@ void Interpreter::HandleARMBranchInstruction(std::shared_ptr<ARMInstruction> ins
 
 void Interpreter::HandleARMDataProcessingInstruction(std::shared_ptr<ARMInstruction> instruction)
 {
+    if (!_cpu->ConditionPasses(instruction->GetCondition()))
+        return;
+
     auto dataproc = std::static_pointer_cast<ARM::DataProcessingInstruction>(instruction);
 
     int64_t firstOperand = _cpu->GetRegister(dataproc->GetFirstOperand());
@@ -393,6 +399,9 @@ void Interpreter::HandleARMMiscellaneousLoadStoreInstruction(std::shared_ptr<ARM
 
 void Interpreter::HandleARMPSROperationInstruction(std::shared_ptr<ARMInstruction> instruction)
 {
+    if (!_cpu->ConditionPasses(instruction->GetCondition()))
+        return;
+
     if (instruction->GetOpcode() == ARM::ARMOpcodes::MRS)
     {
         auto mrs = std::static_pointer_cast<ARM::MovePSRToRegisterInstruction>(instruction);
@@ -468,6 +477,9 @@ void Interpreter::HandleARMPSROperationInstruction(std::shared_ptr<ARMInstructio
 
 void Interpreter::HandleARMMultiplyInstruction(std::shared_ptr<ARMInstruction> instruction)
 {
+    if (!_cpu->ConditionPasses(instruction->GetCondition()))
+        return;
+
     auto mul = std::static_pointer_cast<ARM::MultiplyAccumulateInstruction>(instruction);
     GeneralPurposeRegister& firstOp = _cpu->GetRegister(mul->GetFirstOperand());
     GeneralPurposeRegister& secondOp = _cpu->GetRegister(mul->GetSecondOperand());

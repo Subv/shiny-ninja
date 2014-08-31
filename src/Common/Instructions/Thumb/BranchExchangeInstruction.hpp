@@ -74,12 +74,7 @@ namespace Thumb
             return MathHelper::CheckBit(_instruction, 11);
         }
 
-        uint32_t GetOpcode() const override
-        {
-            if (MathHelper::CheckBits(_instruction, 11, 2, 2))
-                return ThumbOpcodes::BL;
-            return MathHelper::CheckBit(_instruction, 12) ? ThumbOpcodes::BL : ThumbOpcodes::BLX_1;
-        }
+        uint32_t GetOpcode() const override { return ThumbOpcodes::BL; }
         std::string ToString() const override;
 
         uint32_t GetOffset() const

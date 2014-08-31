@@ -57,9 +57,38 @@ void CPU::Run()
 
 bool CPU::ConditionPasses(InstructionCondition condition)
 {
-    // TODO: STUB
     switch (condition)
     {
+        case InstructionCondition::Equal:
+            return _state.CPSR.Flags.Z;
+        case InstructionCondition::NotEqual:
+            return !_state.CPSR.Flags.Z;
+        case InstructionCondition::CarrySet:
+            return _state.CPSR.Flags.C;
+        case InstructionCondition::CarryCleared:
+            return !_state.CPSR.Flags.C;
+        case InstructionCondition::Negative:
+            return _state.CPSR.Flags.N;
+        case InstructionCondition::PositiveOrZero:
+            return !_state.CPSR.Flags.N;
+        case InstructionCondition::Overflow:
+            return _state.CPSR.Flags.V;
+        case InstructionCondition::NotOverflow:
+            return !_state.CPSR.Flags.V;
+        case InstructionCondition::UnsignedHigher:
+            return _state.CPSR.Flags.C && !_state.CPSR.Flags.Z;
+        case InstructionCondition::UnsignedLowerOrSame:
+            return !_state.CPSR.Flags.C || _state.CPSR.Flags.Z;
+        case InstructionCondition::GreaterEqual:
+            return _state.CPSR.Flags.N == _state.CPSR.Flags.V;
+        case InstructionCondition::LessThan:
+            return _state.CPSR.Flags.N != _state.CPSR.Flags.V;
+        case InstructionCondition::GreaterThan:
+            return !_state.CPSR.Flags.Z && _state.CPSR.Flags.N == _state.CPSR.Flags.V;
+        case InstructionCondition::LessOrEqual:
+            return _state.CPSR.Flags.Z || _state.CPSR.Flags.N != _state.CPSR.Flags.V;
+        case InstructionCondition::Always:
+        case InstructionCondition::Unused:
         default:
             return true;
     }
