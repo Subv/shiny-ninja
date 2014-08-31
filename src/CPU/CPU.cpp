@@ -50,6 +50,8 @@ void CPU::Run()
         _dma->Step();
         StepInstruction();
         GetGPU()->Step(_cycles);
+        // Check for interrupts on every loop
+        ProcessInterrupts();
     }
 }
 
@@ -218,10 +220,48 @@ void CPU::RequestInterrupt(InterruptTypes type)
     if (!IsInterruptEnabled(type))
         return;
 
-    // Write the interrupt to the Interrupt Request Flags for the sake of completeness, we process the interrupt inmediately
+    // Write the interrupt to the Interrupt Request Flags, they will be processed on the next tick
     uint16_t interruptRequests = GetMemory()->ReadUInt16(InterruptRequestFlags);
     interruptRequests |= (1 << uint8_t(type));
-    GetMemory()->WriteUInt32(InterruptRequestFlags, interruptRequests);
+    GetMemory()->WriteUInt16(InterruptRequestFlags, interruptRequests);
+}
 
-    TriggerInterrupt(type);
+void CPU::ProcessInterrupts()
+{
+    // All interrupts are disabled when an IRQ is being handled
+    if (GetCurrentStatusFlags().I)
+        return;
+
+    // Check the interrupt flags and service the requested interrupts
+    uint16_t interruptRequests = GetMemory()->ReadUInt16(InterruptRequestFlags);
+    
+    // Only one interrupt is triggered at a time
+    if (MathHelper::CheckBit(interruptRequests, 0))
+        TriggerInterrupt(InterruptTypes::VBlank);
+    else if (MathHelper::CheckBit(interruptRequests, 1))
+        TriggerInterrupt(InterruptTypes::HBlank);
+    else if (MathHelper::CheckBit(interruptRequests, 2))
+        TriggerInterrupt(InterruptTypes::VCounterMatch);
+    else if (MathHelper::CheckBit(interruptRequests, 3))
+        TriggerInterrupt(InterruptTypes::Timer0Overflow);
+    else if (MathHelper::CheckBit(interruptRequests, 4))
+        TriggerInterrupt(InterruptTypes::Timer1Overflow);
+    else if (MathHelper::CheckBit(interruptRequests, 5))
+        TriggerInterrupt(InterruptTypes::Timer2Overflow);
+    else if (MathHelper::CheckBit(interruptRequests, 6))
+        TriggerInterrupt(InterruptTypes::Timer3Overflow);
+    else if (MathHelper::CheckBit(interruptRequests, 7))
+        TriggerInterrupt(InterruptTypes::SerialCommunication);
+    else if (MathHelper::CheckBit(interruptRequests, 8))
+        TriggerInterrupt(InterruptTypes::DMA0);
+    else if (MathHelper::CheckBit(interruptRequests, 9))
+        TriggerInterrupt(InterruptTypes::DMA1);
+    else if (MathHelper::CheckBit(interruptRequests, 10))
+        TriggerInterrupt(InterruptTypes::DMA2);
+    else if (MathHelper::CheckBit(interruptRequests, 11))
+        TriggerInterrupt(InterruptTypes::DMA3);
+    else if (MathHelper::CheckBit(interruptRequests, 12))
+        TriggerInterrupt(InterruptTypes::KeyPad);
+    else if (MathHelper::CheckBit(interruptRequests, 13))
+        TriggerInterrupt(InterruptTypes::GamePak);
 }

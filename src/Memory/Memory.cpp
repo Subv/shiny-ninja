@@ -143,7 +143,13 @@ void MMU::WriteUInt8(uint32_t address, uint8_t value)
             break;
         case 0x4: // I/O Registers
             Utilities::Assert(address <= 0x040003FF, "Trying to write in unused IOMAP memory");
-            _ioram[(address & 0xFFF) % 0x400] = value;
+            
+            // The way the GBA handles the Interrupt Request Flags makes this code necessary, writing 1 to the bits in this address will both enable and disable interrupt requests
+            if (address >= InterruptRequestFlags && address < InterruptRequestFlags + 2)
+                _ioram[(address & 0xFFF) % 0x400] ^= value;
+            else
+                _ioram[(address & 0xFFF) % 0x400] = value;
+
             break;
         case 0x5: // BG/OBJ Palette RAM
             Utilities::Assert(address <= 0x050003FF, "Trying to write in unused palette memory");

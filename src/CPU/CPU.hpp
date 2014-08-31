@@ -186,6 +186,7 @@ public:
 
 private:
     void TriggerInterrupt(InterruptTypes type);
+    void ProcessInterrupts();
 
     uint32_t _cycles;
 
