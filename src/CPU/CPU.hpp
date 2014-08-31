@@ -5,6 +5,7 @@
 #include "Interpreter/Interpreter.hpp"
 #include "Memory/Memory.hpp"
 #include "GPU/GPU.hpp"
+#include "DMA/DMA.hpp"
 
 #include <atomic>
 #include <cstdio>
@@ -196,6 +197,7 @@ private:
     std::unique_ptr<Decoder> _decoder;
     std::unique_ptr<MMU> _memory;
     std::unique_ptr<GPU> _gpu;
+    std::unique_ptr<DMA> _dma;
     // std::shared_ptr<Instruction> _nextInstruction; // Used by prefetching
 
     // Callbacks are used to inform the UI about stuff that happens in the emulator

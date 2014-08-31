@@ -475,7 +475,7 @@ void Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr
             //! TODO: Remove * 4 when GetImmediate() is fixed (doesn't do the math yet)
             //! Since not all opcodes under this format need a multiplication...
             //! Warpten.
-            Rd = _cpu->GetMemory()->ReadUInt32(Rn + instr->GetImmediate() << 2);
+            Rd = _cpu->GetMemory()->ReadUInt32(Rn + (instr->GetImmediate() << 2));
             break;
         case Thumb::ThumbOpcodes::STRB_1:
             _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate(), Rd);
@@ -484,13 +484,13 @@ void Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr
             //! TODO: Remove * 4 when GetImmediate() is fixed (doesn't do the math yet)
             //! Since not all opcodes under this format need a multiplication...
             //! Warpten.
-            _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate() << 2, Rd);
+            _cpu->GetMemory()->WriteUInt8(Rn + (instr->GetImmediate() << 2), Rd);
             break;
         case Thumb::ThumbOpcodes::LDRH_1:
-            Rd = _cpu->GetMemory()->ReadUInt32(Rn + instr->GetImmediate() << 1);
+            Rd = _cpu->GetMemory()->ReadUInt32(Rn + (instr->GetImmediate() << 1));
             break;
         case Thumb::ThumbOpcodes::STRH_1:
-            _cpu->GetMemory()->WriteUInt32(Rn + instr->GetImmediate() << 1, Rd);
+            _cpu->GetMemory()->WriteUInt32(Rn + (instr->GetImmediate() << 1), Rd);
             break;
         default:
             break;
@@ -507,10 +507,10 @@ void Interpreter::HandleThumbLoadStoreStackInstruction(std::shared_ptr<ThumbInst
     switch (instr->GetOpcode())
     {
         case Thumb::ThumbOpcodes::ADD_6:
-            Rd = _cpu->GetRegister(SP) + instr->GetRelativeOffset() << 2;
+            Rd = _cpu->GetRegister(SP) + uint32_t(instr->GetRelativeOffset() << 2);
             break;
         case Thumb::ThumbOpcodes::ADD_5:
-            Rd = _cpu->GetRegister(PC) & 0xFFFFFFFC + instr->GetRelativeOffset() << 2;
+            Rd = _cpu->GetRegister(PC) & 0xFFFFFFFC + uint32_t(instr->GetRelativeOffset() << 2);
             break;
         default:
             break;

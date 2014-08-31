@@ -4,7 +4,8 @@ file(GLOB_RECURSE sources
 	Decoder/*.cpp Decoder/*.hpp
 	GPU/*.cpp GPU/*.hpp
 	Interpreter/*.cpp Interpreter/*.hpp
-	Memory/*.cpp Memory/*.hpp)
+	Memory/*.cpp Memory/*.hpp
+    DMA/*.cpp DMA/*.hpp)
 
 include_directories(
 	${CMAKE_BINARY_DIR}

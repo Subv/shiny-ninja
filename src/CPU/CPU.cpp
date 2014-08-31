@@ -17,6 +17,7 @@ void CPU::Reset()
     _interpreter = std::unique_ptr<Interpreter>(new Interpreter(this));
     _memory = std::unique_ptr<MMU>(new MMU(this));
     _gpu = std::unique_ptr<GPU>(new GPU(this));
+    _dma = std::unique_ptr<DMA>(new DMA(this));
 
     // Zero-out all the registers
     _state.Registers = { };
@@ -46,6 +47,7 @@ void CPU::Run()
     // Loop until something stops the CPU
     while (_runState == CPURunState::Running)
     {
+        _dma->Step();
         StepInstruction();
         GetGPU()->Step(_cycles);
     }
