@@ -33,7 +33,7 @@ TODO List
   * [ ] Implement some kind of graphics adapter class so users can extend it and create their own interfaces
   * [ ] Provide some basic interfaces based on Qt, ncurses, and possibly libcaca
 - [ ] MMU
-  * [ ] Implement memory writes
+  * [x] Implement memory writes
   * [ ] Implement read/writes to/from unused memory
 - [ ] Miscellaneous
   * [ ] Implement the emulator GUI (Some work has been started, but it's nowhere near finished yet)
