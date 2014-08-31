@@ -77,15 +77,7 @@ public:
         return (Value & (1 << i)) != 0;
     }
 
-    uint32_t GetBits(uint8_t firstBitIndex, uint32_t bitCount)
-    {
-        if (firstBitIndex + bitCount > 32)
-            bitCount = 32 - firstBitIndex;
-        uint32_t returnValue = 0;
-        for (; bitCount > 0; --bitCount)
-            returnValue |= uint32_t(operator[](bitCount + firstBitIndex)) << bitCount;
-        return returnValue;
-    }
+    uint32_t GetBits(uint8_t firstBitIndex, uint32_t bitCount);
 
     GeneralPurposeRegister& Flip()
     {

@@ -1,4 +1,5 @@
 #include "Utilities.hpp"
+#include "MathHelper.hpp"
 
 #include <iostream>
 
@@ -12,3 +13,8 @@ void Utilities::Assert(bool condition, const char* message)
     }
 }
 
+
+uint32_t GeneralPurposeRegister::GetBits(uint8_t firstBitIndex, uint32_t bitCount)
+{
+    return MathHelper::GetBits(Value, firstBitIndex, bitCount);
+}
