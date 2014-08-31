@@ -413,7 +413,7 @@ void Interpreter::HandleThumbBranchExchangeInstruction(std::shared_ptr<ThumbInst
 void Interpreter::HandleThumbLiteralPoolLoadInstruction(std::shared_ptr<ThumbInstruction> instruction)
 {
     auto instr = std::static_pointer_cast<Thumb::LoadFromLiteralStoreInstruction>(instruction);
-    uint32_t address = (_cpu->GetRegister(PC) + 2) & 0xFFFFFFFC + instr->GetImmediate();
+    uint32_t address = ((_cpu->GetRegister(PC) + 2) & 0xFFFFFFFC) + instr->GetImmediate();
     _cpu->GetRegister(instr->GetDestinationRegister()) = _cpu->GetMemory()->ReadUInt32(address);
 }
 
