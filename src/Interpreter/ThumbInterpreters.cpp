@@ -384,13 +384,6 @@ void Interpreter::HandleThumbBranchExchangeInstruction(std::shared_ptr<ThumbInst
 
     GeneralPurposeRegister Rm = _cpu->GetRegister(realInstr->GetTargetAddressRegister());
 
-    // If Rm[1:0] == 0b10, the result is UNPREDICTABLE, as branches
-    // to non word-aligned addresses are impossible in ARM state.
-    if (Rm[0] == 0 && Rm[1] == 1)
-    {
-        // Do stuff.
-    }
-
     // Register 15 can be specified for <Rm>. If this is done, R15
     // is read as normal for Thumb code, that is, it is the address
     // of the BX instruction itself plus 4. If the BX instruction is
@@ -401,10 +394,19 @@ void Interpreter::HandleThumbBranchExchangeInstruction(std::shared_ptr<ThumbInst
     // (because the value read for R15 has bits[1:0]==0b10).
     if (realInstr->GetTargetAddressRegister() == PC)
     {
+        // Increment the PC register value by 2 because the real GBA CPU uses Pre-fetching
+        Rm += 2;
         // Do stuff.
     }
 
-    _cpu->GetCurrentStatusFlags().T = Rm[0];
+    // If Rm[1:0] == 0b10, the result is UNPREDICTABLE, as branches
+    // to non word-aligned addresses are impossible in ARM state.
+    if (Rm[0] == 0 && Rm[1] == 1)
+    {
+        // Do stuff.
+    }
+
+    _cpu->SetInstructionSet(Rm[0] ? InstructionSet::Thumb : InstructionSet::ARM);
     _cpu->GetRegister(PC) = Rm.GetBits(1, 31) << 1;
 }
 
@@ -412,7 +414,7 @@ void Interpreter::HandleThumbBranchExchangeInstruction(std::shared_ptr<ThumbInst
 void Interpreter::HandleThumbLiteralPoolLoadInstruction(std::shared_ptr<ThumbInstruction> instruction)
 {
     auto instr = std::static_pointer_cast<Thumb::LoadFromLiteralStoreInstruction>(instruction);
-    uint32_t address = _cpu->GetRegister(PC) & 0xFFFFFFFC + instr->GetImmediate();
+    uint32_t address = (_cpu->GetRegister(PC) + 2) & 0xFFFFFFFC + instr->GetImmediate();
     _cpu->GetRegister(instr->GetDestinationRegister()) = _cpu->GetMemory()->ReadUInt32(address);
 }
 
@@ -423,9 +425,16 @@ void Interpreter::HandleThumbLoadStoreRegisterOffsetInstruction(std::shared_ptr<
 {
     auto instr = std::static_pointer_cast<Thumb::LoadStoreRegisterOffsetInstruction>(instruction);
 
-    GeneralPurposeRegister& Rd = _cpu->GetRegister(instr->GetDestinationRegister());
-    GeneralPurposeRegister& Rn = _cpu->GetRegister(instr->GetFirstOperand());
-    GeneralPurposeRegister& Rm = _cpu->GetRegister(instr->GetSecondOperand());
+    GeneralPurposeRegister Rd = _cpu->GetRegister(instr->GetDestinationRegister());
+    GeneralPurposeRegister Rn = _cpu->GetRegister(instr->GetFirstOperand());
+    GeneralPurposeRegister Rm = _cpu->GetRegister(instr->GetSecondOperand());
+    
+    if (instr->GetDestinationRegister() == PC)
+        Rd += 2;
+    if (instr->GetFirstOperand() == PC)
+        Rn += 2;
+    if (instr->GetSecondOperand() == PC)
+        Rm += 2;
 
     switch (instr->GetOpcode())
     {
@@ -456,6 +465,8 @@ void Interpreter::HandleThumbLoadStoreRegisterOffsetInstruction(std::shared_ptr<
         default:
             break;
     }
+
+    _cpu->GetRegister(instr->GetDestinationRegister()) = Rd;
 }
 
 // Not verified
@@ -510,7 +521,7 @@ void Interpreter::HandleThumbLoadStoreStackInstruction(std::shared_ptr<ThumbInst
             Rd = _cpu->GetRegister(SP) + uint32_t(instr->GetRelativeOffset() << 2);
             break;
         case Thumb::ThumbOpcodes::ADD_5:
-            Rd = _cpu->GetRegister(PC) & 0xFFFFFFFC + uint32_t(instr->GetRelativeOffset() << 2);
+            Rd = (_cpu->GetRegister(PC) + 2) & 0xFFFFFFFC + uint32_t(instr->GetRelativeOffset() << 2);
             break;
         default:
             break;
