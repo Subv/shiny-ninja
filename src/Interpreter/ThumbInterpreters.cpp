@@ -587,3 +587,13 @@ void Interpreter::HandleThumbBranchLinkInstruction(std::shared_ptr<ThumbInstruct
         _cpu->GetRegister(LR) = oldPC | 1;
     }
 }
+
+void Interpreter::HandleThumbBranchInstruction(std::shared_ptr<ThumbInstruction> instruction)
+{
+    auto branch = std::static_pointer_cast<Thumb::BranchInstruction>(instruction);
+
+    if (branch->IsConditionalBranch() && !_cpu->ConditionPasses(InstructionCondition(branch->GetCondition())))
+        return;
+
+    _cpu->GetRegister(PC) += branch->GetBranchOffset() + 2;
+}

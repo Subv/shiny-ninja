@@ -153,6 +153,8 @@ void Interpreter::InitializeThumb()
     // Branch/Exchange Instruction operations
     _thumbHandlers[Thumb::ThumbOpcodes::BX] = std::bind(&Interpreter::HandleThumbBranchExchangeInstruction, this, std::placeholders::_1);
     _thumbHandlers[Thumb::ThumbOpcodes::BLX_2] = std::bind(&Interpreter::HandleThumbBranchExchangeInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::B_CONDITIONAL] = std::bind(&Interpreter::HandleThumbBranchInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::B_UNCONDITIONAL] = std::bind(&Interpreter::HandleThumbBranchInstruction, this, std::placeholders::_1);
 
     // Long Branch operation
     _thumbHandlers[Thumb::ThumbOpcodes::BL] = std::bind(&Interpreter::HandleThumbBranchLinkInstruction, this, std::placeholders::_1);

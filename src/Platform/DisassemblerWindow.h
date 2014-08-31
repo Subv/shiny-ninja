@@ -2,6 +2,7 @@
 #define DISASSEMBLERWINDOW_H
 
 #include <QDialog>
+#include <array>
 
 namespace Ui {
     class MainWindow;
@@ -9,6 +10,7 @@ namespace Ui {
 }
 
 class MainWindow;
+class QLabel;
 
 class DisassemblerWindow : public QDialog
 {
@@ -23,6 +25,8 @@ public:
 private:
     MainWindow* _mainWindow;
     Ui::DisassemblerWindow* ui;
+    std::array<QLabel*, 16> _registers;
+    std::array<QLabel*, 4> _flags;
 };
 
 #endif // MAINWINDOW_H

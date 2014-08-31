@@ -34,20 +34,26 @@ namespace Thumb
 
         uint32_t GetCondition() const
         {
-            Utilities::Assert(!IsConditionalBranch(), "Thumb::BranchInstruction: Condition cannot be gotten if unconditional!");
+            Utilities::Assert(IsConditionalBranch(), "Thumb::BranchInstruction: Condition cannot be gotten if unconditional!");
             return MathHelper::GetBits(_instruction, 8, 4);
         }
 
-        uint32_t GetImmediate() const
+        int8_t GetImmediateConditional() const
         {
-            if (IsConditionalBranch())
-                return MathHelper::GetBits(_instruction, 0, 8);
-            return MathHelper::GetBits(_instruction, 0, 10);
+            return MathHelper::GetBits(_instruction, 0, 8);
+        }
+
+        int16_t GetImmediateUnconditional() const
+        {
+            uint16_t bits = MathHelper::GetBits(_instruction, 0, 11);
+            return MathHelper::CheckBit(bits, 10) ? -(bits & 0x3FF) : bits;
         }
 
         int32_t GetBranchOffset() const
         {
-            return int32_t(GetImmediate() << 1);
+            if (IsConditionalBranch())
+                return GetImmediateConditional() << 1;
+            return GetImmediateUnconditional() << 1;
         }
 
     private:

@@ -38,6 +38,7 @@ public:
     void HandleThumbSpecialDataProcessingInstruction(std::shared_ptr<ThumbInstruction> instruction);
     void HandleThumbBranchExchangeInstruction(std::shared_ptr<ThumbInstruction> instruction);
     void HandleThumbBranchLinkInstruction(std::shared_ptr<ThumbInstruction> instruction);
+    void HandleThumbBranchInstruction(std::shared_ptr<ThumbInstruction> instruction);
     void HandleThumbLiteralPoolLoadInstruction(std::shared_ptr<ThumbInstruction> instruction);
     void HandleThumbLoadStoreRegisterOffsetInstruction(std::shared_ptr<ThumbInstruction> instruction);
     void HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr<ThumbInstruction> instruction);

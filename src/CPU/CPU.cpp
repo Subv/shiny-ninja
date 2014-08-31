@@ -33,6 +33,8 @@ void CPU::Reset()
     SetCurrentCPUMode(CPUMode::System);
 
     GetRegister(PC) = 0x8000000; // Default entry point
+
+    _cycles = 0;
 }
 
 void CPU::Run()
