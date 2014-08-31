@@ -501,7 +501,7 @@ void Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr
     }
 }
 
-// not verified
+// Sections: A7.1.31, A7.1.60
 void Interpreter::HandleThumbLoadStoreStackInstruction(std::shared_ptr<ThumbInstruction> instruction)
 {
     auto instr = std::static_pointer_cast<Thumb::LoadStoreStackInstruction>(instruction);
