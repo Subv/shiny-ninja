@@ -11,7 +11,7 @@
 #include "Common/MathHelper.hpp"
 #include "Common/Utilities.hpp"
 
-Interpreter::Interpreter(CPU* arm)  : _cpu(arm)
+Interpreter::Interpreter(CPU* arm) : _cpu(arm)
 {
     InitializeHandlers();
 }
@@ -153,6 +153,9 @@ void Interpreter::InitializeThumb()
     // Branch/Exchange Instruction operations
     _thumbHandlers[Thumb::ThumbOpcodes::BX] = std::bind(&Interpreter::HandleThumbBranchExchangeInstruction, this, std::placeholders::_1);
     _thumbHandlers[Thumb::ThumbOpcodes::BLX_2] = std::bind(&Interpreter::HandleThumbBranchExchangeInstruction, this, std::placeholders::_1);
+
+    // Long Branch operation
+    _thumbHandlers[Thumb::ThumbOpcodes::BL] = std::bind(&Interpreter::HandleThumbBranchLinkInstruction, this, std::placeholders::_1);
 
     // Load from literal pool operation
     _thumbHandlers[Thumb::ThumbOpcodes::LDR_3] = std::bind(&Interpreter::HandleThumbLiteralPoolLoadInstruction, this, std::placeholders::_1);

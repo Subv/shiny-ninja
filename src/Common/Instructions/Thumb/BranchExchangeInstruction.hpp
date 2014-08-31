@@ -77,18 +77,9 @@ namespace Thumb
         uint32_t GetOpcode() const override { return ThumbOpcodes::BL; }
         std::string ToString() const override;
 
-        uint32_t GetOffset() const
+        int32_t GetOffset() const
         {
-            /*
-             * TODO: This needs to access LR register...
-             * if H == 10 then
-             *    LR = PC + (SignExtend(offset_11) << 12)
-             * else if H == 11 then
-             *    PC = LR + (offset_11 << 1)
-             *    LR = (address of next instruction) | 1
-             * else if (ARMv5T case, H == 01, ignored)
-             */
-            return MathHelper::GetBits(_instruction, 0, 11) << 1;
+            return MathHelper::GetBits(_instruction, 0, 11);
         }
     };
 }
