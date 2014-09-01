@@ -10,8 +10,7 @@ std::string Thumb::StackOperation::ToString() const
     stream << Thumb::ToString(GetOpcode()) << " ";
     std::bitset<9> registersSet(GetRegisterMask());
     stream << "{";
-    uint8_t bitSetCount = registersSet.count();
-    while (bitSetCount > 0)
+    while (registersSet.count() > 0)
     {
         uint8_t bitIndex = 0;
         for (; bitIndex < 9 && !registersSet.test(bitIndex); ++bitIndex);
@@ -21,8 +20,7 @@ std::string Thumb::StackOperation::ToString() const
         else
             stream << "R" << +bitIndex;
         registersSet[bitIndex] = false;
-        --bitSetCount;
-        if (bitSetCount != 0)
+        if (registersSet.count() != 0)
             stream << ", ";
     }
     stream << "}";

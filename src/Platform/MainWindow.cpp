@@ -67,7 +67,7 @@ void MainWindow::open()
         return;
     }
 
-    FILE* bios = fopen("E:/NDS_Projects/gba_bios.bin", "rb");
+    FILE* bios = fopen("./gba_bios.bin", "rb");
     if (!bios)
     {
         std::cout << "Could not load the GBA Bios." << std::endl;

@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <sstream>
+#include <bitset>
 
 std::string Thumb::LoadFromLiteralStoreInstruction::ToString() const
 {
@@ -89,13 +90,16 @@ std::string Thumb::LoadStoreMultipleInstruction::ToString() const
 {
     std::stringstream stream;
     stream << Thumb::ToString(GetOpcode()) << " R" << GetRegister() << "!, {" ;
-    uint32_t registersMask = GetRegisterList();
-    for (uint8_t i = 0; i < 8; ++i)
+
+    std::bitset<8> registersBits(GetRegisterList());
+    while (registersBits.count() > 0)
     {
-        if ((registersMask & (1 << i)) == 0)
-            continue;
-        stream << "R" << +i;
-        if (i < 7)
+        uint8_t bitIndex = 0;
+        for (; bitIndex < 8 && !registersBits.test(bitIndex); ++bitIndex);
+
+        stream << "R" << +bitIndex;
+        registersBits[bitIndex] = false;
+        if (registersBits.count() != 0)
             stream << ", ";
     }
     stream << "}";

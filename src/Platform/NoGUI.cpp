@@ -6,7 +6,7 @@
 NoGUI::NoGUI(int argc, char* argv[])
 {
     FILE* rom = fopen(argv[2], "rb");
-    // int z = getchar();
+    int z = getchar();
 
     if (!rom)
     {
