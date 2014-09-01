@@ -1,8 +1,8 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 
-#include <bitset>
 #include <cstdint>
+#include <limits>
 
 // #undef _GLIBCXX_HAVE_BROKEN_VSWPRINTF
 
@@ -58,14 +58,14 @@ public:
         }
     };
 
-    uint32_t Value;
-    // bool Carry = false;
-    // bool Overflow = false;
-    // bool Borrow = false;
+    uint32_t Value = 0;
+    bool Carry = false;
+    bool Overflow = false;
+    bool Borrow = false;
 
     operator uint32_t() const { return Value; }
     // Causes ambiguous casts (compiler boils down a bool() to `operator uint32_t() != 0`)
-    // operator bool() const { return Value != 0; }
+    explicit operator bool() const { return Value != 0; }
 
     BitReference operator[] (uint8_t i)
     {
@@ -85,9 +85,21 @@ public:
         return *this;
     }
 
-    GeneralPurposeRegister& operator = (const uint32_t& val)
+    GeneralPurposeRegister& operator = (const uint64_t& val)
     {
+        Borrow = false;
+        Carry = false;
+        Overflow = val > std::numeric_limits<int32_t>::max();
         Value = val;
+        return *this;
+    }
+
+    GeneralPurposeRegister& operator = (const GeneralPurposeRegister& other)
+    {
+        Value = other.Value;
+        Carry = other.Carry;
+        Overflow = other.Overflow;
+        Borrow = other.Borrow;
         return *this;
     }
 
@@ -100,12 +112,30 @@ public:
     // Arithmetic operators
     GeneralPurposeRegister& operator += (uint32_t const& other)
     {
+        int64_t dirtySum = (int64_t(Value) + other);
+
+        Borrow = false;
+
+        // Returns 1 if the addition specified as its parameter caused a carry
+        // (true result is bigger than 2^32−1, where the operands are treated
+        //  as unsigned integers), and returns 0 in all other cases.
+        Carry = dirtySum > 0x80000000;
+
+        // Returns 1 if the addition specified as its parameter caused a 32-bit
+        // signed overflow. Addition generates an overflow if both operands have
+        // the same sign (bit[31]), and the sign of the result is different to
+        // the sign of both operands.
+        Overflow = dirtySum > std::numeric_limits<uint32_t>::max();
+
         Value += other;
         return *this;
     }
 
     GeneralPurposeRegister& operator -= (uint32_t const& other)
     {
+        Carry = false;
+        Borrow = Value < other;
+        Overflow = (uint64_t(Value) - other) < std::numeric_limits<uint32_t>::min();
         Value -= other;
         return *this;
     }
@@ -160,5 +190,19 @@ public:
         return *this;
     }
 };
+
+inline GeneralPurposeRegister operator + (GeneralPurposeRegister const& left, GeneralPurposeRegister const& right)
+{
+    GeneralPurposeRegister reg = left;
+    reg += right;
+    return reg;
+}
+
+inline GeneralPurposeRegister operator - (GeneralPurposeRegister const& left, GeneralPurposeRegister const& right)
+{
+    GeneralPurposeRegister reg = left;
+    reg -= right;
+    return reg;
+}
 
 #endif

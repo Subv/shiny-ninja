@@ -118,22 +118,22 @@ void Interpreter::HandleThumbAddSubImmRegInstruction(std::shared_ptr<ThumbInstru
     uint32_t Rm = instr->IsImmediate() ?
                 instr->GetThirdOperand() : // Imm
                 _cpu->GetRegister(instr->GetThirdOperand()); // Rm
+
     switch (instr->GetOpcode())
     {
         case Thumb::ThumbOpcodes::ADD_1:
         case Thumb::ThumbOpcodes::ADD_3:
             Rd = Rn + Rm;
-            _cpu->GetCurrentStatusFlags().C = MathHelper::CarryFrom(Rn, Rm);
-            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(Rd);
+            _cpu->GetCurrentStatusFlags().C = Rd.Carry;
             break;
         case Thumb::ThumbOpcodes::SUB_1:
         case Thumb::ThumbOpcodes::SUB_3:
             Rd = Rn - Rm;
-            _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(Rn, Rm);
-            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(Rd);
+            _cpu->GetCurrentStatusFlags().C = !Rd.Borrow;
             break;
 
     }
+    _cpu->GetCurrentStatusFlags().V = Rd.Overflow;
     _cpu->GetCurrentStatusFlags().N = Rd[31];
     _cpu->GetCurrentStatusFlags().Z = Rd == 0;
 }
@@ -154,7 +154,7 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
             break;
         case Thumb::ThumbOpcodes::CMP_1: // Rd is actually Rn here
         {
-            int32_t aluOut = Rd - Imm;
+            int64_t aluOut = int64_t(Rd) - Imm;
             _cpu->GetCurrentStatusFlags().N = (aluOut >> 31) & 1;
             _cpu->GetCurrentStatusFlags().Z = aluOut == 0;
             _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(Rd, Imm);
@@ -165,15 +165,15 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
             Rd += Imm;
             _cpu->GetCurrentStatusFlags().N = Rd[31];
             _cpu->GetCurrentStatusFlags().Z = Rd == 0;
-            _cpu->GetCurrentStatusFlags().C = MathHelper::CarryFrom(Rd, Imm);
-            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(Rd);
+            _cpu->GetCurrentStatusFlags().C = Rd.Carry;
+            _cpu->GetCurrentStatusFlags().V = Rd.Overflow;
             break;
         case Thumb::ThumbOpcodes::SUB_2:
             Rd -= Imm;
             _cpu->GetCurrentStatusFlags().N = Rd[31];
             _cpu->GetCurrentStatusFlags().Z = Rd == 0;
-            _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(Rd, Imm);
-            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(Rd);
+            _cpu->GetCurrentStatusFlags().C = !Rd.Borrow;
+            _cpu->GetCurrentStatusFlags().V = Rd.Overflow;
             break;
 
     }
@@ -253,11 +253,21 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
         }
         case Thumb::ThumbOpcodes::ADC:
         {
-            Rd += Rm + _cpu->GetCurrentStatusFlags().C;
+            uint64_t dirtySum = Rd;
+            if (!_cpu->GetCurrentStatusFlags().C)
+            {
+                dirtySum += Rm;
+                _cpu->GetCurrentStatusFlags().C = dirtySum < Rm;
+            }
+            else
+            {
+                dirtySum += Rm + 1;
+                _cpu->GetCurrentStatusFlags().C = dirtySum <= Rm;
+            }
+            Rd = dirtySum;
             _cpu->GetCurrentStatusFlags().N = Rd[31];
             _cpu->GetCurrentStatusFlags().Z = Rd == 0;
-            _cpu->GetCurrentStatusFlags().C = MathHelper::CarryFrom(Rd, Rm + _cpu->GetCurrentStatusFlags().C);
-            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(Rd);
+            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(dirtySum);
             break;
         }
         case Thumb::ThumbOpcodes::SBC:
@@ -265,8 +275,8 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
             Rd -= Rm + !_cpu->GetCurrentStatusFlags().C;
             _cpu->GetCurrentStatusFlags().N = Rd[31];
             _cpu->GetCurrentStatusFlags().Z = Rd == 0;
-            _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(Rd, Rm + !_cpu->GetCurrentStatusFlags().C);
-            _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(Rd);
+            _cpu->GetCurrentStatusFlags().C = !Rd.Borrow;
+            _cpu->GetCurrentStatusFlags().V = Rd.Overflow;
             break;
         }
         case Thumb::ThumbOpcodes::ROR: // Rm = Rs here
@@ -299,8 +309,8 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
             Rd = 0 - Rm;
             _cpu->GetCurrentStatusFlags().N = Rd[31];
             _cpu->GetCurrentStatusFlags().Z = Rd == 0;
-            _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(0, Rm);
-            _cpu->GetCurrentStatusFlags().Z = MathHelper::Overflow<uint32_t>(Rd);
+            _cpu->GetCurrentStatusFlags().C = !Rd.Borrow; //! TODO Doublecheck
+            _cpu->GetCurrentStatusFlags().Z = Rd.Overflow;
             break;
         }
         case Thumb::ThumbOpcodes::CMN: // Rd is actually Rn here

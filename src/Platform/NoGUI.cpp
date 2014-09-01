@@ -6,6 +6,7 @@
 NoGUI::NoGUI(int argc, char* argv[])
 {
     FILE* rom = fopen(argv[2], "rb");
+    // int z = getchar();
 
     if (!rom)
     {
@@ -31,7 +32,7 @@ NoGUI::NoGUI(int argc, char* argv[])
         return;
     }
 
-    FILE* bios = fopen("E:/NDS_Projects/gba_bios.bin", "rb");
+    FILE* bios = fopen("./gba_bios.bin", "rb");
     if (!bios)
     {
         std::cout << "Could not load the GBA Bios." << std::endl;
