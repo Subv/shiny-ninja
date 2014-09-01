@@ -13,10 +13,16 @@ TEST_CASE("GeneralPurposeRegister", "Executes a batch of tests on the GPRs")
     GeneralPurposeRegister Rm;
     Rm.Value = 0x00000001;
 
+    Rd = Rn - Rn; // 0
+    REQUIRE(Rd.Carry    == false);
+    REQUIRE(Rd.Overflow == false);
+    REQUIRE(Rd.Borrow   == false);
+    REQUIRE(Rd          == 0);
+
     Rd = Rn + Rm; // 0xFFFF FFFF + 0x0000 0001 = (0x1 0000 0000) = 0x0000 0000
-    REQUIRE(Rd.Carry    == true);  // Carry
-    REQUIRE(Rd.Overflow == true);  // Overflow
-    REQUIRE(Rd.Borrow   == false); // Doesn't borrow
+    REQUIRE(Rd.Carry    == true);
+    REQUIRE(Rd.Overflow == true);
+    REQUIRE(Rd.Borrow   == false);
     REQUIRE(Rd          == 0);
 
     Rd = Rm - Rn; // 0x0000 0001 - 0xFFFF FFFF = 0xFFFF FFFE = 2
