@@ -64,6 +64,7 @@ public:
     bool Borrow = false;
 
     operator uint32_t() const { return Value; }
+
     // Causes ambiguous casts (compiler boils down a bool() to `operator uint32_t() != 0`)
     explicit operator bool() const { return Value != 0; }
 
@@ -90,7 +91,7 @@ public:
         Borrow = false;
         Carry = false;
         Overflow = val > std::numeric_limits<int32_t>::max();
-        Value = val;
+        Value = uint32_t(val);
         return *this;
     }
 

@@ -167,7 +167,7 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
             break;
         case Thumb::ThumbOpcodes::CMP_1: // Rd is actually Rn here
         {
-            int64_t aluOut = int64_t(Rd) - Imm;
+            int64_t aluOut = int64_t(uint32_t(Rd)) - Imm;
             _cpu->GetCurrentStatusFlags().N = (aluOut >> 31) & 1;
             _cpu->GetCurrentStatusFlags().Z = aluOut == 0;
             _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(Rd, Imm);
@@ -197,9 +197,11 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
 void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInstruction> instruction)
 {
     auto realInstr = std::static_pointer_cast<Thumb::DataProcessingInstruction>(instruction);
-    GeneralPurposeRegister& Rd = _cpu->GetRegister(realInstr->GetFirstOperand());
+    GeneralPurposeRegister Rd = _cpu->GetRegister(realInstr->GetFirstOperand());
     GeneralPurposeRegister Rm = _cpu->GetRegister(realInstr->GetSecondOperand());
     
+    if (realInstr->GetFirstOperand() == PC)
+        Rd += 2;
     if (realInstr->GetSecondOperand() == PC)
         Rm += 2;
 
@@ -318,7 +320,8 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
             int32_t aluOut = Rd & Rm;
             _cpu->GetCurrentStatusFlags().N = aluOut & (1 << 31);
             _cpu->GetCurrentStatusFlags().Z = aluOut == 0;
-            break;
+            // Don't update the Rn register
+            return;
         }
         case Thumb::ThumbOpcodes::NEG:
         {
@@ -340,7 +343,8 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
                 _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(Rd, Rm);
             else
                 _cpu->GetCurrentStatusFlags().C = MathHelper::CarryFrom(Rd, Rm);
-            break;
+            // Don't update the Rn register
+            return;
         }
         case Thumb::ThumbOpcodes::ORR:
             Rd |= Rm;
@@ -358,6 +362,8 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
             _cpu->GetCurrentStatusFlags().Z = Rd == 0;
             break;
     }
+
+    _cpu->GetRegister(realInstr->GetFirstOperand()) = Rd;
 }
 
 // Sections: A7.1.6, A7.1.23, A7.1.44
@@ -366,8 +372,14 @@ void Interpreter::HandleThumbSpecialDataProcessingInstruction(std::shared_ptr<Th
 {
     auto realInstr = std::static_pointer_cast<Thumb::SpecialDataProcessingInstruction>(instruction);
 
-    GeneralPurposeRegister& Rd = _cpu->GetRegister(realInstr->GetDestinationRegister());
-    GeneralPurposeRegister& Rm = _cpu->GetRegister(realInstr->GetFirstDataRegister());
+    GeneralPurposeRegister Rd = _cpu->GetRegister(realInstr->GetDestinationRegister());
+    GeneralPurposeRegister Rm = _cpu->GetRegister(realInstr->GetFirstDataRegister());
+
+    if (realInstr->GetDestinationRegister() == PC)
+        Rd += 2;
+
+    if (realInstr->GetFirstDataRegister() == PC)
+        Rm += 2;
 
     switch (realInstr->GetOpcode())
     {
@@ -399,6 +411,8 @@ void Interpreter::HandleThumbSpecialDataProcessingInstruction(std::shared_ptr<Th
         default:
             break;
     }
+
+    _cpu->GetRegister(realInstr->GetDestinationRegister()) = Rd;
 }
 
 // Sections: A7.1.19, A7.1.18
@@ -547,7 +561,12 @@ void Interpreter::HandleThumbLoadStoreMultipleInstruction(std::shared_ptr<ThumbI
 
     if (instr->GetOpcode() == Thumb::ThumbOpcodes::LDMIA)
     {
-        uint32_t address = _cpu->GetRegister(instr->GetRegister());
+        uint32_t loadAddress = _cpu->GetRegister(instr->GetRegister());
+        if (instr->GetRegister() == PC)
+            loadAddress += 2;
+
+        uint32_t address = loadAddress;
+
         uint32_t registersMask = instr->GetRegisterList();
 
         bool writeBack = true;
@@ -563,21 +582,28 @@ void Interpreter::HandleThumbLoadStoreMultipleInstruction(std::shared_ptr<ThumbI
             {
                 _cpu->GetRegister(i) = _cpu->GetMemory()->ReadUInt32(address);
                 address += 4;
-            }
 
-            if (i == instr->GetRegister())
-                writeBack = false;
+                if (i == instr->GetRegister())
+                    writeBack = false;
+            }
         }
         // If the base register <Rn> is specified in <registers>,
         // the final value of <Rn> is the loaded value (not the written-back value).
 
         if (writeBack)
-            _cpu->GetRegister(instr->GetRegister()) = address;
+            _cpu->GetRegister(instr->GetRegister()) = loadAddress + (MathHelper::NumberOfSetBits(registersMask) * 4);
     }
     else // if (instr->GetOpcode() == Thumb::ThumbOpcodes::STMIA)
     {
-        uint32_t address = _cpu->GetRegister(instr->GetRegister());
+        uint32_t loadAddress = _cpu->GetRegister(instr->GetRegister());
+        if (instr->GetRegister() == PC)
+            loadAddress += 2;
+
+        uint32_t address = loadAddress;
+
         uint32_t registersMask = instr->GetRegisterList();
+
+        bool writeBack = true;
 
         if (registersMask == 0) // UNPREDICTABLE
         {
@@ -590,12 +616,22 @@ void Interpreter::HandleThumbLoadStoreMultipleInstruction(std::shared_ptr<ThumbI
             {
                 _cpu->GetMemory()->WriteUInt32(address, _cpu->GetRegister(i));
                 address += 4;
+                
+                if (i == instr->GetRegister())
+                {
+                    // Only if this register is the lowest-numbered one
+                    if (loadAddress == address - 4)
+                        writeBack = false;
+                    else
+                    {
+                        // UNPREDICTABLE
+                    }
+                }
             }
         }
-        // If <Rn> is specified in <registers>:
-        //  • If <Rn> is the lowest-numbered register specified in <registers>,
-        //    the original value of <Rn> is stored.
-        //  • Otherwise, the stored value of <Rn> is UNPREDICTABLE.
+
+        if (writeBack)
+            _cpu->GetRegister(instr->GetRegister()) = loadAddress + (MathHelper::NumberOfSetBits(registersMask) * 4);
     }
 }
 

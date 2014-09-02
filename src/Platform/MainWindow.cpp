@@ -83,6 +83,7 @@ void MainWindow::open()
     fclose(rom);
 
     auto checkbox = findChild<QCheckBox*>("runOnLoad");
+
     if (checkbox->isChecked())
     {
         // Run the CPU in a different thread
@@ -97,8 +98,9 @@ void MainWindow::restart()
     if (!_cpu)
         return;
 
-    _cpu->Reset();
+    _cpu->Stop();
     _cpuThread.join();
+    _cpu->Reset();
 }
 
 void MainWindow::RegisterCPUCallbacks()
@@ -112,7 +114,7 @@ void MainWindow::RegisterCPUCallbacks()
         findChild<QLabel*>("label")->setText(message);
         if (_disasmWindow)
             _disasmWindow->UpdateLabelData();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     });
 }
 
@@ -127,11 +129,24 @@ void MainWindow::openDisassembler()
 void MainWindow::pause()
 {
     if (_cpu)
+    {
         _cpu->Stop();
+        _cpuThread.join();
+    }
 }
 
 void MainWindow::step()
 {
     if (_cpu)
-        _cpu->StepInstruction();
+        _cpu->Step();
+}
+
+void MainWindow::resume()
+{
+    if (_cpu)
+    {
+        _cpuThread = std::thread([&] {
+            _cpu->Run();
+        });
+    }
 }

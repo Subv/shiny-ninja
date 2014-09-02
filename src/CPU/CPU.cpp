@@ -44,17 +44,10 @@ void CPU::Run()
         return;
 
     _runState = CPURunState::Running;
-    _cycles = 0;
 
     // Loop until something stops the CPU
     while (_runState == CPURunState::Running)
-    {
-        _dma->Step();
-        StepInstruction();
-        GetGPU()->Step(_cycles);
-        // Check for interrupts on every loop
-        ProcessInterrupts();
-    }
+        Step();
 }
 
 bool CPU::ConditionPasses(InstructionCondition condition)
@@ -169,8 +162,11 @@ GeneralPurposeRegister& CPU::GetRegisterForMode(CPUMode mode, uint8_t reg)
     return _state.Registers[reg];
 }
 
-void CPU::StepInstruction()
+void CPU::Step()
 {
+    // Update the DMA channels
+    _dma->Step();
+
     std::shared_ptr<Instruction> instruction;
 
     if (GetCurrentInstructionSet() == InstructionSet::ARM)
@@ -202,6 +198,11 @@ void CPU::StepInstruction()
     }
     else
         std::cout << "Unknown Instruction" << std::endl;
+
+    // Update the GPU
+    GetGPU()->Step(_cycles);
+    // Check for interrupts on every loop
+    ProcessInterrupts();
 }
 
 bool CPU::IsInterruptEnabled(InterruptTypes type)

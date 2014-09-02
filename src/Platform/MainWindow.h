@@ -29,6 +29,7 @@ public:
 
 private slots:
     void open();
+    void resume();
     void restart();
     void pause();
     void step();

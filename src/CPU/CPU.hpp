@@ -153,6 +153,7 @@ public:
     void LoadROM(GBAHeader& header, FILE* rom, FILE* bios);
     void Reset();
     void Stop() { _runState = CPURunState::Stopped; }
+    void Resume() { _runState = CPURunState::Running; }
     void Run();
 
     bool ConditionPasses(InstructionCondition condition);
@@ -182,7 +183,7 @@ public:
     void RegisterInstructionCallback(InstructionCallbackTypes type, std::function<void(std::shared_ptr<Instruction>)> callback) { _instructionCallbacks[type] = callback; }
     void ExecuteInstructionCallback(InstructionCallbackTypes type, std::shared_ptr<Instruction> instruction);
 
-    void StepInstruction();
+    void Step();
 
 private:
     void TriggerInterrupt(InterruptTypes type);

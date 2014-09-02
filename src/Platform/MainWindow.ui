@@ -66,6 +66,19 @@
      <string>Run ROM on load</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="resumeButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>110</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Resume CPU</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -214,6 +227,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>resumeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>resume()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>57</x>
+     <y>142</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>195</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>open()</slot>
@@ -221,5 +250,6 @@
   <slot>openDisassembler()</slot>
   <slot>pause()</slot>
   <slot>step()</slot>
+  <slot>resume()</slot>
  </slots>
 </ui>
