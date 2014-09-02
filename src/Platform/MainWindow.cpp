@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    _cpu->Stop();
+    _cpuThread.join();
     delete ui;
 }
 
@@ -114,14 +116,17 @@ void MainWindow::RegisterCPUCallbacks()
         findChild<QLabel*>("label")->setText(message);
         if (_disasmWindow)
             _disasmWindow->UpdateLabelData();
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     });
 }
 
 void MainWindow::openDisassembler()
 {
     if (_disasmWindow)
+    {
+        _disasmWindow->show();
         return;
+    }
     _disasmWindow = new DisassemblerWindow(this);
     _disasmWindow->show();
 }

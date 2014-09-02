@@ -111,14 +111,14 @@ uint8_t MMU::ReadUInt8(uint32_t address)
 
 void MMU::WriteUInt32(uint32_t address, uint32_t value)
 {
-    WriteUInt16(address, (value >> 16) & 0xFFFF);
-    WriteUInt16(address + 2, value & 0xFFFF);
+    WriteUInt16(address, value & 0xFFFF);
+    WriteUInt16(address + 2, (value >> 16) & 0xFFFF);
 }
 
 void MMU::WriteUInt16(uint32_t address, uint16_t value)
 {
-    WriteUInt8(address, (value >> 8) & 0xFF);
-    WriteUInt8(address + 1, value & 0xFF);
+    WriteUInt8(address, value & 0xFF);
+    WriteUInt8(address + 1, (value >> 8) & 0xFF);
 }
 
 void MMU::WriteUInt8(uint32_t address, uint8_t value)
