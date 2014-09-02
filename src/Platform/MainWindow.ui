@@ -79,6 +79,42 @@
      <string>Resume CPU</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="instDelay">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>60</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>40</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Instruction Delay (ms)</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="updateInstDelay">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>80</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Update</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -243,13 +279,48 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>updateInstDelay</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>updateInstDelay()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>317</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>195</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>MainWindow</sender>
+   <signal>instructionExecuted(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onInstructionExecuted(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>170</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>195</x>
+     <y>170</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
+  <signal>instructionExecuted(QString)</signal>
   <slot>open()</slot>
   <slot>restart()</slot>
   <slot>openDisassembler()</slot>
   <slot>pause()</slot>
   <slot>step()</slot>
   <slot>resume()</slot>
+  <slot>updateInstDelay()</slot>
+  <slot>onInstructionExecuted(QString)</slot>
  </slots>
 </ui>

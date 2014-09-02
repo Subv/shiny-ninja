@@ -34,6 +34,11 @@ private slots:
     void pause();
     void step();
     void openDisassembler();
+    void updateInstDelay();
+    void onInstructionExecuted(QString message);
+
+signals:
+    void instructionExecuted(QString message);
     
 private:
     DisassemblerWindow* _disasmWindow;
@@ -41,6 +46,7 @@ private:
     GBAHeader _header;
     std::thread _cpuThread;
     Ui::MainWindow *ui;
+    uint32_t instructionDelay;
 };
 
 #endif // MAINWINDOW_H

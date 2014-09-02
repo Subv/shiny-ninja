@@ -18,7 +18,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _disasmWindow(nullptr)
+    _disasmWindow(nullptr),
+    instructionDelay(50)
 {
     ui->setupUi(this);
 }
@@ -113,10 +114,11 @@ void MainWindow::RegisterCPUCallbacks()
     _cpu->RegisterInstructionCallback(InstructionCallbackTypes::InstructionExecuted, [&](std::shared_ptr<Instruction> instruction)
     {
         QString message = QString::fromUtf8(("Set: " + std::string(instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") + ". Instruction: " + instruction->ToString()).c_str());
-        findChild<QLabel*>("label")->setText(message);
-        if (_disasmWindow)
-            _disasmWindow->UpdateLabelData();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        emit instructionExecuted(message);
+
+        if (_cpu->GetRegister(PC) == 0x8000166 || _cpu->GetRegister(PC) == 0x8000170)
+            _cpu->Stop();
+        std::this_thread::sleep_for(std::chrono::milliseconds(instructionDelay));
     });
 }
 
@@ -154,4 +156,17 @@ void MainWindow::resume()
             _cpu->Run();
         });
     }
+}
+
+void MainWindow::updateInstDelay()
+{
+    auto textbox = findChild<QLineEdit*>("instDelay");
+    instructionDelay = std::max(1, textbox->text().toInt());
+}
+
+void MainWindow::onInstructionExecuted(QString message)
+{
+    findChild<QLabel*>("label")->setText(message);
+    if (_disasmWindow)
+        _disasmWindow->UpdateLabelData();
 }
