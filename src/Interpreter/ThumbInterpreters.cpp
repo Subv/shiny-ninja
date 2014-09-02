@@ -155,7 +155,10 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
 {
     auto realInstr = std::static_pointer_cast<Thumb::AddSubCmpMovImmInstruction>(instruction);
 
-    GeneralPurposeRegister& Rd = _cpu->GetRegister(realInstr->GetDestinationRegister());
+    GeneralPurposeRegister Rd = _cpu->GetRegister(realInstr->GetDestinationRegister());
+    if (realInstr->GetDestinationRegister() == PC)
+        Rd += 2;
+
     uint32_t Imm = realInstr->GetImmediate();
 
     switch (realInstr->GetOpcode())
@@ -172,7 +175,7 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
             _cpu->GetCurrentStatusFlags().Z = aluOut == 0;
             _cpu->GetCurrentStatusFlags().C = !MathHelper::BorrowFrom(Rd, Imm);
             _cpu->GetCurrentStatusFlags().V = MathHelper::Overflow<uint32_t>(aluOut);
-            break;
+            return; // Don't update Rd
         }
         case Thumb::ThumbOpcodes::ADD_2:
             Rd += Imm;
@@ -188,8 +191,9 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
             _cpu->GetCurrentStatusFlags().C = !Rd.Borrow;
             _cpu->GetCurrentStatusFlags().V = Rd.Overflow;
             break;
-
     }
+
+    _cpu->GetRegister(realInstr->GetDestinationRegister()) = Rd;
 }
 
 // Sections: A7.1.10, A7.1.26, A7.1.39, A7.1.41, A7.1.12, A7.1.2, A7.1.55
@@ -513,8 +517,13 @@ void Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr
 {
     auto instr = std::static_pointer_cast<Thumb::LoadStoreImmediateInstruction>(instruction);
 
-    GeneralPurposeRegister& Rd = _cpu->GetRegister(instr->GetDestinationRegister());
-    GeneralPurposeRegister& Rn = _cpu->GetRegister(instr->GetBaseAddressRegister());
+    GeneralPurposeRegister Rd = _cpu->GetRegister(instr->GetDestinationRegister());
+    GeneralPurposeRegister Rn = _cpu->GetRegister(instr->GetBaseAddressRegister());
+
+    if (instr->GetDestinationRegister() == PC)
+        Rd += 2;
+    if (instr->GetBaseAddressRegister() == PC)
+        Rn += 2;
 
     switch (instr->GetOpcode())
     {
@@ -526,19 +535,21 @@ void Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr
             break;
         case Thumb::ThumbOpcodes::STRB_1:
             _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate(), Rd);
-            break;
+            return; // Don't update the Rd register
         case Thumb::ThumbOpcodes::STR_1:
             _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate(), Rd);
-            break;
+            return; // Don't update the Rd register
         case Thumb::ThumbOpcodes::LDRH_1:
             Rd = _cpu->GetMemory()->ReadUInt32(Rn + instr->GetImmediate());
             break;
         case Thumb::ThumbOpcodes::STRH_1:
             _cpu->GetMemory()->WriteUInt32(Rn + instr->GetImmediate(), Rd);
-            break;
+            return; // Don't update the Rd register
         default:
             break;
     }
+
+    _cpu->GetRegister(instr->GetDestinationRegister()) = Rd;
 }
 
 // Sections: A7.1.31, A7.1.60
@@ -551,7 +562,7 @@ void Interpreter::HandleThumbLoadStoreStackInstruction(std::shared_ptr<ThumbInst
     if (instr->IsLoadOperation())
         Rd = _cpu->GetMemory()->ReadUInt32(_cpu->GetRegister(SP) + instr->GetRelativeOffset());
     else
-        _cpu->GetMemory()->WriteUInt32(_cpu->GetRegister(SP) + instr->GetRelativeOffset(), Rd);
+        _cpu->GetMemory()->WriteUInt32(_cpu->GetRegister(SP) + instr->GetRelativeOffset(), Rd + (instr->GetDestinationRegister() == PC ? 2 : 0));
 }
 
 // Section: A7.1.27, A7.1.57
