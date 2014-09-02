@@ -79,7 +79,12 @@ void Interpreter::HandleThumbImmediateShiftInstruction(std::shared_ptr<ThumbInst
 {
     auto shiftInstr = std::static_pointer_cast<Thumb::ImmediateShiftInstruction>(instruction);
 
-    GeneralPurposeRegister& Rm = _cpu->GetRegister(shiftInstr->GetSourceRegister());
+    GeneralPurposeRegister Rm = _cpu->GetRegister(shiftInstr->GetSourceRegister());
+    
+    // Account for prefetching
+    if (shiftInstr->GetSourceRegister() == PC)
+        Rm += 2;
+
     GeneralPurposeRegister& Rd = _cpu->GetRegister(shiftInstr->GetDestinationRegister());
     uint32_t Imm = shiftInstr->GetOffset();
 
@@ -114,10 +119,17 @@ void Interpreter::HandleThumbAddSubImmRegInstruction(std::shared_ptr<ThumbInstru
 {
     auto instr = std::static_pointer_cast<Thumb::AddSubInstruction>(instruction);
     GeneralPurposeRegister& Rd = _cpu->GetRegister(instr->GetDestinationRegister());
-    GeneralPurposeRegister& Rn = _cpu->GetRegister(instr->GetSourceRegister());
+    GeneralPurposeRegister Rn = _cpu->GetRegister(instr->GetSourceRegister());
+    
+    if (instr->GetSourceRegister() == PC)
+        Rn += 2;
+
     uint32_t Rm = instr->IsImmediate() ?
                 instr->GetThirdOperand() : // Imm
                 _cpu->GetRegister(instr->GetThirdOperand()); // Rm
+
+    if (!instr->IsImmediate() && instr->GetThirdOperand() == PC)
+        Rm += 2;
 
     switch (instr->GetOpcode())
     {
@@ -145,6 +157,7 @@ void Interpreter::HandleThumbAddCmpMovSubImmediateInstruction(std::shared_ptr<Th
 
     GeneralPurposeRegister& Rd = _cpu->GetRegister(realInstr->GetDestinationRegister());
     uint32_t Imm = realInstr->GetImmediate();
+
     switch (realInstr->GetOpcode())
     {
         case Thumb::ThumbOpcodes::MOV_1:
@@ -185,7 +198,10 @@ void Interpreter::HandleThumbDataProcessingInstruction(std::shared_ptr<ThumbInst
 {
     auto realInstr = std::static_pointer_cast<Thumb::DataProcessingInstruction>(instruction);
     GeneralPurposeRegister& Rd = _cpu->GetRegister(realInstr->GetFirstOperand());
-    GeneralPurposeRegister& Rm = _cpu->GetRegister(realInstr->GetSecondOperand());
+    GeneralPurposeRegister Rm = _cpu->GetRegister(realInstr->GetSecondOperand());
+    
+    if (realInstr->GetSecondOperand() == PC)
+        Rm += 2;
 
     uint32_t opcode = realInstr->GetOpcode();
 
