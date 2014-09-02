@@ -116,7 +116,7 @@ void MainWindow::RegisterCPUCallbacks()
         QString message = QString::fromUtf8(("Set: " + std::string(instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") + ". Instruction: " + instruction->ToString()).c_str());
         emit instructionExecuted(message);
 
-        if (_cpu->GetRegister(PC) == 0x8000166 || _cpu->GetRegister(PC) == 0x8000170)
+        if (_cpu->GetRegister(PC) == 0x8000166 || _cpu->GetRegister(PC) == 0x8000170 || _cpu->GetRegister(PC) == 0x80002FA)
             _cpu->Stop();
         std::this_thread::sleep_for(std::chrono::milliseconds(instructionDelay));
     });
@@ -152,6 +152,9 @@ void MainWindow::resume()
 {
     if (_cpu)
     {
+        _cpu->Stop();
+        if (_cpuThread.joinable())
+            _cpuThread.join();
         _cpuThread = std::thread([&] {
             _cpu->Run();
         });
