@@ -106,7 +106,7 @@ void Interpreter::HandleThumbImmediateShiftInstruction(std::shared_ptr<ThumbInst
         case Thumb::ThumbOpcodes::ASR_1:
         {
             _cpu->GetCurrentStatusFlags().C = Rm[Imm == 0 ? 31 : (Imm - 1)];
-            Rd = (Imm == 0) ? (Rm[31] == 0 ? 0 : 0xFFFFFFFF) : (int32_t(Rm) >> 5);
+            Rd = (Imm == 0) ? (Rm[31] == 0 ? 0 : 0xFFFFFFFF) : (int32_t(uint32_t(Rm)) >> Imm);
             break;
         }
     }

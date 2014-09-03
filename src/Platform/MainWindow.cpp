@@ -86,7 +86,6 @@ void MainWindow::open()
     fclose(rom);
 
     auto checkbox = findChild<QCheckBox*>("runOnLoad");
-
     if (checkbox->isChecked())
     {
         // Run the CPU in a different thread
@@ -116,7 +115,7 @@ void MainWindow::RegisterCPUCallbacks()
         QString message = QString::fromUtf8(("Set: " + std::string(instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") + ". Instruction: " + instruction->ToString()).c_str());
         emit instructionExecuted(message);
 
-        if (_cpu->GetRegister(PC) == 0x8000166 || _cpu->GetRegister(PC) == 0x8000170 || _cpu->GetRegister(PC) == 0x80002FA)
+        if (_cpu->GetRegister(PC) == 0x8000314)
             _cpu->Stop();
         std::this_thread::sleep_for(std::chrono::milliseconds(instructionDelay));
     });
