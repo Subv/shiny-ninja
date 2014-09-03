@@ -172,6 +172,14 @@ void Interpreter::InitializeThumb()
     _thumbHandlers[Thumb::ThumbOpcodes::STRB_2] = std::bind(&Interpreter::HandleThumbLoadStoreRegisterOffsetInstruction, this, std::placeholders::_1);
     _thumbHandlers[Thumb::ThumbOpcodes::STRH_2] = std::bind(&Interpreter::HandleThumbLoadStoreRegisterOffsetInstruction, this, std::placeholders::_1);
 
+    // Load/Store Immediate Offset operation
+    _thumbHandlers[Thumb::ThumbOpcodes::LDRB_1] = std::bind(&Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::LDR_1] = std::bind(&Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::STRB_1] = std::bind(&Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::STR_1] = std::bind(&Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::LDRH_1] = std::bind(&Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction, this, std::placeholders::_1);
+    _thumbHandlers[Thumb::ThumbOpcodes::STRH_1] = std::bind(&Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction, this, std::placeholders::_1);
+
     // Load/Store Word/Byte/Halfword Immediate Offset operation
     _thumbHandlers[Thumb::ThumbOpcodes::LDR_4] = std::bind(&Interpreter::HandleThumbLoadStoreStackInstruction, this, std::placeholders::_1);
     _thumbHandlers[Thumb::ThumbOpcodes::STR_3] = std::bind(&Interpreter::HandleThumbLoadStoreStackInstruction, this, std::placeholders::_1);

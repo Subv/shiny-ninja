@@ -113,11 +113,13 @@ void MainWindow::RegisterCPUCallbacks()
     _cpu->RegisterInstructionCallback(InstructionCallbackTypes::InstructionExecuted, [&](std::shared_ptr<Instruction> instruction)
     {
         QString message = QString::fromUtf8(("Set: " + std::string(instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") + ". Instruction: " + instruction->ToString()).c_str());
-        emit instructionExecuted(message);
 
-        if (_cpu->GetRegister(PC) == 0x8000314)
+        if (_cpu->GetRegister(PC) == 0x08000346)
             _cpu->Stop();
-        std::this_thread::sleep_for(std::chrono::milliseconds(instructionDelay));
+
+        emit instructionExecuted(message);
+        if (instructionDelay)
+            std::this_thread::sleep_for(std::chrono::milliseconds(instructionDelay));
     });
 }
 
@@ -163,7 +165,7 @@ void MainWindow::resume()
 void MainWindow::updateInstDelay()
 {
     auto textbox = findChild<QLineEdit*>("instDelay");
-    instructionDelay = std::max(1, textbox->text().toInt());
+    instructionDelay = std::max(0, textbox->text().toInt());
 }
 
 void MainWindow::onInstructionExecuted(QString message)

@@ -537,13 +537,13 @@ void Interpreter::HandleThumbLoadStoreImmediateOffsetInstruction(std::shared_ptr
             _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate(), Rd);
             return; // Don't update the Rd register
         case Thumb::ThumbOpcodes::STR_1:
-            _cpu->GetMemory()->WriteUInt8(Rn + instr->GetImmediate(), Rd);
+            _cpu->GetMemory()->WriteUInt32(Rn + instr->GetImmediate(), Rd);
             return; // Don't update the Rd register
         case Thumb::ThumbOpcodes::LDRH_1:
-            Rd = _cpu->GetMemory()->ReadUInt32(Rn + instr->GetImmediate());
+            Rd = _cpu->GetMemory()->ReadUInt16(Rn + instr->GetImmediate());
             break;
         case Thumb::ThumbOpcodes::STRH_1:
-            _cpu->GetMemory()->WriteUInt32(Rn + instr->GetImmediate(), Rd);
+            _cpu->GetMemory()->WriteUInt16(Rn + instr->GetImmediate(), Rd);
             return; // Don't update the Rd register
         default:
             break;
