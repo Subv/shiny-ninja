@@ -43,10 +43,9 @@ namespace Thumb
             return MathHelper::GetBits(_instruction, 0, 8);
         }
 
-        int16_t GetImmediateUnconditional() const
+        int32_t GetImmediateUnconditional() const
         {
-            uint16_t bits = MathHelper::GetBits(_instruction, 0, 11);
-            return MathHelper::CheckBit(bits, 10) ? -(bits & 0x3FF) : bits;
+            return MathHelper::IntegerSignExtend<11, 32>(MathHelper::GetBits(_instruction, 0, 11));
         }
 
         int32_t GetBranchOffset() const
@@ -83,7 +82,7 @@ namespace Thumb
         uint32_t GetOpcode() const override { return ThumbOpcodes::BL; }
         std::string ToString() const override;
 
-        int32_t GetOffset() const
+        uint32_t GetOffset() const
         {
             return MathHelper::GetBits(_instruction, 0, 11);
         }

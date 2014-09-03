@@ -83,5 +83,11 @@ namespace MathHelper
         i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
         return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
     }
+
+    template<int SourceBits, int DestBits>
+    inline int32_t IntegerSignExtend(uint32_t num)
+    {
+        return (int32_t(num) << (DestBits - SourceBits)) >> (DestBits - SourceBits);
+    }
 }
 #endif

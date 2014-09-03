@@ -652,11 +652,11 @@ void Interpreter::HandleThumbBranchLinkInstruction(std::shared_ptr<ThumbInstruct
     
     // If this is just the high part of the instruction, update the LR
     if (!branch->IsTriggeringSubroutineCall())
-        _cpu->GetRegister(LR) = _cpu->GetRegister(PC) + 2 + (branch->GetOffset() << 12);
+        _cpu->GetRegister(LR) = _cpu->GetRegister(PC) + 2 + (MathHelper::IntegerSignExtend<11, 32>(branch->GetOffset()) << 12);
     else
     {
         uint32_t oldPC = _cpu->GetRegister(PC);
-        _cpu->GetRegister(PC) = _cpu->GetRegister(LR) + (branch->GetOffset() << 1);
+        _cpu->GetRegister(PC) = _cpu->GetRegister(LR) + ((branch->GetOffset() & 0x7FF) << 1);
         _cpu->GetRegister(LR) = oldPC | 1;
     }
 }
