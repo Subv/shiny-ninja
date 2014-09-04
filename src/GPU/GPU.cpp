@@ -1,6 +1,6 @@
 #include "GPU.hpp"
 #include "CPU/CPU.hpp"
-
+#include "Common/MathHelper.hpp"
 #include <iostream>
 
 // http://www.cs.rit.edu/~tjh8300/CowBite/CowBiteSpec.htm
@@ -130,6 +130,32 @@ void GPU::Step(uint32_t cycles)
             _cpu->RequestInterrupt(InterruptTypes::VCounterMatch);
     }
 
+    // DrawHorizontal();
+
     WriteBit(DISPSTAT, 0, vCount >= VDRAW_DURATION && vCount <= VDRAW_DURATION + VBLANK_DURATION);
     WriteBit(DISPSTAT, 1, cycles >= HDRAW_DURATION && cycles <= HDRAW_DURATION + HBLANK_DURATION);
+}
+
+VideoMode GPU::GetVideoMode()
+{
+    // Bits 0-2 of DISPCNT tell us what video mode to use
+    return VideoMode(MathHelper::GetBits(_cpu->GetMemory()->ReadUInt16(DISPCNT), 0, 3));
+}
+
+bool GPU::IsBackgroundActive(uint8_t bg)
+{
+    // Bits 8-11 of DISPCNT tell us what Backgrounds are displayed
+    return MathHelper::CheckBit(_cpu->GetMemory()->ReadUInt16(DISPCNT), std::min(11, 8 + bg));
+}
+
+void GPU::DrawHorizontal()
+{
+    uint8_t currentLine = ReadUInt8(VCOUNT);
+
+    // Video Mode 3 uses raw pixel data, so just copy it over from VRAM to the output screen array
+    if (GetVideoMode() == VideoMode::MODE_3)
+    {
+        // Copy the corresponding line
+        memcpy(&_screen[currentLine * 240], &_vram[currentLine * 240], sizeof(uint16_t) * 160);
+    }
 }

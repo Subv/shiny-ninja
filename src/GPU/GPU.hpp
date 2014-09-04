@@ -79,8 +79,14 @@ class GPU final
          */
         void ExtractColorValues(uint16_t input, uint8_t& red, uint8_t& green, uint8_t& blue);
 
+        VideoMode GetVideoMode();
+        bool IsBackgroundActive(uint8_t bg);
+
+        void DrawHorizontal();
+
     private:
         CPU* _cpu;
+        uint16_t _screen[0x9600]; // 240x160 screen. This holds the composed screen (16 bit color per pixel), taking into account the video mode and all active backgrounds
         uint8_t _vram[0x18000]; // VRAM (96KB)
         uint8_t _oam[0x400];    // OAM (1KB)
         uint8_t _obj[0x400];    // BG/OBJ Palette (1KB)
