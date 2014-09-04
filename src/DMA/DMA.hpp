@@ -8,8 +8,8 @@ enum class InterruptTypes;
 
 #define DMA0CNT_L 0x40000B8 // DMA 0 Word Count
 #define DMA0CNT_H 0x40000BA // DMA0 Control Address
-#define DMA0SAD // DMA0 Source Address
-#define DMA0DAD // DMA0 Destination Address
+#define DMA0SAD 0x40000B0 // DMA0 Source Address
+#define DMA0DAD 0x40000B4 // DMA0 Destination Address
 
 #pragma pack(push, 1)
 union DMAControl
@@ -64,7 +64,8 @@ private:
     // Helper functions
     static uint32_t GetDMAControlAddress(Channel channel) { return DMA0CNT_H + uint8_t(channel) * 0xC; }
     static uint32_t GetDMACountAddress(Channel channel) { return DMA0CNT_L + uint8_t(channel) * 0xC; }
-    static uint32_t GetDMASourceAddress(Channel channel) { return 0; }
+    static uint32_t GetDMASourceAddress(Channel channel) { return DMA0SAD + uint8_t(channel) * 0xC; }
+    static uint32_t GetDMADestinationAddress(Channel channel) { return DMA0DAD + uint8_t(channel) * 0xC; }
 
     CPU* _cpu;
 };
