@@ -8,10 +8,12 @@ class LCDAdapter
 public:
     virtual ~LCDAdapter() { }
 
-    virtual uint8_t* GetDataArray() const = 0;
+    uint8_t* GetDataArray() { return pixelData; }
+    virtual void DrawHorizontal(uint8_t line) = 0;
+    virtual void EndFrame() = 0;
 
 private:
-    uint8_t pixelData[4 * 256 * 192];
+    uint16_t pixelData[0x9600]; // 240x160 screen. This holds the composed screen (16 bit color per pixel), taking into account the video mode and all active backgrounds
 };
 
 #endif

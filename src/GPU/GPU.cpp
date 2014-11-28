@@ -119,21 +119,64 @@ void GPU::Step(uint32_t cycles)
  * next frame. Waiting for this register to reach 160 is one way to synchronize
  * a program to 60Hz.
  */
-    uint8_t vCount = ReadUInt8(VCOUNT);
-    if (vCount == ReadUInt8(DISPSTAT + 1))
+    if (_nextEvent <= cycles)
     {
-        // Checking bits 8-15 of u16 DISPSTAT against VCOUNT
-        // If they are equal, V-COUNTER (#2) of DISPSTAT is set, and
-        // if #5 is set, an IRQ is requested.
-        WriteBit(DISPSTAT, 2, true);
-        if (ReadBit(DISPSTAT, 5))
-            _cpu->RequestInterrupt(InterruptTypes::VCounterMatch);
+        if (InHBlank())
+        {
+            // End the HBlank
+            WriteBit(DISPSTAT, 1, false);
+            _nextEvent = _nextHBlank;
+            
+            uint8_t line = GetCurrentLine() + 1;
+            WriteUInt8(VCOUNT, line);
+
+            switch (line)
+            {
+                case VERTICAL_PIXELS:
+                    // Start the VBlank
+                    WriteBit(DISPSTAT, 0, true);
+                    // Request the interrupt if it's enabled in DISPSTAT
+                    if (ReadBit(DISPSTAT, 3))
+                        _cpu->RequestInterrupt(InterruptTypes::VBlank);
+
+                    _adapter->EndFrame();
+                    break;
+                case VERTICAL_TOTAL_PIXELS - 1:
+                    // End the VBlank
+                    WriteBit(DISPSTAT, 0, false);
+                    break;
+                case VERTICAL_TOTAL_PIXELS:
+                    // Reset the VCOUNT and start again
+                    WriteUInt8(VCOUNT, 0);
+                    break;
+            }
+
+            if (line == ReadUInt8(DISPSTAT + 1))
+            {
+                // Checking bits 8-15 of u16 DISPSTAT against VCOUNT
+                // If they are equal, V-COUNTER (#2) of DISPSTAT is set, and
+                // if #5 is set, an IRQ is requested.
+                WriteBit(DISPSTAT, 2, true);
+                if (ReadBit(DISPSTAT, 5))
+                    _cpu->RequestInterrupt(InterruptTypes::VCounterMatch);
+            }
+
+            if (line < VERTICAL_PIXELS)
+                DrawHorizontal(line);
+        }
+        else
+        {
+            // Set HBlank
+            WriteBit(DISPSTAT, 1, true);
+            // Trigger the interrupt if it's enabled in the DISPSTAT
+            if (ReadBit(DISPSTAT, 4))
+                _cpu->RequestInterrupt(InterruptTypes::HBlank);
+
+            _lastHBlank = _nextHBlank;
+            _nextEvent = _lastHBlank + HBLANK_LENGTH;
+            _nextHBlank = _nextEvent + HDRAW_LENGTH;
+        }
     }
-
-    // DrawHorizontal();
-
-    WriteBit(DISPSTAT, 0, vCount >= VDRAW_DURATION && vCount <= VDRAW_DURATION + VBLANK_DURATION);
-    WriteBit(DISPSTAT, 1, cycles >= HDRAW_DURATION && cycles <= HDRAW_DURATION + HBLANK_DURATION);
 }
 
 VideoMode GPU::GetVideoMode()
@@ -148,14 +191,29 @@ bool GPU::IsBackgroundActive(uint8_t bg)
     return MathHelper::CheckBit(_cpu->GetMemory()->ReadUInt16(DISPCNT), std::min(11, 8 + bg));
 }
 
-void GPU::DrawHorizontal()
+void GPU::DrawHorizontal(uint8_t currentLine)
 {
-    uint8_t currentLine = ReadUInt8(VCOUNT);
-
     // Video Mode 3 uses raw pixel data, so just copy it over from VRAM to the output screen array
     if (GetVideoMode() == VideoMode::MODE_3)
     {
         // Copy the corresponding line
-        memcpy(&_screen[currentLine * 240], &_vram[currentLine * 240], sizeof(uint16_t) * 160);
-    }
+        memcpy(&_adapter->GetDataArray()[currentLine * 240], &_vram[currentLine * 240], sizeof(uint16_t) * 160);
+    }   
+    
+    _adapter->DrawHorizontal(currentLine);
+}
+
+bool GPU::InHBlank()
+{
+    return ReadBit(DISPSTAT, 1);
+}
+
+bool GPU::InVBlank()
+{
+    return ReadBit(DISPSTAT, 0);
+}
+
+uint8_t GPU::GetCurrentLine()
+{
+    return ReadUInt8(VCOUNT);
 }

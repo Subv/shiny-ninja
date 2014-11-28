@@ -49,7 +49,7 @@ enum VideoData
 class GPU final
 {
     public:
-        GPU(CPU* cpu) : _cpu(cpu), _adapter(nullptr)
+        GPU(CPU* cpu) : _cpu(cpu), _adapter(nullptr), _nextEvent(HDRAW_LENGTH), _lastHBlank(0), _nextHBlank(HDRAW_LENGTH)
         {
             memset(_vram, 0, sizeof(_vram) / sizeof(uint8_t));
             memset(_oam, 0, sizeof(_oam) / sizeof(uint8_t));
@@ -79,14 +79,22 @@ class GPU final
          */
         void ExtractColorValues(uint16_t input, uint8_t& red, uint8_t& green, uint8_t& blue);
 
+        void SetLCDAdapter(std::shared_ptr<LCDAdapter> adapter) { _adapter = adapter; }
+
+        bool InHBlank();
+        bool InVBlank();
+        uint8_t GetCurrentLine();
+
         VideoMode GetVideoMode();
         bool IsBackgroundActive(uint8_t bg);
 
-        void DrawHorizontal();
+        void DrawHorizontal(uint8_t line);
 
     private:
+        uint32_t _nextEvent;
+        uint32_t _lastHBlank;
+        uint32_t _nextHBlank;
         CPU* _cpu;
-        uint16_t _screen[0x9600]; // 240x160 screen. This holds the composed screen (16 bit color per pixel), taking into account the video mode and all active backgrounds
         uint8_t _vram[0x18000]; // VRAM (96KB)
         uint8_t _oam[0x400];    // OAM (1KB)
         uint8_t _obj[0x400];    // BG/OBJ Palette (1KB)

@@ -53,7 +53,7 @@ void NoGUI::RegisterCPUCallbacks()
 {
     _cpu->RegisterInstructionCallback(InstructionCallbackTypes::InstructionExecuted, [&](std::shared_ptr<Instruction> instruction)
     {
-        std::cout << "Set: " << (instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") << ". Instruction: " << instruction->ToString() << std::endl;
+        //std::cout << "Set: " << (instruction->GetInstructionSet() == InstructionSet::ARM ? "ARM" : "Thumb") << ". Instruction: " << instruction->ToString() << std::endl;
     });
 }
 
